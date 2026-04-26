@@ -1,65 +1,202 @@
-import Image from "next/image";
+'use client'
+import { useEffect, useState } from 'react'
+import { fetchTrades, Trade } from '@/lib/supabase'
+import StatsRow from '@/components/StatsRow'
+import EquityCurve from '@/components/EquityCurve'
+import SignalIntelligence from '@/components/SignalIntelligence'
+import TradeLog from '@/components/TradeLog'
 
-export default function Home() {
+const NAV = ['Overview', 'Signal Intelligence', 'Trade Log']
+
+export default function Dashboard() {
+  const [trades, setTrades]   = useState<Trade[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError]     = useState('')
+  const [tab, setTab]         = useState('Overview')
+  const [lastRefresh, setLastRefresh] = useState(new Date())
+
+  const load = async () => {
+    try {
+      const data = await fetchTrades()
+      setTrades(data)
+      setLastRefresh(new Date())
+    } catch (e: any) {
+      setError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    load()
+    // Auto-refresh every 2 minutes
+    const interval = setInterval(load, 120_000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const wins   = trades.filter(t => t.result === 'WIN').length
+  const losses = trades.filter(t => t.result === 'LOSS').length
+  const wr     = trades.length ? Math.round(wins / trades.length * 1000) / 10 : 0
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div style={{ minHeight: '100vh', background: '#0f1117', color: '#e2e8f0' }}>
+
+      {/* Header */}
+      <div style={{ background: '#1a1d27', borderBottom: '1px solid #2a2d3a', padding: '0 2rem' }}>
+        <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 60 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ fontSize: 22 }}>🤖</span>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: '-0.02em' }}>Peter's Bot</div>
+              <div style={{ fontSize: 11, color: '#64748b' }}>Volatility 75 Index · DEMO · v5.0</div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+            {/* Live stats in header */}
+            {trades.length > 0 && (
+              <div style={{ display: 'flex', gap: 20, fontSize: 13 }}>
+                <span style={{ color: '#64748b' }}>
+                  {trades.length} trades ·{' '}
+                  <span style={{ color: wr >= 55 ? '#22c55e' : '#ef4444', fontWeight: 700 }}>{wr}% win rate</span>
+                </span>
+                <span style={{ color: '#22c55e', fontWeight: 700 }}>
+                  {wins}W
+                </span>
+                <span style={{ color: '#ef4444', fontWeight: 700 }}>
+                  {losses}L
+                </span>
+              </div>
+            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#64748b' }}>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', display: 'inline-block', boxShadow: '0 0 6px #22c55e' }} />
+              Live · refreshes every 2 min
+            </div>
+            <button onClick={load}
+              style={{ background: '#2a2d3a', border: 'none', color: '#94a3b8', padding: '6px 14px', borderRadius: 8, fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
+              ↻ Refresh
+            </button>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Nav tabs */}
+        <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', gap: 4 }}>
+          {NAV.map(n => (
+            <button key={n} onClick={() => setTab(n)}
+              style={{
+                padding: '10px 18px', background: 'none', border: 'none', cursor: 'pointer',
+                fontSize: 13, fontWeight: 600, borderBottom: tab === n ? '2px solid #6366f1' : '2px solid transparent',
+                color: tab === n ? '#6366f1' : '#64748b',
+                marginBottom: -1,
+              }}>
+              {n}
+            </button>
+          ))}
         </div>
-      </main>
+      </div>
+
+      {/* Body */}
+      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '2rem' }}>
+
+        {loading && (
+          <div style={{ textAlign: 'center', padding: '4rem', color: '#64748b' }}>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>⏳</div>
+            Loading trade data from Supabase...
+          </div>
+        )}
+
+        {error && (
+          <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 12, padding: '1.5rem', color: '#ef4444', marginBottom: '1.5rem' }}>
+            <strong>Error loading data:</strong> {error}
+          </div>
+        )}
+
+        {!loading && !error && trades.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '4rem', color: '#64748b' }}>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>📊</div>
+            <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>No trades yet</div>
+            <div style={{ fontSize: 14 }}>The bot needs to place its first trade. Check back soon — it runs 24/7.</div>
+          </div>
+        )}
+
+        {!loading && trades.length > 0 && (
+          <>
+            {/* Stats always visible */}
+            <StatsRow trades={trades} />
+
+            {tab === 'Overview' && (
+              <>
+                <EquityCurve trades={trades} />
+
+                {/* Insight box */}
+                <div style={{ background: '#1a1d27', border: '1px solid #2a2d3a', borderRadius: 12, padding: '1.5rem', marginBottom: '1.5rem' }}>
+                  <div style={{ fontSize: 11, color: '#64748b', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '1rem' }}>
+                    What The Bot Is Doing — In Plain English
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem', fontSize: 13 }}>
+                    {[
+                      {
+                        icon: '📊', title: 'Technical Indicators',
+                        desc: 'RSI tells it if price is oversold (likely to rise) or overbought (likely to fall). MACD shows momentum direction. Bollinger Bands show if price is stretched too far.'
+                      },
+                      {
+                        icon: '📦', title: 'Box Theory (S&R Levels)',
+                        desc: 'Like invisible walls — price bounces off Monthly, Weekly and Daily highs and lows repeatedly. The bot only trades near these walls where bounces are most likely.'
+                      },
+                      {
+                        icon: '📐', title: 'Z-Score + Fibonacci',
+                        desc: 'Z-Score measures how far price has stretched from its average. Fibonacci levels are mathematical price magnets where markets reverse. "History always tells a story."'
+                      },
+                      {
+                        icon: '📡', title: 'Higher Timeframe Trend',
+                        desc: 'The bot checks the 1-hour and 4-hour charts. If both point UP, it only takes BUY trades. If both point DOWN, only SELL. Never fights the bigger trend.'
+                      },
+                      {
+                        icon: '✅', title: 'Signal Confirmation',
+                        desc: 'A signal must appear twice in a row before the bot trades. This eliminates false signals — if the market is truly moving, it shows up consistently.'
+                      },
+                      {
+                        icon: '💹', title: 'Kelly Criterion',
+                        desc: 'Instead of random stake sizes, the bot uses the mathematically optimal amount based on your real win rate. Bet more when your edge is proven, less when it isn\'t.'
+                      },
+                    ].map(item => (
+                      <div key={item.title} style={{ background: '#141620', borderRadius: 10, padding: '1rem 1.25rem' }}>
+                        <div style={{ fontSize: 20, marginBottom: 6 }}>{item.icon}</div>
+                        <div style={{ fontWeight: 700, marginBottom: 4, color: '#e2e8f0' }}>{item.title}</div>
+                        <div style={{ color: '#64748b', lineHeight: 1.6 }}>{item.desc}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Target box */}
+                <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 12, padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', gap: 16 }}>
+                  <span style={{ fontSize: 28 }}>🎯</span>
+                  <div>
+                    <div style={{ fontWeight: 700, marginBottom: 4 }}>Target to go LIVE: 55%+ win rate over 50+ trades</div>
+                    <div style={{ color: '#64748b', fontSize: 13 }}>
+                      Current: <strong style={{ color: wr >= 55 ? '#22c55e' : '#eab308' }}>{wr}%</strong> over {trades.length} trades.{' '}
+                      {wr >= 55 && trades.length >= 50
+                        ? '🚀 You\'re ready to consider going live!'
+                        : wr >= 55
+                        ? `Keep going — need ${50 - trades.length} more trades to confirm the edge.`
+                        : 'Keep collecting data. The bot is learning.'}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {tab === 'Signal Intelligence' && <SignalIntelligence trades={trades} />}
+            {tab === 'Trade Log' && <TradeLog trades={trades} />}
+          </>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div style={{ textAlign: 'center', padding: '2rem', color: '#2a2d3a', fontSize: 12 }}>
+        Last refreshed {lastRefresh.toLocaleTimeString()} · Data from Supabase · Bot runs 24/7 on Railway
+      </div>
     </div>
-  );
+  )
 }
