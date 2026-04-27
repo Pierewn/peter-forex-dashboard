@@ -14,9 +14,12 @@ export default function Dashboard() {
   const [error, setError]     = useState('')
   const [tab, setTab]         = useState('Overview')
   const [lastRefresh, setLastRefresh] = useState(new Date())
+  const [refreshing, setRefreshing]   = useState(false)
 
-  const load = async () => {
+  const load = async (manual = false) => {
+    if (manual) setRefreshing(true)
     try {
+      setError('')
       const data = await fetchTrades()
       setTrades(data)
       setLastRefresh(new Date())
@@ -24,13 +27,14 @@ export default function Dashboard() {
       setError(e.message)
     } finally {
       setLoading(false)
+      setRefreshing(false)
     }
   }
 
   useEffect(() => {
     load()
     // Auto-refresh every 2 minutes
-    const interval = setInterval(load, 120_000)
+    const interval = setInterval(() => load(), 120_000)
     return () => clearInterval(interval)
   }, [])
 
@@ -48,7 +52,7 @@ export default function Dashboard() {
             <span style={{ fontSize: 22 }}>🤖</span>
             <div>
               <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: '-0.02em' }}>Peter's Bot</div>
-              <div style={{ fontSize: 11, color: '#64748b' }}>Volatility 75 Index · DEMO · v5.0</div>
+              <div style={{ fontSize: 11, color: '#64748b' }}>V75 · EUR/USD · GBP/USD · DEMO · v5.2</div>
             </div>
           </div>
 
@@ -72,9 +76,9 @@ export default function Dashboard() {
               <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', display: 'inline-block', boxShadow: '0 0 6px #22c55e' }} />
               Live · refreshes every 2 min
             </div>
-            <button onClick={load}
-              style={{ background: '#2a2d3a', border: 'none', color: '#94a3b8', padding: '6px 14px', borderRadius: 8, fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
-              ↻ Refresh
+            <button onClick={() => load(true)} disabled={refreshing}
+              style={{ background: refreshing ? '#1a1d27' : '#2a2d3a', border: 'none', color: refreshing ? '#6366f1' : '#94a3b8', padding: '6px 14px', borderRadius: 8, fontSize: 12, cursor: refreshing ? 'default' : 'pointer', fontWeight: 600, transition: 'all 0.2s' }}>
+              {refreshing ? '↻ Refreshing...' : '↻ Refresh'}
             </button>
           </div>
         </div>
