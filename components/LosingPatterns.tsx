@@ -2,9 +2,10 @@
 import { Trade } from '@/lib/supabase'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Cell, RadarChart, Radar, PolarGrid,
-  PolarAngleAxis, PolarRadiusAxis,
+  ResponsiveContainer, Cell,
 } from 'recharts'
+
+type FmtVal = string | number | (string | number)[]
 
 interface Props { trades: Trade[] }
 
@@ -190,7 +191,7 @@ export default function LosingPatterns({ trades }: Props) {
               <CartesianGrid strokeDasharray="3 3" stroke="#2a2d3a" />
               <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 12 }} />
               <YAxis domain={[0, 100]} tick={{ fill: '#64748b', fontSize: 11 }} unit="%" />
-              <Tooltip contentStyle={TipStyle} formatter={(v: number) => [`${v}%`, 'Win Rate']} />
+              <Tooltip contentStyle={TipStyle} formatter={(v: FmtVal | undefined) => [`${v ?? 0}%`, 'Win Rate']} />
               <Bar dataKey="wr" radius={[6, 6, 0, 0]}>
                 {dirData.map((d, i) => <Cell key={i} fill={wrColour(d.wr)} />)}
               </Bar>
@@ -233,7 +234,7 @@ export default function LosingPatterns({ trades }: Props) {
                 <CartesianGrid strokeDasharray="3 3" stroke="#2a2d3a" />
                 <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 12 }} />
                 <YAxis tick={{ fill: '#64748b', fontSize: 11 }} unit="$" />
-                <Tooltip contentStyle={TipStyle} formatter={(v: number) => [`$${v}`, 'P&L']} />
+                <Tooltip contentStyle={TipStyle} formatter={(v: FmtVal | undefined) => [`$${v ?? 0}`, 'P&L']} />
                 <Bar dataKey="pnl" radius={[6, 6, 0, 0]}>
                   {scorePnl.map((d, i) => <Cell key={i} fill={d.pnl >= 0 ? '#22c55e' : '#ef4444'} />)}
                 </Bar>
@@ -254,7 +255,7 @@ export default function LosingPatterns({ trades }: Props) {
                 <CartesianGrid strokeDasharray="3 3" stroke="#2a2d3a" />
                 <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 11 }} />
                 <YAxis domain={[0, 100]} tick={{ fill: '#64748b', fontSize: 11 }} unit="%" />
-                <Tooltip contentStyle={TipStyle} formatter={(v: number, n, p) => [`${v}% (${p.payload.trades} trades)`, 'Win Rate']} />
+                <Tooltip contentStyle={TipStyle} formatter={(v: FmtVal | undefined, _n: any, p: any) => [`${v ?? 0}% (${p?.payload?.trades ?? 0} trades)`, 'Win Rate']} />
                 <Bar dataKey="wr" radius={[6, 6, 0, 0]}>
                   {adxData.map((d, i) => <Cell key={i} fill={wrColour(d.wr)} />)}
                 </Bar>
@@ -274,7 +275,7 @@ export default function LosingPatterns({ trades }: Props) {
               <CartesianGrid strokeDasharray="3 3" stroke="#2a2d3a" />
               <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 11 }} />
               <YAxis domain={[0, 100]} tick={{ fill: '#64748b', fontSize: 11 }} unit="%" />
-              <Tooltip contentStyle={TipStyle} formatter={(v: number, n, p) => [`${v}% (${p.payload.trades} trades)`, 'Win Rate']} />
+              <Tooltip contentStyle={TipStyle} formatter={(v: FmtVal | undefined, _n: any, p: any) => [`${v ?? 0}% (${p?.payload?.trades ?? 0} trades)`, 'Win Rate']} />
               <Bar dataKey="wr" radius={[6, 6, 0, 0]}>
                 {zData.map((d, i) => <Cell key={i} fill={wrColour(d.wr)} />)}
               </Bar>
