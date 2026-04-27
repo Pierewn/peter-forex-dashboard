@@ -5,8 +5,9 @@ import StatsRow from '@/components/StatsRow'
 import EquityCurve from '@/components/EquityCurve'
 import SignalIntelligence from '@/components/SignalIntelligence'
 import TradeLog from '@/components/TradeLog'
+import LosingPatterns from '@/components/LosingPatterns'
 
-const NAV = ['Overview', 'Signal Intelligence', 'Trade Log']
+const NAV = ['Overview', 'Signal Intelligence', 'Patterns & Insights', 'Trade Log']
 
 export default function Dashboard() {
   const [trades, setTrades]   = useState<Trade[]>([])
@@ -192,6 +193,7 @@ export default function Dashboard() {
             )}
 
             {tab === 'Signal Intelligence' && <SignalIntelligence trades={trades} />}
+            {tab === 'Patterns & Insights' && <LosingPatterns trades={trades} />}
             {tab === 'Trade Log' && <TradeLog trades={trades} />}
           </>
         )}
