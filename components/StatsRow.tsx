@@ -23,7 +23,7 @@ export default function StatsRow({ trades }: Props) {
     { label: 'Wins / Losses',   value: `${wins} / ${losses}`,  unit: '',   colour: '#94a3b8' },
     { label: 'Total P&L',       value: `$${totalPnl.toFixed(2)}`, unit: '', colour: pnlColour },
     { label: 'Balance',         value: `$${lastBal.toFixed(2)}`,  unit: '', colour: '#e2e8f0' },
-    { label: 'Avg Score',       value: `${avgScore}/20`,        unit: '',   colour: '#a78bfa' },
+    { label: 'Avg Score',       value: `${avgScore}/32`,        unit: '',   colour: '#a78bfa' },
     { label: 'Avg Payout',      value: `${avgPayout}%`,         unit: '',   colour: '#38bdf8' },
   ]
 
