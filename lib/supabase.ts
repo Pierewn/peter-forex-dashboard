@@ -25,6 +25,19 @@ export interface Trade {
   result: 'WIN' | 'LOSS' | 'EVEN'
   pnl: number
   balance: number
+  // ── self-optimisation columns (v5.11) ──
+  regime:       string | null
+  trend_bias:   string | null
+  smc_score:    number | null
+  fvg_hit:      boolean | null
+  ob_hit:       boolean | null
+  bos:          string | null
+  sweep:        string | null
+  eqh_hit:      boolean | null
+  eql_hit:      boolean | null
+  displacement: string | null
+  pd_zone:      string | null
+  ote:          string | null
 }
 
 export interface Scan {

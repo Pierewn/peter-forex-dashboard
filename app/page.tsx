@@ -6,8 +6,9 @@ import EquityCurve from '@/components/EquityCurve'
 import SignalIntelligence from '@/components/SignalIntelligence'
 import TradeLog from '@/components/TradeLog'
 import LosingPatterns from '@/components/LosingPatterns'
+import SelfLearning from '@/components/SelfLearning'
 
-const NAV = ['Overview', 'Signal Intelligence', 'Patterns & Insights', 'Trade Log']
+const NAV = ['Overview', 'Signal Intelligence', 'Patterns & Insights', 'Self-Learning', 'Trade Log']
 
 export default function Dashboard() {
   const [trades, setTrades]   = useState<Trade[]>([])
@@ -53,7 +54,7 @@ export default function Dashboard() {
             <span style={{ fontSize: 22 }}>🤖</span>
             <div>
               <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: '-0.02em' }}>Peter's Bot</div>
-              <div style={{ fontSize: 11, color: '#64748b' }}>V75 · DEMO · v5.10</div>
+              <div style={{ fontSize: 11, color: '#64748b' }}>V75 · DEMO · v5.11</div>
             </div>
           </div>
 
@@ -194,6 +195,7 @@ export default function Dashboard() {
 
             {tab === 'Signal Intelligence' && <SignalIntelligence trades={trades} />}
             {tab === 'Patterns & Insights' && <LosingPatterns trades={trades} />}
+            {tab === 'Self-Learning' && <SelfLearning trades={trades} />}
             {tab === 'Trade Log' && <TradeLog trades={trades} />}
           </>
         )}

@@ -35,7 +35,7 @@ export default function SignalIntelligence({ trades }: Props) {
   // Win rate by confidence score
   const byScore = groupBy(trades, t => t.score)
   const scoreData = Object.entries(byScore)
-    .map(([score, ts]) => ({ score: `${score}/20`, wr: winRate(ts), count: ts.length }))
+    .map(([score, ts]) => ({ score: `${score}/32`, wr: winRate(ts), count: ts.length }))
     .sort((a, b) => parseInt(a.score) - parseInt(b.score))
 
   // Win rate by direction
