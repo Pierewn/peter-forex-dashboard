@@ -56,6 +56,77 @@ function MiniBar({ data, dataKey = 'wr' }: { data: { name: string; wr: number; c
   )
 }
 
+// ── Time-of-day heatmap ────────────────────────────────────────────────────
+function TimeOfDayChart({ trades }: { trades: Trade[] }) {
+  const withHour = trades.filter(t => t.hour !== null && t.hour !== undefined)
+  if (withHour.length < 5) {
+    return (
+      <Section title="⏰ Win Rate by Hour (UTC)" sub="Which hours of the day does the bot perform best?">
+        <div style={{ color: '#64748b', fontSize: 13 }}>
+          Need v5.12+ trades with hour data. Building up...
+        </div>
+      </Section>
+    )
+  }
+  // Group into 4-hour buckets for readability
+  const buckets: Record<string, Trade[]> = {
+    '00–04': [], '04–08': [], '08–12': [],
+    '12–16': [], '16–20': [], '20–24': [],
+  }
+  withHour.forEach(t => {
+    const h = t.hour as number
+    if (h < 4)       buckets['00–04'].push(t)
+    else if (h < 8)  buckets['04–08'].push(t)
+    else if (h < 12) buckets['08–12'].push(t)
+    else if (h < 16) buckets['12–16'].push(t)
+    else if (h < 20) buckets['16–20'].push(t)
+    else             buckets['20–24'].push(t)
+  })
+  const data = Object.entries(buckets)
+    .filter(([, ts]) => ts.length > 0)
+    .map(([bucket, ts]) => ({ name: bucket, wr: wr(ts), count: ts.length }))
+  return (
+    <Section title="⏰ Win Rate by Hour (UTC)" sub="Which time windows does the bot perform best in?">
+      <MiniBar data={data} />
+      <div style={{ fontSize: 11, color: '#64748b', marginTop: 8 }}>
+        London session: 08–17 UTC · NY session: 13–22 UTC · Forex filter auto-activates at v6.0
+      </div>
+    </Section>
+  )
+}
+
+// ── Stake efficiency chart ─────────────────────────────────────────────────
+function StakeEfficiencyChart({ trades }: { trades: Trade[] }) {
+  if (trades.length < 5) {
+    return (
+      <Section title="💰 Stake Efficiency" sub="Do larger Kelly stakes actually win more?">
+        <div style={{ color: '#64748b', fontSize: 13 }}>Need more trades.</div>
+      </Section>
+    )
+  }
+  const stakes = trades.map(t => t.stake).filter(Boolean)
+  if (!stakes.length) return null
+  const p25 = stakes.slice().sort((a,b)=>a-b)[Math.floor(stakes.length * 0.25)]
+  const p75 = stakes.slice().sort((a,b)=>a-b)[Math.floor(stakes.length * 0.75)]
+  const bands = [
+    { label: `Base ($1–$${p25.toFixed(2)})`, filter: (t: Trade) => t.stake <= p25 },
+    { label: `Mid ($${p25.toFixed(2)}–$${p75.toFixed(2)})`, filter: (t: Trade) => t.stake > p25 && t.stake <= p75 },
+    { label: `High ($${p75.toFixed(2)}+)`, filter: (t: Trade) => t.stake > p75 },
+  ]
+  const data = bands.map(b => {
+    const g = trades.filter(b.filter)
+    return { name: b.label, wr: wr(g), count: g.length }
+  }).filter(d => d.count > 0)
+  return (
+    <Section title="💰 Stake Efficiency" sub="Does Kelly sizing higher-confidence trades actually win more?">
+      <MiniBar data={data} />
+      <div style={{ fontSize: 11, color: '#64748b', marginTop: 8 }}>
+        If high-stake trades win less, Kelly is over-sizing — the confidence score thresholds may need tuning.
+      </div>
+    </Section>
+  )
+}
+
 export default function SelfLearning({ trades }: Props) {
   // Only trades that have the new columns
   const enriched = trades.filter(t => t.regime !== null && t.regime !== undefined)
@@ -301,6 +372,12 @@ export default function SelfLearning({ trades }: Props) {
               </div>
             </Section>
           )}
+
+          {/* Row 5: Time-of-day heatmap + Stake efficiency */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
+            <TimeOfDayChart trades={trades} />
+            <StakeEfficiencyChart trades={trades} />
+          </div>
 
           {/* Data coverage notice */}
           <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 10, padding: '1rem 1.25rem', fontSize: 12, color: '#94a3b8' }}>

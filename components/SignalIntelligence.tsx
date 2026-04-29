@@ -73,6 +73,20 @@ export default function SignalIntelligence({ trades }: Props) {
     { layer: 'Deviation',  wins: +avgDev(winTrades).toFixed(2),   losses: +avgDev(lossTrades).toFixed(2)   },
   ] : []
 
+  // Score distribution — where are most trades clustering?
+  const scoreDist = [
+    { range: '7–9  (min)',  min: 7,  max: 9  },
+    { range: '10–12',       min: 10, max: 12 },
+    { range: '13–15',       min: 13, max: 15 },
+    { range: '16–19',       min: 16, max: 19 },
+    { range: '20–24',       min: 20, max: 24 },
+    { range: '25–32 (max)', min: 25, max: 32 },
+  ]
+  const scoreDistData = scoreDist.map(b => {
+    const g = trades.filter(t => t.score >= b.min && t.score <= b.max)
+    return { range: b.range, count: g.length, wr: winRate(g) }
+  }).filter(b => b.count > 0)
+
   // ADX distribution
   const adxBuckets: Record<string, Trade[]> = { '<20': [], '20-25': [], '25-30': [], '30-35': [], '35+': [] }
   trades.forEach(t => {
@@ -216,6 +230,32 @@ export default function SignalIntelligence({ trades }: Props) {
           </BarChart>
         </ResponsiveContainer>
       </Card>
+
+      {/* Score distribution */}
+      {scoreDistData.length >= 2 && (
+        <Card>
+          <SectionTitle>Score Distribution — Where Are Trades Clustering?</SectionTitle>
+          <div style={{ fontSize: 12, color: '#64748b', marginBottom: 12 }}>
+            Bar height = number of trades. Colour = win rate. Are most trades near the minimum threshold or near maximum conviction?
+          </div>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart data={scoreDistData} barSize={38}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#2a2d3a" />
+              <XAxis dataKey="range" tick={{ fill: '#64748b', fontSize: 10 }} />
+              <YAxis yAxisId="left" tick={{ fill: '#64748b', fontSize: 11 }} label={{ value: 'Trades', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 10 }} />
+              <YAxis yAxisId="right" orientation="right" domain={[0,100]} tick={{ fill: '#64748b', fontSize: 11 }} unit="%" />
+              <Tooltip contentStyle={TipStyle} formatter={(v: any, name: string) => [name === 'count' ? `${v} trades` : `${v}%`, name === 'count' ? 'Count' : 'Win Rate']} />
+              <Bar yAxisId="left"  dataKey="count" name="count" fill="#6366f1" opacity={0.5} radius={[4,4,0,0]} />
+              <Bar yAxisId="right" dataKey="wr"    name="wr"    radius={[4,4,0,0]}>
+                {scoreDistData.map((d, i) => <Cell key={i} fill={BAR_COLOUR(d.wr)} />)}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+          <div style={{ fontSize: 11, color: '#64748b', marginTop: 8 }}>
+            Purple bars (left axis) = trade count. Coloured bars (right axis) = win rate per band. Most trades should cluster at 13+ for a calibrated edge.
+          </div>
+        </Card>
+      )}
 
     </div>
   )

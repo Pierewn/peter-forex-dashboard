@@ -54,7 +54,7 @@ export default function Dashboard() {
             <span style={{ fontSize: 22 }}>🤖</span>
             <div>
               <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: '-0.02em' }}>Peter's Bot</div>
-              <div style={{ fontSize: 11, color: '#64748b' }}>V75 · DEMO · v5.11</div>
+              <div style={{ fontSize: 11, color: '#64748b' }}>V75 · DEMO · v5.12</div>
             </div>
           </div>
 

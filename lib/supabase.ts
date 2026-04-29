@@ -25,6 +25,7 @@ export interface Trade {
   result: 'WIN' | 'LOSS' | 'EVEN'
   pnl: number
   balance: number
+  hour:         number | null
   // ── self-optimisation columns (v5.11) ──
   regime:       string | null
   trend_bias:   string | null
