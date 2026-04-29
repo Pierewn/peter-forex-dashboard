@@ -3,6 +3,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Trade } from '@/lib/supabase'
 
 interface Props { trades: Trade[] }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Fmt = (v: any, n?: any, p?: any) => [string, string]
 
 function winRate(trades: Trade[]) {
   if (!trades.length) return 0
@@ -244,7 +246,7 @@ export default function SignalIntelligence({ trades }: Props) {
               <XAxis dataKey="range" tick={{ fill: '#64748b', fontSize: 10 }} />
               <YAxis yAxisId="left" tick={{ fill: '#64748b', fontSize: 11 }} label={{ value: 'Trades', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 10 }} />
               <YAxis yAxisId="right" orientation="right" domain={[0,100]} tick={{ fill: '#64748b', fontSize: 11 }} unit="%" />
-              <Tooltip contentStyle={TipStyle} formatter={(v: any, name: string) => [name === 'count' ? `${v} trades` : `${v}%`, name === 'count' ? 'Count' : 'Win Rate']} />
+              <Tooltip contentStyle={TipStyle} formatter={((v: any, name: any) => [name === 'count' ? `${v} trades` : `${v}%`, name === 'count' ? 'Count' : 'Win Rate']) as Fmt} />
               <Bar yAxisId="left"  dataKey="count" name="count" fill="#6366f1" opacity={0.5} radius={[4,4,0,0]} />
               <Bar yAxisId="right" dataKey="wr"    name="wr"    radius={[4,4,0,0]}>
                 {scoreDistData.map((d, i) => <Cell key={i} fill={BAR_COLOUR(d.wr)} />)}
