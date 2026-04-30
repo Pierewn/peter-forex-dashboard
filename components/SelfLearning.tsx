@@ -234,8 +234,47 @@ export default function SelfLearning({ trades }: Props) {
     .map(s => { const g = enriched.filter(s.f); return { name: s.label, wr: wr(g), count: g.length } })
     .filter(d => d.count >= 2).sort((a, b) => b.wr - a.wr)
 
+  // ── Duration analytics (v6.2+) ────────────────────────────────────────
+  const withDuration = trades.filter(t => t.duration !== null && t.duration !== undefined)
+  const durationData = [5, 7, 10]
+    .map(d => {
+      const g = withDuration.filter(t => t.duration === d)
+      return { name: `${d} min`, wr: wr(g), count: g.length }
+    })
+    .filter(d => d.count > 0)
+
+  // Duration split by regime — does 10-min help in trending markets?
+  const enrichedWithDur = enriched.filter(t => t.duration !== null && t.duration !== undefined)
+  const durRegimeData = regimeOrder
+    .filter(r => regimeMap[r]?.length >= 2)
+    .map(r => {
+      const rt = regimeMap[r].filter(t => t.duration !== null && t.duration !== undefined)
+      const d5  = rt.filter(t => t.duration === 5)
+      const d10 = rt.filter(t => t.duration === 10)
+      return {
+        regime: r.replace('TRENDING_', 'T_').replace('TRENDING', 'TREND'),
+        '5min':  d5.length  >= 2 ? wr(d5)  : null,
+        '10min': d10.length >= 2 ? wr(d10) : null,
+        total: rt.length,
+      }
+    })
+    .filter(d => d.total >= 2)
+
   // ── Insights ──────────────────────────────────────────────────────────
   const insights: { icon: string; text: string; good: boolean }[] = []
+
+  // Duration insight
+  if (durationData.length >= 2) {
+    const best = [...durationData].sort((a, b) => b.wr - a.wr)[0]
+    const worst = [...durationData].sort((a, b) => a.wr - b.wr)[0]
+    if (best.name !== worst.name && best.count >= 3) {
+      insights.push({
+        icon: '🕐',
+        text: `Best trade duration: ${best.name} at ${best.wr}% win rate (${best.count} trades). ${worst.name} trades win only ${worst.wr}%. The nightly recalibration uses this — if ${worst.name} keeps underperforming, dynamic duration will route fewer trades there.`,
+        good: best.wr >= 55,
+      })
+    }
+  }
 
   if (withTrend.length >= 3 && againstTrend.length >= 3) {
     const diff = wr(withTrend) - wr(againstTrend)
@@ -337,6 +376,51 @@ export default function SelfLearning({ trades }: Props) {
             : alignData.length < 2
               ? <Pending msg="Need trades in multiple trend directions." />
               : <MiniBar data={alignData} />}
+        </Section>
+      </div>
+
+      {/* ── Row 2b: Duration analytics (v6.2+) ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
+        <Section title="🕐 Win Rate by Trade Duration" badge="v6.2+" sub="5 min (ranging), 7 min (trending), 10 min (strong trend / high score) — which wins more?">
+          {withDuration.length < 5
+            ? <Pending msg="Needs v6.2+ trades with duration data — collecting now." />
+            : durationData.length < 2
+              ? <Pending msg="Need trades at multiple durations." />
+              : (
+                <>
+                  <MiniBar data={durationData} />
+                  <div style={{ fontSize: 11, color: '#64748b', marginTop: 8 }}>
+                    5 min = RANGING (fast mean-reversion) · 7–10 min = TRENDING (trend needs time to play out)
+                  </div>
+                </>
+              )
+          }
+        </Section>
+
+        <Section title="🎯 Duration vs Regime" badge="v6.2+" sub="Does giving trending trades more time actually improve win rate?">
+          {enrichedWithDur.length < 5
+            ? <Pending msg="Needs enriched v6.2+ trades — collecting now." />
+            : durRegimeData.length < 2
+              ? <Pending msg="Need multiple regimes with duration data." />
+              : (
+                <>
+                  <ResponsiveContainer width="100%" height={180}>
+                    <BarChart data={durRegimeData} barSize={16}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#2a2d3a" />
+                      <XAxis dataKey="regime" tick={{ fill: '#94a3b8', fontSize: 11 }} />
+                      <YAxis domain={[0, 100]} tick={{ fill: '#64748b', fontSize: 11 }} unit="%" />
+                      <Tooltip contentStyle={TipStyle} />
+                      <Bar dataKey="5min"  name="5 min"  fill="#6366f1" radius={[4,4,0,0]} />
+                      <Bar dataKey="10min" name="10 min" fill="#22c55e" radius={[4,4,0,0]} />
+                      <Legend wrapperStyle={{ fontSize: 11, color: '#94a3b8' }} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                  <div style={{ fontSize: 11, color: '#64748b', marginTop: 8 }}>
+                    If 10 min &gt; 5 min in TRENDING regimes, the dynamic duration logic is proven.
+                  </div>
+                </>
+              )
+          }
         </Section>
       </div>
 
