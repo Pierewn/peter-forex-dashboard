@@ -95,12 +95,15 @@ export default function LiveInsights({ trades }: Props) {
   // 3. Session insight
   if (bestSession && bestSession[0] !== 'R75') {
     const [name, ts] = bestSession
-    const label = name === 'LONDON' ? 'London session (11am–8pm Kenya)'
-      : name === 'NEW_YORK' ? 'New York session (8pm–1am Kenya)' : name
+    const label = name === 'LONDON' ? 'London morning — EUR/USD (11am–4pm Kenya)'
+      : name === 'GOLD_LONDON' ? 'London/NY overlap — Gold (4pm–8pm Kenya)'
+      : name === 'NEW_YORK' ? 'New York session — GBP/USD (8pm–1am Kenya)' : name
     insights.push({
       icon: '🕐', colour: '#38bdf8',
       title: `Best trading window: ${label} at ${wr(ts)}% win rate`,
-      body: `The ${label} is when the most banks and institutions are actively trading. More volume = cleaner price moves = more reliable signals. Your bot is picking this up. Watch if this pattern holds as more forex trades build up.`,
+      body: name === 'GOLD_LONDON'
+        ? `The London/NY overlap is when both European commodity desks and American traders are active simultaneously — Gold sees its highest daily volume in this window. Big institutions move Gold here, creating the cleanest technical setups. Your bot is catching this.`
+        : `The ${label} is when the most banks and institutions are actively trading. More volume = cleaner price moves = more reliable signals. Your bot is picking this up. Watch if this pattern holds as more trades build up.`,
     })
   }
 

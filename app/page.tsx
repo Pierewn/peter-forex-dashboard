@@ -17,6 +17,7 @@ const SYMBOL_LABELS: Record<string, string> = {
   'R_75':       'V75 (Synthetic)',
   'frxEURUSD':  'EUR/USD',
   'frxGBPUSD':  'GBP/USD',
+  'frxXAUUSD':  'Gold / USD',
 }
 
 export default function Dashboard() {
@@ -71,7 +72,7 @@ export default function Dashboard() {
             <span style={{ fontSize: 22 }}>🤖</span>
             <div>
               <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: '-0.02em' }}>Peter's Bot</div>
-              <div style={{ fontSize: 11, color: '#64748b' }}>EUR/USD · GBP/USD · V75 · DEMO · v6.1</div>
+              <div style={{ fontSize: 11, color: '#64748b' }}>EUR/USD · Gold · GBP/USD · V75 · DEMO · v6.3</div>
             </div>
           </div>
 
@@ -182,6 +183,10 @@ export default function Dashboard() {
                       {
                         icon: '📐', title: 'Z-Score + Fibonacci',
                         desc: 'Z-Score measures how far price has stretched from its average. Fibonacci levels are mathematical price magnets where markets reverse. "History always tells a story."'
+                      },
+                      {
+                        icon: '🥇', title: 'Gold Trading (13:00–17:00 UTC)',
+                        desc: 'Gold (XAU/USD) is traded during the London/NY overlap — peak institutional volume. Gold respects Fibonacci and support/resistance levels extremely well. Same technical signals, different asset class.'
                       },
                       {
                         icon: '📡', title: 'Higher Timeframe Trend',

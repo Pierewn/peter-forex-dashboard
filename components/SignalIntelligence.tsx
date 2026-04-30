@@ -106,20 +106,33 @@ export default function SignalIntelligence({ trades }: Props) {
   // ── v6.1 multi-asset charts ───────────────────────────────────────────────
 
   // Win rate by symbol (asset)
+  const SYMBOL_NAMES: Record<string, string> = {
+    'R_75':       'V75',
+    'frxEURUSD':  'EUR/USD',
+    'frxGBPUSD':  'GBP/USD',
+    'frxXAUUSD':  'Gold',
+  }
   const bySymbol = groupBy(trades, t => t.symbol ?? 'R_75')
   const symbolData = Object.entries(bySymbol)
     .map(([sym, ts]) => ({
-      name: sym === 'R_75' ? 'V75' : sym === 'frxEURUSD' ? 'EUR/USD' : sym === 'frxGBPUSD' ? 'GBP/USD' : sym,
+      name: SYMBOL_NAMES[sym] ?? sym,
       wr: winRate(ts), count: ts.length,
     }))
     .sort((a, b) => b.wr - a.wr)
 
   // Win rate by session
-  const sessionOrder = ['LONDON', 'NEW_YORK', 'R75', 'OFF_HOURS']
+  const sessionOrder = ['LONDON', 'GOLD_LONDON', 'NEW_YORK', 'R75', 'OFF_HOURS']
+  const SESSION_LABELS: Record<string, string> = {
+    'LONDON':      'EUR/USD London AM',
+    'GOLD_LONDON': 'Gold (London/NY)',
+    'NEW_YORK':    'GBP/USD NY',
+    'R75':         'V75 Synthetic',
+    'OFF_HOURS':   'Off-Hours',
+  }
   const bySession = groupBy(trades, t => t.session_name ?? (t.symbol === 'R_75' ? 'R75' : 'UNKNOWN'))
   const sessionData = sessionOrder
     .filter(s => bySession[s]?.length)
-    .map(s => ({ session: s.replace('_', ' '), wr: winRate(bySession[s]), count: bySession[s].length }))
+    .map(s => ({ session: SESSION_LABELS[s] ?? s, wr: winRate(bySession[s]), count: bySession[s].length }))
 
   // Win rate by day of week
   const DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
