@@ -48,6 +48,8 @@ export interface Trade {
   de_risk:           boolean | null  // soft brake (1.5% daily loss) was active
   recovery:          boolean | null  // post-streak 50%-stake recovery trade
   win_rate_at_entry: number | null   // overall win rate when Kelly was sized
+  // ── v6.2 dynamic duration ──
+  duration:          number | null   // trade duration in minutes (5 | 7 | 10)
 }
 
 export interface Scan {
