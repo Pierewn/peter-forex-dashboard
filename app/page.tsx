@@ -54,7 +54,7 @@ export default function Dashboard() {
             <span style={{ fontSize: 22 }}>🤖</span>
             <div>
               <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: '-0.02em' }}>Peter's Bot</div>
-              <div style={{ fontSize: 11, color: '#64748b' }}>V75 · DEMO · v5.14</div>
+              <div style={{ fontSize: 11, color: '#64748b' }}>EUR/USD · GBP/USD · V75 · DEMO · v6.0</div>
             </div>
           </div>
 
@@ -179,14 +179,12 @@ export default function Dashboard() {
                 <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 12, padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', gap: 16 }}>
                   <span style={{ fontSize: 28 }}>🎯</span>
                   <div>
-                    <div style={{ fontWeight: 700, marginBottom: 4 }}>Target to go LIVE: 55%+ win rate over 50+ trades</div>
+                    <div style={{ fontWeight: 700, marginBottom: 4 }}>Target to go LIVE: 55%+ win rate over 100+ forex trades</div>
                     <div style={{ color: '#64748b', fontSize: 13 }}>
-                      Current: <strong style={{ color: wr >= 55 ? '#22c55e' : '#eab308' }}>{wr}%</strong> over {trades.length} trades.{' '}
-                      {wr >= 55 && trades.length >= 50
+                      Current: <strong style={{ color: wr >= 55 ? '#22c55e' : '#eab308' }}>{wr}%</strong> over {trades.length} trades (53 on V75 + forex paper trades incoming).{' '}
+                      {wr >= 55 && trades.length >= 100
                         ? '🚀 You\'re ready to consider going live!'
-                        : wr >= 55
-                        ? `Keep going — need ${50 - trades.length} more trades to confirm the edge.`
-                        : 'Keep collecting data. The bot is learning.'}
+                        : 'Collecting forex paper trade data. Next milestone: 55%+ over 100 trades.'}
                     </div>
                   </div>
                 </div>
