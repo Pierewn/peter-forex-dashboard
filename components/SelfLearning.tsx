@@ -15,23 +15,28 @@ const TipStyle = {
   borderRadius: 8, padding: '8px 12px', fontSize: 12,
 }
 
-function wr(trades: Trade[]) {
-  if (!trades.length) return 0
-  return Math.round(trades.filter(t => t.result === 'WIN').length / trades.length * 1000) / 10
-}
-
-function pct(n: number, d: number) {
-  return d === 0 ? 0 : Math.round(n / d * 1000) / 10
+function wr(ts: Trade[]) {
+  if (!ts.length) return 0
+  return Math.round(ts.filter(t => t.result === 'WIN').length / ts.length * 1000) / 10
 }
 
 const colour = (v: number) =>
   v >= 60 ? '#22c55e' : v >= 50 ? '#6366f1' : v >= 40 ? '#eab308' : '#ef4444'
 
-function Section({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) {
+function Section({ title, sub, badge, children }: {
+  title: string; sub?: string; badge?: string; children: React.ReactNode
+}) {
   return (
     <div style={{ background: '#1a1d27', border: '1px solid #2a2d3a', borderRadius: 12, padding: '1.5rem', marginBottom: '1.25rem' }}>
-      <div style={{ fontSize: 11, color: '#64748b', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: sub ? 4 : '1rem' }}>
-        {title}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: sub ? 4 : '1rem' }}>
+        <div style={{ fontSize: 11, color: '#64748b', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+          {title}
+        </div>
+        {badge && (
+          <span style={{ fontSize: 10, background: 'rgba(99,102,241,0.15)', color: '#a78bfa', borderRadius: 4, padding: '1px 6px', fontWeight: 600 }}>
+            {badge}
+          </span>
+        )}
       </div>
       {sub && <div style={{ fontSize: 12, color: '#64748b', marginBottom: '1rem' }}>{sub}</div>}
       {children}
@@ -39,7 +44,7 @@ function Section({ title, sub, children }: { title: string; sub?: string; childr
   )
 }
 
-function MiniBar({ data, dataKey = 'wr' }: { data: { name: string; wr: number; count: number }[]; dataKey?: string }) {
+function MiniBar({ data }: { data: { name: string; wr: number; count: number }[] }) {
   return (
     <ResponsiveContainer width="100%" height={180}>
       <BarChart data={data} barSize={32}>
@@ -48,7 +53,7 @@ function MiniBar({ data, dataKey = 'wr' }: { data: { name: string; wr: number; c
         <YAxis domain={[0, 100]} tick={{ fill: '#64748b', fontSize: 11 }} unit="%" />
         <Tooltip contentStyle={TipStyle}
           formatter={((v: any, _n: any, p: any) => [`${v}% (${p?.payload?.count ?? 0} trades)`, 'Win Rate']) as Fmt} />
-        <Bar dataKey={dataKey} radius={[4, 4, 0, 0]}>
+        <Bar dataKey="wr" radius={[4, 4, 0, 0]}>
           {data.map((d, i) => <Cell key={i} fill={colour(d.wr)} />)}
         </Bar>
       </BarChart>
@@ -56,62 +61,62 @@ function MiniBar({ data, dataKey = 'wr' }: { data: { name: string; wr: number; c
   )
 }
 
+function Pending({ msg }: { msg: string }) {
+  return (
+    <div style={{ color: '#64748b', fontSize: 13, padding: '1.5rem 0', textAlign: 'center' }}>
+      <div style={{ fontSize: 20, marginBottom: 8 }}>⏳</div>
+      {msg}
+    </div>
+  )
+}
+
 // ── Time-of-day heatmap ────────────────────────────────────────────────────
 function TimeOfDayChart({ trades }: { trades: Trade[] }) {
   const withHour = trades.filter(t => t.hour !== null && t.hour !== undefined)
-  if (withHour.length < 5) {
-    return (
-      <Section title="⏰ Win Rate by Hour (UTC)" sub="Which hours of the day does the bot perform best?">
-        <div style={{ color: '#64748b', fontSize: 13 }}>
-          Need v5.12+ trades with hour data. Building up...
-        </div>
-      </Section>
-    )
-  }
-  // Group into 4-hour buckets for readability
+  if (withHour.length < 5) return (
+    <Section title="⏰ Win Rate by Hour (UTC)" badge="v5.12+" sub="Which time windows does the bot perform best in?">
+      <Pending msg="Needs v5.12+ trades with hour data — building up..." />
+    </Section>
+  )
   const buckets: Record<string, Trade[]> = {
     '00–04': [], '04–08': [], '08–12': [],
     '12–16': [], '16–20': [], '20–24': [],
   }
   withHour.forEach(t => {
     const h = t.hour as number
-    if (h < 4)       buckets['00–04'].push(t)
+    if (h < 4) buckets['00–04'].push(t)
     else if (h < 8)  buckets['04–08'].push(t)
     else if (h < 12) buckets['08–12'].push(t)
     else if (h < 16) buckets['12–16'].push(t)
     else if (h < 20) buckets['16–20'].push(t)
-    else             buckets['20–24'].push(t)
+    else buckets['20–24'].push(t)
   })
-  const data = Object.entries(buckets)
-    .filter(([, ts]) => ts.length > 0)
-    .map(([bucket, ts]) => ({ name: bucket, wr: wr(ts), count: ts.length }))
+  const data = Object.entries(buckets).filter(([, ts]) => ts.length > 0)
+    .map(([b, ts]) => ({ name: b, wr: wr(ts), count: ts.length }))
   return (
-    <Section title="⏰ Win Rate by Hour (UTC)" sub="Which time windows does the bot perform best in?">
+    <Section title="⏰ Win Rate by Hour (UTC)" badge="v5.12+" sub="Which time windows does the bot perform best in?">
       <MiniBar data={data} />
       <div style={{ fontSize: 11, color: '#64748b', marginTop: 8 }}>
-        London session: 08–17 UTC · NY session: 13–22 UTC · Forex filter auto-activates at v6.0
+        London: 08–17 UTC · NY: 13–22 UTC · Forex session filter auto-activates at v6.0
       </div>
     </Section>
   )
 }
 
-// ── Stake efficiency chart ─────────────────────────────────────────────────
+// ── Stake efficiency ───────────────────────────────────────────────────────
 function StakeEfficiencyChart({ trades }: { trades: Trade[] }) {
-  if (trades.length < 5) {
-    return (
-      <Section title="💰 Stake Efficiency" sub="Do larger Kelly stakes actually win more?">
-        <div style={{ color: '#64748b', fontSize: 13 }}>Need more trades.</div>
-      </Section>
-    )
-  }
-  const stakes = trades.map(t => t.stake).filter(Boolean)
-  if (!stakes.length) return null
-  const p25 = stakes.slice().sort((a,b)=>a-b)[Math.floor(stakes.length * 0.25)]
-  const p75 = stakes.slice().sort((a,b)=>a-b)[Math.floor(stakes.length * 0.75)]
+  if (trades.length < 5) return (
+    <Section title="💰 Stake Efficiency" sub="Does Kelly sizing higher-confidence trades actually win more?">
+      <Pending msg="Need more trades." />
+    </Section>
+  )
+  const stakes = trades.map(t => t.stake).filter(Boolean).sort((a, b) => a - b)
+  const p25 = stakes[Math.floor(stakes.length * 0.25)]
+  const p75 = stakes[Math.floor(stakes.length * 0.75)]
   const bands = [
-    { label: `Base ($1–$${p25.toFixed(2)})`, filter: (t: Trade) => t.stake <= p25 },
-    { label: `Mid ($${p25.toFixed(2)}–$${p75.toFixed(2)})`, filter: (t: Trade) => t.stake > p25 && t.stake <= p75 },
-    { label: `High ($${p75.toFixed(2)}+)`, filter: (t: Trade) => t.stake > p75 },
+    { label: `Low  ≤$${p25.toFixed(2)}`,  filter: (t: Trade) => t.stake <= p25 },
+    { label: `Mid  $${p25.toFixed(2)}–$${p75.toFixed(2)}`, filter: (t: Trade) => t.stake > p25 && t.stake <= p75 },
+    { label: `High >$${p75.toFixed(2)}`,  filter: (t: Trade) => t.stake > p75 },
   ]
   const data = bands.map(b => {
     const g = trades.filter(b.filter)
@@ -121,158 +126,157 @@ function StakeEfficiencyChart({ trades }: { trades: Trade[] }) {
     <Section title="💰 Stake Efficiency" sub="Does Kelly sizing higher-confidence trades actually win more?">
       <MiniBar data={data} />
       <div style={{ fontSize: 11, color: '#64748b', marginTop: 8 }}>
-        If high-stake trades win less, Kelly is over-sizing — the confidence score thresholds may need tuning.
+        If high-stake trades win less, Kelly is over-sizing — confidence thresholds may need tuning.
       </div>
     </Section>
   )
 }
 
 export default function SelfLearning({ trades }: Props) {
-  // Only trades that have the new columns
-  const enriched = trades.filter(t => t.regime !== null && t.regime !== undefined)
-  const hasData  = enriched.length >= 3
+  if (!trades.length) return (
+    <div style={{ textAlign: 'center', padding: '4rem', color: '#64748b' }}>
+      <div style={{ fontSize: 36, marginBottom: 12 }}>🧠</div>
+      <div style={{ fontWeight: 700 }}>No trades yet — the bot will populate this tab as it trades.</div>
+    </div>
+  )
 
-  // ── 1. Win rate by regime ──────────────────────────────────────────────
+  // Split into enriched (v5.11+ columns present) vs legacy
+  const enriched = trades.filter(t => t.regime !== null && t.regime !== undefined)
+  const legacy   = trades.filter(t => t.regime === null  || t.regime === undefined)
+
+  // ── All-trades data (works with every row) ────────────────────────────
+  const allWins   = trades.filter(t => t.result === 'WIN')
+  const allLosses = trades.filter(t => t.result === 'LOSS')
+
+  const avg = (ts: Trade[], key: keyof Trade) =>
+    ts.length ? +(ts.reduce((s, t) => s + ((t[key] as number) ?? 0), 0) / ts.length).toFixed(2) : 0
+
+  // Layer chart — tech/box/dev work on ALL trades; SMC is 0 for legacy (correct)
+  const layerData = allWins.length >= 2 && allLosses.length >= 2 ? [
+    { layer: 'Technical', wins: avg(allWins, 'tech_score'), losses: avg(allLosses, 'tech_score') },
+    { layer: 'Box/S&R',   wins: avg(allWins, 'box_score'),  losses: avg(allLosses, 'box_score')  },
+    { layer: 'Deviation', wins: avg(allWins, 'dev_score'),  losses: avg(allLosses, 'dev_score')  },
+    { layer: 'SMC/ICT',   wins: avg(allWins, 'smc_score'),  losses: avg(allLosses, 'smc_score')  },
+  ] : []
+
+  // ADX-estimated regime for ALL trades (best-effort for legacy rows)
+  const adxRegimeData = (() => {
+    const buckets = [
+      { name: 'Quiet\n<20',    filter: (t: Trade) => t.adx < 20 },
+      { name: 'Ranging\n20–25', filter: (t: Trade) => t.adx >= 20 && t.adx < 25 },
+      { name: 'Trending\n25–30',filter: (t: Trade) => t.adx >= 25 && t.adx < 30 },
+      { name: 'Strong\n30+',   filter: (t: Trade) => t.adx >= 30 },
+    ]
+    return buckets.map(b => {
+      const g = trades.filter(b.filter)
+      return { name: b.name, wr: wr(g), count: g.length }
+    }).filter(d => d.count > 0)
+  })()
+
+  // ── Enriched-only data ────────────────────────────────────────────────
+  const eWins   = enriched.filter(t => t.result === 'WIN')
+  const eLosses = enriched.filter(t => t.result === 'LOSS')
+
   const regimeOrder = ['TRENDING_BULL', 'TRENDING_BEAR', 'TRENDING', 'RANGING', 'VOLATILE', 'QUIET']
   const regimeMap: Record<string, Trade[]> = {}
-  enriched.forEach(t => {
-    const k = t.regime || 'UNKNOWN'
-    if (!regimeMap[k]) regimeMap[k] = []
-    regimeMap[k].push(t)
-  })
-  const regimeData = regimeOrder
-    .filter(r => regimeMap[r]?.length)
+  enriched.forEach(t => { const k = t.regime!; if (!regimeMap[k]) regimeMap[k] = []; regimeMap[k].push(t) })
+  const regimeData = regimeOrder.filter(r => regimeMap[r]?.length)
     .map(r => ({ name: r.replace('TRENDING_', 'T_'), wr: wr(regimeMap[r]), count: regimeMap[r].length }))
 
-  // ── 2. HTF alignment — WITH vs AGAINST vs NEUTRAL ─────────────────────
   const withTrend: Trade[] = [], againstTrend: Trade[] = [], neutralTrades: Trade[] = []
   enriched.forEach(t => {
     const bias = t.trend_bias || 'NEUTRAL'
     const dir  = t.direction
-    const isCallBull = dir === 'CALL' && bias === 'BULLISH'
-    const isPutBear  = dir === 'PUT'  && bias === 'BEARISH'
-    const isCallBear = dir === 'CALL' && bias === 'BEARISH'
-    const isPutBull  = dir === 'PUT'  && bias === 'BULLISH'
-    if (isCallBull || isPutBear) withTrend.push(t)
-    else if (isCallBear || isPutBull) againstTrend.push(t)
+    if ((dir === 'CALL' && bias === 'BULLISH') || (dir === 'PUT' && bias === 'BEARISH')) withTrend.push(t)
+    else if ((dir === 'CALL' && bias === 'BEARISH') || (dir === 'PUT' && bias === 'BULLISH')) againstTrend.push(t)
     else neutralTrades.push(t)
   })
   const alignData = [
-    { name: '✅ With Trend',    wr: wr(withTrend),    count: withTrend.length },
-    { name: '⚠️ Against Trend', wr: wr(againstTrend), count: againstTrend.length },
-    { name: '↔️ Neutral HTF',   wr: wr(neutralTrades), count: neutralTrades.length },
+    { name: '✅ With Trend',    wr: wr(withTrend),     count: withTrend.length },
+    { name: '⚠️ Against',       wr: wr(againstTrend),  count: againstTrend.length },
+    { name: '↔️ Neutral',       wr: wr(neutralTrades), count: neutralTrades.length },
   ].filter(d => d.count > 0)
 
-  // ── 3. SMC score impact (0 = no SMC, 1-2, 3-4, 5-6) ──────────────────
   const smcBands = [
-    { label: '0 (none)', min: 0, max: 0 },
-    { label: '1–2',      min: 1, max: 2 },
-    { label: '3–4',      min: 3, max: 4 },
-    { label: '5–6 (max)',min: 5, max: 6 },
+    { label: '0 pts',    min: 0, max: 0 },
+    { label: '1–2 pts',  min: 1, max: 2 },
+    { label: '3–4 pts',  min: 3, max: 4 },
+    { label: '5–6 pts',  min: 5, max: 6 },
   ]
   const smcData = smcBands.map(b => {
     const g = enriched.filter(t => (t.smc_score ?? 0) >= b.min && (t.smc_score ?? 0) <= b.max)
     return { name: b.label, wr: wr(g), count: g.length }
   }).filter(d => d.count > 0)
 
-  // ── 4. P/D zone win rate ───────────────────────────────────────────────
   const pdOrder = ['DEEP_DISCOUNT', 'DISCOUNT', 'EQUILIBRIUM', 'PREMIUM', 'DEEP_PREMIUM']
   const pdMap: Record<string, Trade[]> = {}
   enriched.forEach(t => { const k = t.pd_zone || 'UNKNOWN'; if (!pdMap[k]) pdMap[k] = []; pdMap[k].push(t) })
-  const pdData = pdOrder
-    .filter(p => pdMap[p]?.length)
-    .map(p => ({ name: p.replace('_', '\n'), wr: wr(pdMap[p]), count: pdMap[p].length }))
+  const pdData = pdOrder.filter(p => pdMap[p]?.length)
+    .map(p => ({ name: p.replace('DEEP_', 'D.').replace('_', '\n'), wr: wr(pdMap[p]), count: pdMap[p].length }))
 
-  // ── 5. SMC signal attribution (wins vs losses avg layer) ──────────────
-  const wins   = enriched.filter(t => t.result === 'WIN')
-  const losses = enriched.filter(t => t.result === 'LOSS')
-  const avg    = (ts: Trade[], key: keyof Trade) =>
-    ts.length ? +(ts.reduce((s, t) => s + ((t[key] as number) ?? 0), 0) / ts.length).toFixed(2) : 0
-
-  const layerData = wins.length && losses.length ? [
-    { layer: 'Technical', wins: avg(wins, 'tech_score'), losses: avg(losses, 'tech_score') },
-    { layer: 'Box/S&R',   wins: avg(wins, 'box_score'),  losses: avg(losses, 'box_score')  },
-    { layer: 'Deviation', wins: avg(wins, 'dev_score'),  losses: avg(losses, 'dev_score')  },
-    { layer: 'SMC/ICT',   wins: avg(wins, 'smc_score'),  losses: avg(losses, 'smc_score')  },
-  ] : []
-
-  // ── 6. Individual SMC signal win rates ────────────────────────────────
-  const smcSignals = [
-    { label: 'FVG',          filter: (t: Trade) => t.fvg_hit === true },
-    { label: 'Order Block',  filter: (t: Trade) => t.ob_hit === true },
-    { label: 'BOS',          filter: (t: Trade) => t.bos !== 'none' && t.bos !== null },
-    { label: 'Sweep',        filter: (t: Trade) => t.sweep !== 'none' && t.sweep !== null },
-    { label: 'OTE',          filter: (t: Trade) => t.ote !== 'none' && t.ote !== null },
-    { label: 'Displacement', filter: (t: Trade) => t.displacement !== 'none' && t.displacement !== null },
-    { label: 'EQH/EQL',      filter: (t: Trade) => (t.eqh_hit || t.eql_hit) === true },
-  ]
-  const signalData = smcSignals
-    .map(s => {
-      const g = enriched.filter(s.filter)
-      return { name: s.label, wr: wr(g), count: g.length }
-    })
-    .filter(d => d.count >= 2)
-    .sort((a, b) => b.wr - a.wr)
-
-  // ── 7. OTE accuracy ───────────────────────────────────────────────────
-  const oteTrades    = enriched.filter(t => t.ote !== 'none' && t.ote !== null)
+  const oteTrades    = enriched.filter(t => t.ote && t.ote !== 'none')
   const nonOteTrades = enriched.filter(t => !t.ote || t.ote === 'none')
   const oteData = [
-    { name: 'OTE Entry',     wr: wr(oteTrades),    count: oteTrades.length },
-    { name: 'Standard Entry',wr: wr(nonOteTrades), count: nonOteTrades.length },
+    { name: 'OTE Entry',      wr: wr(oteTrades),    count: oteTrades.length },
+    { name: 'Standard Entry', wr: wr(nonOteTrades), count: nonOteTrades.length },
   ].filter(d => d.count > 0)
 
-  // ── Learning insights ─────────────────────────────────────────────────
+  const smcSignals = [
+    { label: 'FVG',          f: (t: Trade) => t.fvg_hit === true },
+    { label: 'Order Block',  f: (t: Trade) => t.ob_hit  === true },
+    { label: 'BOS',          f: (t: Trade) => !!t.bos  && t.bos  !== 'none' },
+    { label: 'Sweep',        f: (t: Trade) => !!t.sweep && t.sweep !== 'none' },
+    { label: 'OTE',          f: (t: Trade) => !!t.ote  && t.ote  !== 'none' },
+    { label: 'Displacement', f: (t: Trade) => !!t.displacement && t.displacement !== 'none' },
+    { label: 'EQH/EQL',      f: (t: Trade) => !!(t.eqh_hit || t.eql_hit) },
+  ]
+  const signalData = smcSignals
+    .map(s => { const g = enriched.filter(s.f); return { name: s.label, wr: wr(g), count: g.length } })
+    .filter(d => d.count >= 2).sort((a, b) => b.wr - a.wr)
+
+  // ── Insights ──────────────────────────────────────────────────────────
   const insights: { icon: string; text: string; good: boolean }[] = []
 
   if (withTrend.length >= 3 && againstTrend.length >= 3) {
     const diff = wr(withTrend) - wr(againstTrend)
-    if (diff > 10)
-      insights.push({ icon: '✅', text: `Trading WITH the HTF trend wins ${wr(withTrend)}% vs ${wr(againstTrend)}% against it — trend alignment is a real edge (+${diff.toFixed(1)}%)`, good: true })
-    else if (diff < -10)
-      insights.push({ icon: '⚠️', text: `Counter-trend trades are surprisingly outperforming (${wr(againstTrend)}% vs ${wr(withTrend)}%) — worth monitoring`, good: false })
-    else
-      insights.push({ icon: 'ℹ️', text: `No significant difference between WITH and AGAINST trend yet (${wr(withTrend)}% vs ${wr(againstTrend)}%) — need more data`, good: true })
+    if (Math.abs(diff) > 10)
+      insights.push({ icon: diff > 0 ? '✅' : '⚠️',
+        text: `Trading ${diff > 0 ? 'WITH' : 'AGAINST'} the HTF trend is performing better (${Math.max(wr(withTrend), wr(againstTrend))}% vs ${Math.min(wr(withTrend), wr(againstTrend))}%) — ${diff > 0 ? 'trend alignment confirmed' : 'worth investigating'}.`,
+        good: diff > 0 })
   }
 
-  const smcTrades    = enriched.filter(t => (t.smc_score ?? 0) > 0)
-  const nonSmcTrades = enriched.filter(t => (t.smc_score ?? 0) === 0)
-  if (smcTrades.length >= 3 && nonSmcTrades.length >= 3) {
-    const smcWr    = wr(smcTrades)
-    const nonSmcWr = wr(nonSmcTrades)
-    if (smcWr > nonSmcWr + 8)
-      insights.push({ icon: '🧠', text: `SMC signals are working! Trades with SMC confluence: ${smcWr}% win rate vs ${nonSmcWr}% without. The institutional analysis is adding real edge.`, good: true })
-    else if (smcWr < nonSmcWr - 8)
-      insights.push({ icon: '⚠️', text: `SMC signals aren't helping yet — trades with SMC score ${smcWr}% vs ${nonSmcWr}% without. May need more data.`, good: false })
-    else
-      insights.push({ icon: 'ℹ️', text: `SMC and non-SMC trades performing similarly (${smcWr}% vs ${nonSmcWr}%) — edge not yet confirmed, keep collecting data.`, good: true })
+  const smcT = enriched.filter(t => (t.smc_score ?? 0) > 0)
+  const nonSmc = enriched.filter(t => (t.smc_score ?? 0) === 0)
+  if (smcT.length >= 3 && nonSmc.length >= 3) {
+    const diff = wr(smcT) - wr(nonSmc)
+    insights.push({ icon: diff > 8 ? '🧠' : diff < -8 ? '⚠️' : 'ℹ️',
+      text: `SMC confluence: ${wr(smcT)}% win rate (${smcT.length} trades) vs ${wr(nonSmc)}% without (${nonSmc.length} trades). ${diff > 8 ? 'The institutional layer is adding real edge.' : diff < -8 ? 'SMC not yet helping — needs more data.' : 'Edge not yet confirmed — keep collecting data.'}`,
+      good: diff > 0 })
   }
 
-  const bestRegime = regimeData.sort((a, b) => b.wr - a.wr)[0]
-  const worstRegime = [...regimeData].sort((a, b) => a.wr - b.wr)[0]
-  if (bestRegime && worstRegime && bestRegime.name !== worstRegime.name && bestRegime.count >= 3)
-    insights.push({ icon: '🎯', text: `Best regime: ${bestRegime.name} at ${bestRegime.wr}% win rate (${bestRegime.count} trades). Worst: ${worstRegime.name} at ${worstRegime.wr}%.`, good: bestRegime.wr >= 55 })
+  const bestR = [...regimeData].sort((a, b) => b.wr - a.wr)[0]
+  const worstR = [...regimeData].sort((a, b) => a.wr - b.wr)[0]
+  if (bestR && worstR && bestR.name !== worstR.name && bestR.count >= 3)
+    insights.push({ icon: '🎯',
+      text: `Best regime: ${bestR.name} at ${bestR.wr}% (${bestR.count} trades). Worst: ${worstR.name} at ${worstR.wr}%.`,
+      good: bestR.wr >= 55 })
 
-  if (oteTrades.length >= 3) {
-    const oteWr = wr(oteTrades)
-    insights.push({ icon: oteWr >= 60 ? '✅' : oteWr >= 50 ? 'ℹ️' : '⚠️', text: `OTE entries: ${oteWr}% win rate over ${oteTrades.length} trades — ${oteWr >= 60 ? 'high-precision entries confirmed' : oteWr >= 50 ? 'edge not yet clear' : 'underperforming — check OTE thresholds'}`, good: oteWr >= 55 })
-  }
-
-  const noDataMsg = (
-    <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
-      <div style={{ fontSize: 36, marginBottom: 12 }}>🧠</div>
-      <div style={{ fontWeight: 700, marginBottom: 8 }}>Waiting for v5.11 trade data</div>
-      <div style={{ fontSize: 13 }}>
-        {trades.length > 0
-          ? `${trades.length} historical trades exist but predate the new columns. New learning data starts from the next trade.`
-          : 'No trades yet. The bot will populate this tab as it trades.'}
-      </div>
+  // Legacy notice badge
+  const legacyNote = legacy.length > 0 && (
+    <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: '#94a3b8', marginBottom: '1.25rem' }}>
+      📊 <strong style={{ color: '#e2e8f0' }}>{trades.length} total trades:</strong>{' '}
+      {enriched.length > 0
+        ? <><strong style={{ color: '#22c55e' }}>{enriched.length} enriched</strong> (v5.11+ full analytics) + <strong style={{ color: '#64748b' }}>{legacy.length} legacy</strong> (pre-v5.11, partial data).</>
+        : <><strong style={{ color: '#eab308' }}>{legacy.length} legacy trades</strong> — pre-v5.11. Charts using existing columns are shown below. SMC/regime/HTF charts populate from the next trade.</>
+      }{' '}Charts become statistically meaningful at 20+ trades per category.
     </div>
   )
 
   return (
     <div>
-      {/* Learning insights */}
+      {legacyNote}
+
+      {/* Insights — only when enriched data exists */}
       {insights.length > 0 && (
         <Section title="🤖 What The Bot Is Learning">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -291,102 +295,114 @@ export default function SelfLearning({ trades }: Props) {
         </Section>
       )}
 
-      {!hasData && noDataMsg}
-
-      {hasData && (
-        <>
-          {/* Row 1: Regime + HTF alignment */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
-            <Section title="Win Rate by Market Regime" sub="Which market condition does the bot perform best in?">
-              {regimeData.length < 2
-                ? <div style={{ color: '#64748b', fontSize: 13 }}>Need more regime variety — keep running.</div>
-                : <MiniBar data={regimeData} />}
-            </Section>
-
-            <Section title="HTF Trend Alignment" sub="Does trading WITH the 1H+4H trend actually improve results?">
-              {alignData.length < 2
-                ? <div style={{ color: '#64748b', fontSize: 13 }}>Need trades in multiple trend directions.</div>
-                : <MiniBar data={alignData} />}
-            </Section>
-          </div>
-
-          {/* Row 2: SMC score impact + P/D zone */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
-            <Section title="SMC Score Impact" sub="Does higher SMC confluence actually win more?">
-              {smcData.length < 2
-                ? <div style={{ color: '#64748b', fontSize: 13 }}>Need trades at different SMC levels.</div>
-                : <MiniBar data={smcData} />}
-            </Section>
-
-            <Section title="Premium / Discount Zone" sub="Buying in discount, selling in premium — does ICT theory hold?">
-              {pdData.length < 2
-                ? <div style={{ color: '#64748b', fontSize: 13 }}>Need trades across different P/D zones.</div>
-                : <MiniBar data={pdData} />}
-            </Section>
-          </div>
-
-          {/* Row 3: Signal attribution (wins vs losses) + OTE */}
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
-            <Section title="Score Layer — Avg Points on Wins vs Losses" sub="Which scoring layers actually differentiate winning trades?">
-              {layerData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={180}>
-                  <BarChart data={layerData} barSize={18}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#2a2d3a" />
-                    <XAxis dataKey="layer" tick={{ fill: '#94a3b8', fontSize: 12 }} />
-                    <YAxis tick={{ fill: '#64748b', fontSize: 11 }} />
-                    <Tooltip contentStyle={TipStyle} />
-                    <Bar dataKey="wins"   name="Wins"   fill="#22c55e" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="losses" name="Losses" fill="#ef4444" radius={[4, 4, 0, 0]} />
-                    <Legend wrapperStyle={{ fontSize: 12, color: '#94a3b8' }} />
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <div style={{ color: '#64748b', fontSize: 13 }}>Need wins and losses.</div>
-              )}
-            </Section>
-
-            <Section title="OTE vs Standard Entry" sub="Is the 61.8-78.6% fib entry more accurate?">
-              {oteData.length < 2
-                ? <div style={{ color: '#64748b', fontSize: 13 }}>Need OTE + non-OTE data.</div>
-                : <MiniBar data={oteData} />}
-            </Section>
-          </div>
-
-          {/* Row 4: Individual SMC signal win rates */}
-          {signalData.length >= 2 && (
-            <Section title="Individual SMC Signal Win Rate" sub="Which Smart Money signal is most accurate when it fires? (min 2 trades shown)">
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={signalData} barSize={36}>
+      {/* ── Row 1: Layer chart (ALL trades) + Stake efficiency (ALL trades) ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
+        <Section title="Score Layer — Avg Points on Wins vs Losses"
+          sub="Which indicator layers actually differentiate winning trades? (all trades)">
+          {layerData.length > 0 ? (
+            <>
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart data={layerData} barSize={18}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#2a2d3a" />
-                  <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 12 }} />
-                  <YAxis domain={[0, 100]} tick={{ fill: '#64748b', fontSize: 11 }} unit="%" />
-                  <Tooltip contentStyle={TipStyle}
-                    formatter={((v: any, _n: any, p: any) => [`${v}% (${p?.payload?.count ?? 0} trades)`, 'Win Rate']) as Fmt} />
-                  <Bar dataKey="wr" radius={[4, 4, 0, 0]}>
-                    {signalData.map((d, i) => <Cell key={i} fill={colour(d.wr)} />)}
-                  </Bar>
+                  <XAxis dataKey="layer" tick={{ fill: '#94a3b8', fontSize: 12 }} />
+                  <YAxis tick={{ fill: '#64748b', fontSize: 11 }} />
+                  <Tooltip contentStyle={TipStyle} />
+                  <Bar dataKey="wins"   name="Wins"   fill="#22c55e" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="losses" name="Losses" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                  <Legend wrapperStyle={{ fontSize: 12, color: '#94a3b8' }} />
                 </BarChart>
               </ResponsiveContainer>
-              <div style={{ fontSize: 12, color: '#64748b', marginTop: 12 }}>
-                Signals above 60% are proving their edge. Below 50% need investigation — the bot will naturally use them less as Kelly adjusts.
+              <div style={{ fontSize: 11, color: '#64748b', marginTop: 8 }}>
+                SMC/ICT column shows 0 for pre-v5.11 trades — will fill as new trades come in.
               </div>
-            </Section>
+            </>
+          ) : (
+            <Pending msg="Need both wins and losses to compare." />
           )}
+        </Section>
+        <StakeEfficiencyChart trades={trades} />
+      </div>
 
-          {/* Row 5: Time-of-day heatmap + Stake efficiency */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
-            <TimeOfDayChart trades={trades} />
-            <StakeEfficiencyChart trades={trades} />
-          </div>
+      {/* ── Row 2: ADX regime estimate (ALL trades) + HTF alignment (enriched) ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
+        <Section title="Win Rate by ADX Regime" sub="Estimated from ADX — all trades. Exact regime label available from v5.11+.">
+          {adxRegimeData.length >= 2
+            ? <MiniBar data={adxRegimeData} />
+            : <Pending msg="Need more ADX variety." />}
+        </Section>
 
-          {/* Data coverage notice */}
-          <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 10, padding: '1rem 1.25rem', fontSize: 12, color: '#94a3b8' }}>
-            📊 <strong style={{ color: '#e2e8f0' }}>Self-learning data:</strong> {enriched.length} of {trades.length} trades have full v5.11 analytics.
-            {trades.length > enriched.length && ` ${trades.length - enriched.length} earlier trades are pre-v5.11 and show as legacy data in other tabs.`}
-            {' '}Charts become statistically meaningful at 20+ trades per category.
-          </div>
-        </>
+        <Section title="HTF Trend Alignment" badge="v5.11+" sub="Does trading WITH the 1H+4H trend actually improve results?">
+          {enriched.length < 5
+            ? <Pending msg={`${enriched.length} enriched trades so far — builds from next trade.`} />
+            : alignData.length < 2
+              ? <Pending msg="Need trades in multiple trend directions." />
+              : <MiniBar data={alignData} />}
+        </Section>
+      </div>
+
+      {/* ── Row 3: SMC score impact + P/D zone (enriched) ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
+        <Section title="SMC Score Impact" badge="v5.11+" sub="Does higher SMC confluence actually win more?">
+          {enriched.length < 5
+            ? <Pending msg={`${enriched.length} enriched trades — builds from next trade.`} />
+            : smcData.length < 2
+              ? <Pending msg="Need trades at different SMC levels." />
+              : <MiniBar data={smcData} />}
+        </Section>
+
+        <Section title="Premium / Discount Zone" badge="v5.11+" sub="Buying in discount, selling in premium — does ICT theory hold?">
+          {enriched.length < 5
+            ? <Pending msg={`${enriched.length} enriched trades — builds from next trade.`} />
+            : pdData.length < 2
+              ? <Pending msg="Need trades across P/D zones." />
+              : <MiniBar data={pdData} />}
+        </Section>
+      </div>
+
+      {/* ── Row 4: Exact regime (enriched) + OTE (enriched) ── */}
+      {enriched.length >= 5 && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
+          <Section title="Win Rate by Exact Regime" badge="v5.11+" sub="4-state MRD: which regime is the bot actually profitable in?">
+            {regimeData.length < 2
+              ? <Pending msg="Need more regime variety." />
+              : <MiniBar data={regimeData} />}
+          </Section>
+
+          <Section title="OTE vs Standard Entry" badge="v5.11+" sub="Is the 61.8–78.6% fib entry more accurate?">
+            {oteData.length < 2
+              ? <Pending msg="Need OTE + non-OTE data." />
+              : <MiniBar data={oteData} />}
+          </Section>
+        </div>
       )}
+
+      {/* ── Row 5: Individual SMC signals (enriched) ── */}
+      {signalData.length >= 2 && (
+        <Section title="Individual SMC Signal Win Rate" badge="v5.11+"
+          sub="Which Smart Money signal is most accurate when it fires? (min 2 trades shown)">
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={signalData} barSize={36}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#2a2d3a" />
+              <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 12 }} />
+              <YAxis domain={[0, 100]} tick={{ fill: '#64748b', fontSize: 11 }} unit="%" />
+              <Tooltip contentStyle={TipStyle}
+                formatter={((v: any, _n: any, p: any) => [`${v}% (${p?.payload?.count ?? 0} trades)`, 'Win Rate']) as Fmt} />
+              <Bar dataKey="wr" radius={[4, 4, 0, 0]}>
+                {signalData.map((d, i) => <Cell key={i} fill={colour(d.wr)} />)}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+          <div style={{ fontSize: 12, color: '#64748b', marginTop: 12 }}>
+            Signals above 60% are proving their edge. Below 50% need investigation.
+          </div>
+        </Section>
+      )}
+
+      {/* ── Row 6: Time-of-day + Stake efficiency ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
+        <TimeOfDayChart trades={trades} />
+        <StakeEfficiencyChart trades={trades} />
+      </div>
     </div>
   )
 }
