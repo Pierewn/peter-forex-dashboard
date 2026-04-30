@@ -10,11 +10,19 @@ import SelfLearning from '@/components/SelfLearning'
 
 const NAV = ['Overview', 'Signal Intelligence', 'Patterns & Insights', 'Self-Learning', 'Trade Log']
 
+const SYMBOL_LABELS: Record<string, string> = {
+  'ALL':        'All Assets',
+  'R_75':       'V75 (Synthetic)',
+  'frxEURUSD':  'EUR/USD',
+  'frxGBPUSD':  'GBP/USD',
+}
+
 export default function Dashboard() {
   const [trades, setTrades]   = useState<Trade[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError]     = useState('')
   const [tab, setTab]         = useState('Overview')
+  const [symbol, setSymbol]   = useState('ALL')
   const [lastRefresh, setLastRefresh] = useState(new Date())
   const [refreshing, setRefreshing]   = useState(false)
 
@@ -40,9 +48,16 @@ export default function Dashboard() {
     return () => clearInterval(interval)
   }, [])
 
-  const wins   = trades.filter(t => t.result === 'WIN').length
-  const losses = trades.filter(t => t.result === 'LOSS').length
-  const wr     = trades.length ? Math.round(wins / trades.length * 1000) / 10 : 0
+  // Filter by selected asset symbol — all components receive the filtered slice
+  const filtered = symbol === 'ALL' ? trades : trades.filter(t => (t.symbol ?? 'R_75') === symbol)
+
+  const wins   = filtered.filter(t => t.result === 'WIN').length
+  const losses = filtered.filter(t => t.result === 'LOSS').length
+  const wr     = filtered.length ? Math.round(wins / filtered.length * 1000) / 10 : 0
+
+  // Available symbols derived from actual data (always show ALL + any seen)
+  const seenSymbols = Array.from(new Set(trades.map(t => t.symbol ?? 'R_75')))
+  const symbolOptions = ['ALL', ...seenSymbols]
 
   return (
     <div style={{ minHeight: '100vh', background: '#0f1117', color: '#e2e8f0' }}>
@@ -54,16 +69,28 @@ export default function Dashboard() {
             <span style={{ fontSize: 22 }}>🤖</span>
             <div>
               <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: '-0.02em' }}>Peter's Bot</div>
-              <div style={{ fontSize: 11, color: '#64748b' }}>EUR/USD · GBP/USD · V75 · DEMO · v6.0</div>
+              <div style={{ fontSize: 11, color: '#64748b' }}>EUR/USD · GBP/USD · V75 · DEMO · v6.1</div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            {/* Asset filter */}
+            {trades.length > 0 && (
+              <select
+                value={symbol}
+                onChange={e => setSymbol(e.target.value)}
+                style={{ background: '#2a2d3a', border: '1px solid #3a3d4a', color: '#e2e8f0', padding: '5px 10px', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>
+                {symbolOptions.map(s => (
+                  <option key={s} value={s}>{SYMBOL_LABELS[s] ?? s}</option>
+                ))}
+              </select>
+            )}
+
             {/* Live stats in header */}
             {trades.length > 0 && (
-              <div style={{ display: 'flex', gap: 20, fontSize: 13 }}>
+              <div style={{ display: 'flex', gap: 16, fontSize: 13 }}>
                 <span style={{ color: '#64748b' }}>
-                  {trades.length} trades ·{' '}
+                  {filtered.length} trades ·{' '}
                   <span style={{ color: wr >= 55 ? '#22c55e' : '#ef4444', fontWeight: 700 }}>{wr}% win rate</span>
                 </span>
                 <span style={{ color: '#22c55e', fontWeight: 700 }}>
@@ -128,11 +155,11 @@ export default function Dashboard() {
         {!loading && trades.length > 0 && (
           <>
             {/* Stats always visible */}
-            <StatsRow trades={trades} />
+            <StatsRow trades={filtered} />
 
             {tab === 'Overview' && (
               <>
-                <EquityCurve trades={trades} />
+                <EquityCurve trades={filtered} />
 
                 {/* Insight box */}
                 <div style={{ background: '#1a1d27', border: '1px solid #2a2d3a', borderRadius: 12, padding: '1.5rem', marginBottom: '1.5rem' }}>
@@ -191,10 +218,10 @@ export default function Dashboard() {
               </>
             )}
 
-            {tab === 'Signal Intelligence' && <SignalIntelligence trades={trades} />}
-            {tab === 'Patterns & Insights' && <LosingPatterns trades={trades} />}
-            {tab === 'Self-Learning' && <SelfLearning trades={trades} />}
-            {tab === 'Trade Log' && <TradeLog trades={trades} />}
+            {tab === 'Signal Intelligence' && <SignalIntelligence trades={filtered} />}
+            {tab === 'Patterns & Insights' && <LosingPatterns trades={filtered} />}
+            {tab === 'Self-Learning' && <SelfLearning trades={filtered} />}
+            {tab === 'Trade Log' && <TradeLog trades={filtered} />}
           </>
         )}
       </div>

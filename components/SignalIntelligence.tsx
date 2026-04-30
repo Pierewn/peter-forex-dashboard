@@ -103,6 +103,54 @@ export default function SignalIntelligence({ trades }: Props) {
     .filter(([, ts]) => ts.length > 0)
     .map(([bucket, ts]) => ({ bucket, wr: winRate(ts), count: ts.length }))
 
+  // ── v6.1 multi-asset charts ───────────────────────────────────────────────
+
+  // Win rate by symbol (asset)
+  const bySymbol = groupBy(trades, t => t.symbol ?? 'R_75')
+  const symbolData = Object.entries(bySymbol)
+    .map(([sym, ts]) => ({
+      name: sym === 'R_75' ? 'V75' : sym === 'frxEURUSD' ? 'EUR/USD' : sym === 'frxGBPUSD' ? 'GBP/USD' : sym,
+      wr: winRate(ts), count: ts.length,
+    }))
+    .sort((a, b) => b.wr - a.wr)
+
+  // Win rate by session
+  const sessionOrder = ['LONDON', 'NEW_YORK', 'R75', 'OFF_HOURS']
+  const bySession = groupBy(trades, t => t.session_name ?? (t.symbol === 'R_75' ? 'R75' : 'UNKNOWN'))
+  const sessionData = sessionOrder
+    .filter(s => bySession[s]?.length)
+    .map(s => ({ session: s.replace('_', ' '), wr: winRate(bySession[s]), count: bySession[s].length }))
+
+  // Win rate by day of week
+  const DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  const byDow = groupBy(trades, t => t.day_of_week ?? new Date(t.ts).getDay())
+  const dowData = [0, 1, 2, 3, 4]
+    .filter(d => byDow[d]?.length)
+    .map(d => ({ day: DOW[d], wr: winRate(byDow[d]), count: byDow[d].length }))
+
+  // Payout % vs win rate (do higher payouts come with worse signals?)
+  const payoutBuckets = [
+    { label: '<80%', min: 0, max: 80 }, { label: '80-84%', min: 80, max: 85 },
+    { label: '85-89%', min: 85, max: 90 }, { label: '90-94%', min: 90, max: 95 },
+    { label: '95%+',  min: 95, max: 999 },
+  ]
+  const payoutData = payoutBuckets
+    .map(b => {
+      const g = trades.filter(t => t.payout_pct != null && t.payout_pct >= b.min && t.payout_pct < b.max)
+      return g.length ? { label: b.label, wr: winRate(g), count: g.length } : null
+    })
+    .filter(Boolean) as { label: string; wr: number; count: number }[]
+
+  // De-risk / recovery mode performance
+  const deRiskTrades  = trades.filter(t => t.de_risk)
+  const recoveryTrades = trades.filter(t => t.recovery)
+  const normalTrades  = trades.filter(t => !t.de_risk && !t.recovery)
+  const riskModeData = [
+    { mode: 'Normal', wr: winRate(normalTrades), count: normalTrades.length },
+    ...(deRiskTrades.length  ? [{ mode: 'De-Risk', wr: winRate(deRiskTrades), count: deRiskTrades.length }]  : []),
+    ...(recoveryTrades.length ? [{ mode: 'Recovery', wr: winRate(recoveryTrades), count: recoveryTrades.length }] : []),
+  ]
+
   const SectionTitle = ({ children }: { children: string }) => (
     <div style={{ fontSize: 11, color: '#64748b', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '1rem' }}>
       {children}
@@ -256,6 +304,111 @@ export default function SignalIntelligence({ trades }: Props) {
           <div style={{ fontSize: 11, color: '#64748b', marginTop: 8 }}>
             Purple bars (left axis) = trade count. Coloured bars (right axis) = win rate per band. Most trades should cluster at 13+ for a calibrated edge.
           </div>
+        </Card>
+      )}
+
+      {/* Win rate by Symbol/Asset */}
+      {symbolData.length > 1 && (
+        <Card>
+          <SectionTitle>Win Rate by Asset</SectionTitle>
+          <div style={{ fontSize: 12, color: '#64748b', marginBottom: 12 }}>
+            Is EUR/USD performing better than GBP/USD or V75?
+          </div>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart data={symbolData} barSize={50}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#2a2d3a" />
+              <XAxis dataKey="name" tick={{ fill: '#64748b', fontSize: 12 }} />
+              <YAxis domain={[0, 100]} tick={{ fill: '#64748b', fontSize: 11 }} tickFormatter={v => `${v}%`} />
+              <Tooltip contentStyle={TipStyle} formatter={(v: any, n: any, p: any) => [`${v}% (${p.payload.count} trades)`, 'Win Rate']} />
+              <Bar dataKey="wr" radius={[4, 4, 0, 0]}>
+                {symbolData.map((entry, i) => <Cell key={i} fill={BAR_COLOUR(entry.wr)} />)}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+      )}
+
+      {/* Win rate by Session */}
+      {sessionData.length > 1 && (
+        <Card>
+          <SectionTitle>Win Rate by Session</SectionTitle>
+          <div style={{ fontSize: 12, color: '#64748b', marginBottom: 12 }}>
+            London vs New York vs V75. Which window is the bot sharpest?
+          </div>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart data={sessionData} barSize={50}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#2a2d3a" />
+              <XAxis dataKey="session" tick={{ fill: '#64748b', fontSize: 11 }} />
+              <YAxis domain={[0, 100]} tick={{ fill: '#64748b', fontSize: 11 }} tickFormatter={v => `${v}%`} />
+              <Tooltip contentStyle={TipStyle} formatter={(v: any, n: any, p: any) => [`${v}% (${p.payload.count} trades)`, 'Win Rate']} />
+              <Bar dataKey="wr" radius={[4, 4, 0, 0]}>
+                {sessionData.map((entry, i) => <Cell key={i} fill={BAR_COLOUR(entry.wr)} />)}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+      )}
+
+      {/* Win rate by Day of Week */}
+      {dowData.length >= 3 && (
+        <Card>
+          <SectionTitle>Win Rate by Day of Week</SectionTitle>
+          <div style={{ fontSize: 12, color: '#64748b', marginBottom: 12 }}>
+            Some days are structurally better. Thursday before NFP? Friday chop? The data will show.
+          </div>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart data={dowData} barSize={40}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#2a2d3a" />
+              <XAxis dataKey="day" tick={{ fill: '#64748b', fontSize: 12 }} />
+              <YAxis domain={[0, 100]} tick={{ fill: '#64748b', fontSize: 11 }} tickFormatter={v => `${v}%`} />
+              <Tooltip contentStyle={TipStyle} formatter={(v: any, n: any, p: any) => [`${v}% (${p.payload.count} trades)`, 'Win Rate']} />
+              <Bar dataKey="wr" radius={[4, 4, 0, 0]}>
+                {dowData.map((entry, i) => <Cell key={i} fill={BAR_COLOUR(entry.wr)} />)}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+      )}
+
+      {/* Payout % vs Win Rate */}
+      {payoutData.length >= 2 && (
+        <Card>
+          <SectionTitle>Payout % vs Win Rate</SectionTitle>
+          <div style={{ fontSize: 12, color: '#64748b', marginBottom: 12 }}>
+            Higher payout = market paying a premium for uncertainty. Does better odds come with worse outcomes?
+          </div>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart data={payoutData} barSize={40}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#2a2d3a" />
+              <XAxis dataKey="label" tick={{ fill: '#64748b', fontSize: 11 }} />
+              <YAxis domain={[0, 100]} tick={{ fill: '#64748b', fontSize: 11 }} tickFormatter={v => `${v}%`} />
+              <Tooltip contentStyle={TipStyle} formatter={(v: any, n: any, p: any) => [`${v}% (${p.payload.count} trades)`, 'Win Rate']} />
+              <Bar dataKey="wr" radius={[4, 4, 0, 0]}>
+                {payoutData.map((entry, i) => <Cell key={i} fill={BAR_COLOUR(entry.wr)} />)}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+      )}
+
+      {/* Risk Mode Performance */}
+      {(deRiskTrades.length > 0 || recoveryTrades.length > 0) && (
+        <Card>
+          <SectionTitle>Risk Mode Performance</SectionTitle>
+          <div style={{ fontSize: 12, color: '#64748b', marginBottom: 12 }}>
+            Normal Kelly vs soft de-risk (daily loss &gt;1.5%) vs recovery mode (post-streak). Are the safeguards working?
+          </div>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart data={riskModeData} barSize={50}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#2a2d3a" />
+              <XAxis dataKey="mode" tick={{ fill: '#64748b', fontSize: 12 }} />
+              <YAxis domain={[0, 100]} tick={{ fill: '#64748b', fontSize: 11 }} tickFormatter={v => `${v}%`} />
+              <Tooltip contentStyle={TipStyle} formatter={(v: any, n: any, p: any) => [`${v}% (${p.payload.count} trades)`, 'Win Rate']} />
+              <Bar dataKey="wr" radius={[4, 4, 0, 0]}>
+                {riskModeData.map((entry, i) => <Cell key={i} fill={BAR_COLOUR(entry.wr)} />)}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </Card>
       )}
 

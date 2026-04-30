@@ -26,6 +26,7 @@ export interface Trade {
   pnl: number
   balance: number
   hour:         number | null
+  symbol:       string | null   // R_75 | frxEURUSD | frxGBPUSD
   // ── self-optimisation columns (v5.11) ──
   regime:       string | null
   trend_bias:   string | null
@@ -39,6 +40,14 @@ export interface Trade {
   displacement: string | null
   pd_zone:      string | null
   ote:          string | null
+  // ── v6.1 multi-asset & risk-mode columns ──
+  payout_pct:        number | null   // actual market payout % offered
+  session_name:      string | null   // LONDON | NEW_YORK | R75 | OFF_HOURS
+  day_of_week:       number | null   // 0=Mon … 6=Sun
+  entry_price:       number | null   // price at entry (probe spot)
+  de_risk:           boolean | null  // soft brake (1.5% daily loss) was active
+  recovery:          boolean | null  // post-streak 50%-stake recovery trade
+  win_rate_at_entry: number | null   // overall win rate when Kelly was sized
 }
 
 export interface Scan {
