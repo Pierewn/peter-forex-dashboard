@@ -7,8 +7,10 @@ import SignalIntelligence from '@/components/SignalIntelligence'
 import TradeLog from '@/components/TradeLog'
 import LosingPatterns from '@/components/LosingPatterns'
 import SelfLearning from '@/components/SelfLearning'
+import LiveInsights from '@/components/LiveInsights'
+import ForexLearn from '@/components/ForexLearn'
 
-const NAV = ['Overview', 'Signal Intelligence', 'Patterns & Insights', 'Self-Learning', 'Trade Log']
+const NAV = ['Overview', 'Signal Intelligence', 'Patterns & Insights', 'Self-Learning', 'Trade Log', 'Learn']
 
 const SYMBOL_LABELS: Record<string, string> = {
   'ALL':        'All Assets',
@@ -159,6 +161,7 @@ export default function Dashboard() {
 
             {tab === 'Overview' && (
               <>
+                <LiveInsights trades={filtered} />
                 <EquityCurve trades={filtered} />
 
                 {/* Insight box */}
@@ -222,6 +225,7 @@ export default function Dashboard() {
             {tab === 'Patterns & Insights' && <LosingPatterns trades={filtered} />}
             {tab === 'Self-Learning' && <SelfLearning trades={filtered} />}
             {tab === 'Trade Log' && <TradeLog trades={filtered} />}
+            {tab === 'Learn' && <ForexLearn trades={filtered} />}
           </>
         )}
       </div>
