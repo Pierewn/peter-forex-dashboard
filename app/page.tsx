@@ -72,7 +72,7 @@ export default function Dashboard() {
             <span style={{ fontSize: 22 }}>🤖</span>
             <div>
               <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: '-0.02em' }}>Peter's Bot</div>
-              <div style={{ fontSize: 11, color: '#64748b' }}>EUR/USD · Gold · GBP/USD · V75 · DEMO · v6.8</div>
+              <div style={{ fontSize: 11, color: '#64748b' }}>EUR/USD · Gold · GBP/USD · V75 · DEMO · v6.9</div>
             </div>
           </div>
 
