@@ -97,7 +97,7 @@ function TimeOfDayChart({ trades }: { trades: Trade[] }) {
     <Section title="⏰ Win Rate by Hour (UTC)" badge="v5.12+" sub="Which time windows does the bot perform best in?">
       <MiniBar data={data} />
       <div style={{ fontSize: 11, color: '#64748b', marginTop: 8 }}>
-        London: 08–17 UTC · NY: 13–22 UTC · Forex session filter auto-activates at v6.0
+        Synthetics 24/7 · Gold: 14–17 UTC · Hours 10–11 UTC and 20–21 UTC are blocked (data-proven losing windows)
       </div>
     </Section>
   )

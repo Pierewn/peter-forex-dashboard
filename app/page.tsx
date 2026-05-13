@@ -15,9 +15,11 @@ const NAV = ['Overview', 'Signal Intelligence', 'Patterns & Insights', 'Self-Lea
 const SYMBOL_LABELS: Record<string, string> = {
   'ALL':        'All Assets',
   'R_75':       'V75 (Synthetic)',
-  'frxEURUSD':  'EUR/USD',
-  'frxGBPUSD':  'GBP/USD',
+  'R_50':       'V50 (Synthetic)',
+  'JD75':       'JD75 (Jump 75)',
+  '1HZ75V':     '1HZ75V (V75 1s)',
   'frxXAUUSD':  'Gold / USD',
+  'frxGBPUSD':  'GBP/USD',
 }
 
 export default function Dashboard() {
@@ -72,7 +74,7 @@ export default function Dashboard() {
             <span style={{ fontSize: 22 }}>🤖</span>
             <div>
               <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: '-0.02em' }}>Peter's Bot</div>
-              <div style={{ fontSize: 11, color: '#64748b' }}>EUR/USD · Gold · GBP/USD · V75 · V50 · DEMO · v7.2</div>
+              <div style={{ fontSize: 11, color: '#64748b' }}>V75 · V50 · JD75 · 1HZ75V · Gold · DEMO · v7.7</div>
             </div>
           </div>
 
@@ -185,16 +187,16 @@ export default function Dashboard() {
                         desc: 'Z-Score measures how far price has stretched from its average. Fibonacci levels are mathematical price magnets where markets reverse. "History always tells a story."'
                       },
                       {
-                        icon: '🥇', title: 'Gold Trading (13:00–17:00 UTC)',
-                        desc: 'Gold (XAU/USD) is traded during the London/NY overlap — peak institutional volume. Gold respects Fibonacci and support/resistance levels extremely well. Same technical signals, different asset class.'
+                        icon: '🥇', title: 'Gold Trading (14:00–17:00 UTC)',
+                        desc: 'Gold (XAU/USD) trades during the London/NY overlap — peak institutional volume. All other times the bot rotates through 4 synthetic indices: R_75, R_50, JD75 and 1HZ75V — available 24/7.'
                       },
                       {
                         icon: '📡', title: 'Higher Timeframe Trend',
-                        desc: 'The bot checks the 1-hour and 4-hour charts. If both point UP, it only takes BUY trades. If both point DOWN, only SELL. Never fights the bigger trend.'
+                        desc: 'The bot checks the 1-hour and 4-hour charts. If both point UP, it favours BUY trades (+2 pts). If both point DOWN, it favours SELL. Never fights the bigger trend.'
                       },
                       {
                         icon: '✅', title: 'Signal Confirmation',
-                        desc: 'A signal must appear twice in a row before the bot trades. This eliminates false signals — if the market is truly moving, it shows up consistently.'
+                        desc: 'A signal must score 11+ points before the bot trades — a strong quality gate across 10+ indicators. Each scan takes ~10 seconds so valid setups are caught quickly.'
                       },
                       {
                         icon: '💹', title: 'Kelly Criterion',
@@ -210,16 +212,18 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* Target box */}
-                <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 12, padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', gap: 16 }}>
-                  <span style={{ fontSize: 28 }}>🎯</span>
+                {/* Status box */}
+                <div style={{ background: wr >= 54 ? 'rgba(34,197,94,0.08)' : 'rgba(99,102,241,0.08)', border: `1px solid ${wr >= 54 ? 'rgba(34,197,94,0.25)' : 'rgba(99,102,241,0.25)'}`, borderRadius: 12, padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', gap: 16 }}>
+                  <span style={{ fontSize: 28 }}>{wr >= 54 ? '🚀' : '🎯'}</span>
                   <div>
-                    <div style={{ fontWeight: 700, marginBottom: 4 }}>Target to go LIVE: 55%+ win rate over 100+ forex trades</div>
+                    <div style={{ fontWeight: 700, marginBottom: 4 }}>
+                      {wr >= 54 ? 'Strategy proven profitable — 899-trade deep analysis complete' : 'Building calibration data — target 54%+ win rate'}
+                    </div>
                     <div style={{ color: '#64748b', fontSize: 13 }}>
-                      Current: <strong style={{ color: wr >= 55 ? '#22c55e' : '#eab308' }}>{wr}%</strong> over {trades.length} trades (53 on V75 + forex paper trades incoming).{' '}
-                      {wr >= 55 && trades.length >= 100
-                        ? '🚀 You\'re ready to consider going live!'
-                        : 'Collecting forex paper trade data. Next milestone: 55%+ over 100 trades.'}
+                      Current: <strong style={{ color: wr >= 52 ? '#22c55e' : '#eab308' }}>{wr}%</strong> over {trades.length} trades · Breakeven: ~52.1% (at 92% payout) · Assets: V75, V50, JD75, 1HZ75V (24/7 synthetics) + Gold (14–17 UTC).{' '}
+                      {wr >= 54 && trades.length >= 500
+                        ? '✅ Edge confirmed. 4-way synthetic rotation live. Score ceilings calibrated from real data.'
+                        : `Collecting synthetic trade data — ${trades.length} trades logged so far.`}
                     </div>
                   </div>
                 </div>

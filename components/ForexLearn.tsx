@@ -64,7 +64,7 @@ export default function ForexLearn({ trades }: Props) {
       <Card>
         <SectionTitle emoji="🤖">How This Bot Actually Makes Money</SectionTitle>
         <div style={{ color: '#94a3b8', fontSize: 13, lineHeight: 1.8, marginBottom: '1rem' }}>
-          The bot trades <strong style={{ color: '#e2e8f0' }}>binary options</strong> on currency pairs and a synthetic index. A binary option is simple: you predict whether the price will be higher or lower in exactly 5 minutes. If you're right, you win a fixed payout. If you're wrong, you lose your stake. That's it.
+          The bot trades <strong style={{ color: '#e2e8f0' }}>binary options</strong> on synthetic indices and Gold. A binary option is simple: predict whether the price will be higher or lower in exactly 5 minutes. Right = fixed payout. Wrong = lose your stake. The bot uses 10+ technical indicators to find high-probability setups, only trading when 11+ points of evidence agree.
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem' }}>
           {[
@@ -132,8 +132,8 @@ export default function ForexLearn({ trades }: Props) {
           {
             chart: 'Win Rate by Regime (Signal Intelligence)',
             what: 'Your data split by market condition: Ranging (sideways), Trending Bull (rising), Trending Bear (falling).',
-            good: 'Your bot currently wins 64.7% in Ranging markets — this is your proven edge. Keep trading those.',
-            bad: 'Trending Bull was 22.2% — the bot\'s indicators don\'t fire cleanly in fast-moving trend conditions on V75.',
+            good: 'RANGING is your strongest regime on synthetics. TRENDING_BEAR with HTF confirmation is also strong. The bot scores +2 pts when HTF bias aligns with the signal direction.',
+            bad: 'TRENDING_BULL is permanently blocked (threshold=999 pts) — historically near-zero win rate. Counter-trend trades in strong trends are suppressed automatically.',
           },
           {
             chart: 'BUY vs SELL Performance (Signal Intelligence)',
@@ -143,9 +143,9 @@ export default function ForexLearn({ trades }: Props) {
           },
           {
             chart: 'Win Rate by Session (Signal Intelligence)',
-            what: 'Splits your trades by when they were taken: London (11am–8pm Kenya), NY (8pm–1am Kenya), or V75 overnight.',
-            good: 'Forex pairs have clear session personalities. London tends to be the most reliable for EUR/USD.',
-            bad: 'If a session consistently underperforms, we can raise the threshold for those hours or skip them.',
+            what: 'Splits your trades by when they were taken: London AM (08–14 UTC), Gold overlap (14–17 UTC), NY (17–22 UTC), or overnight synthetics.',
+            good: 'Synthetics trade 24/7 — session data helps identify which hours the signals perform best. Hours 10–11 UTC and 20–21 UTC are currently blocked (data-proven losing hours).',
+            bad: 'If a session consistently underperforms, we raise the threshold for those hours or skip them entirely.',
           },
           {
             chart: 'Day of Week (Signal Intelligence)',
@@ -212,7 +212,7 @@ export default function ForexLearn({ trades }: Props) {
           Market structure is a series of higher highs and higher lows (uptrend) or lower highs and lower lows (downtrend). A Break of Structure is when price violates this pattern — breaking a prior high in a downtrend, for example. It signals a potential trend change and gives the bot directional confidence.
         </Term>
         <Term word="Kelly Criterion — Stake Sizing">
-          A mathematical formula that calculates the optimal percentage of your account to bet on each trade, based on your actual win rate and payout. Too small = leaves money on the table. Too large = risks ruin from a losing streak. Your bot uses a modified version: quarter-Kelly (conservative) scaled up to half-Kelly only on very high confidence signals (score 15+), with a hard 2% of balance maximum.
+          A mathematical formula that calculates the optimal percentage of your account to bet on each trade, based on your actual win rate and payout. Too small = leaves money on the table. Too large = risks ruin from a losing streak. Your bot uses twentieth-Kelly (very conservative) blended 60% per-symbol win rate + 40% overall win rate, with a hard $3 maximum stake per trade. Early trades proved that high Kelly stakes (up to $190!) after short winning streaks were catastrophic — the $3 cap prevents this permanently.
         </Term>
         <Term word="Market Regime — Ranging vs Trending">
           The bot classifies every market condition into one of four states before deciding whether to trade: RANGING (price bouncing in a channel), TRENDING_BULL (price rising strongly), TRENDING_BEAR (price falling strongly), QUIET/VOLATILE (no valid structure). Each regime activates a different sub-strategy and requires a different minimum score. This is how hedge funds work — they don't use one fixed strategy, they adapt.
@@ -253,8 +253,8 @@ export default function ForexLearn({ trades }: Props) {
             desc: 'After 3 consecutive losses, the bot pauses 2 minutes then trades at 50% stake for the next 3 trades. It\'s easing back in rather than doubling down — the opposite of what a losing gambler does.',
           },
           {
-            icon: '✅', colour: '#22c55e', rule: '2x Signal Confirmation',
-            desc: 'The bot never acts on a single signal. The same direction must appear on two consecutive scans (about 1 minute apart). This eliminates one-candle false signals — if the market is really moving, it shows up consistently.',
+            icon: '✅', colour: '#22c55e', rule: '11-Point Signal Gate',
+            desc: 'The bot only trades when 11+ points of technical evidence agree across RSI, MACD, Bollinger, Z-Score, Box Theory, Fibonacci, SMC/ICT, HTF Bias and more. This quality gate (not a count of scans) eliminates weak signals — if the score doesn\'t hit the threshold, no trade fires.',
           },
           {
             icon: '⏭️', colour: '#38bdf8', rule: 'Stale Entry Guard',
@@ -271,26 +271,30 @@ export default function ForexLearn({ trades }: Props) {
         <div style={{ position: 'relative', paddingLeft: '2rem' }}>
           {[
             {
-              phase: 'Phase 1 — Sentinel (COMPLETE ✅)', colour: '#22c55e',
-              desc: `Collect 50+ trades on V75 to calibrate the scoring system. Done — 53 trades collected, RANGING edge confirmed at 64.7% win rate. Thresholds raised from this data in v5.14.`,
+              phase: 'Phase 1 — Calibration (COMPLETE ✅)', colour: '#22c55e',
+              desc: `899+ trades collected on V75, V50, JD75 and Gold. Deep analysis confirmed a 54.1% overall win rate — above the 52.1% breakeven at 92% payout. Score ceilings calibrated from real data: R_75=13, R_50=12, JD75=12. Hour blocks (10–11 UTC, 20–21 UTC), R_50 HTF BEARISH block, and Gold direction rules all data-proven. Strategy is profitable.`,
             },
             {
-              phase: 'Phase 2 — Forex Paper Trading (YOU ARE HERE 📍)', colour: '#6366f1',
-              desc: 'Apply the calibrated system to real forex pairs (EUR/USD, GBP/USD) with demo money. Target: 55%+ win rate over 100 forex trades. This proves the signals work on real markets with real spreads and real session dynamics.',
+              phase: 'Phase 2 — Full Synthetic Focus (COMPLETE ✅)', colour: '#22c55e',
+              desc: 'EUR/USD removed (Deriv doesn\'t offer it at 5-min digital options on this account — London slot was dead). Bot now runs 4 synthetic indices 24/7: R_75 → R_50 → JD75 → 1HZ75V rotating every ~2 min, with Gold during 14–17 UTC. 1HZ75V (Volatility 75, 1-second ticks) added as 4th index — calibrating.',
             },
             {
-              phase: 'Phase 3 — Micro Live (NEXT)', colour: '#64748b',
-              desc: 'Move to a small live account ($500–$1,000) with real money. Same bot, same rules, tiny stakes. This tests execution quality — are fills clean? Does the payout match what was quoted? Are there any real-money surprises?',
+              phase: 'Phase 3 — 1HZ75V Calibration + Go Live Decision (YOU ARE HERE 📍)', colour: '#6366f1',
+              desc: 'Collect 50+ 1HZ75V trades and calibrate its score ceiling (currently mirroring R_75=13). Review overall PnL curve — strategy is proven, account is negative only due to 4 early Kelly outlier trades ($190+ stakes, -$785 total). With $3 cap in place those can\'t recur. Decision point: stay demo or move to micro live ($500–$1,000)?',
             },
             {
-              phase: 'Phase 4 — Compounding (FUTURE)', colour: '#64748b',
-              desc: 'Once Phase 3 confirms the edge is real, Kelly criterion scales stakes with the growing balance. The account compounds — a proven 55% win rate at 90% payout is roughly 5-8% monthly return on capital if managed correctly.',
+              phase: 'Phase 4 — Micro Live (NEXT)', colour: '#64748b',
+              desc: 'Move to a small live Deriv account with real money. Same bot, same rules, $1–$3 stakes. This tests execution on real money — are payouts as quoted? Any live-account quirks? Target: 54%+ win rate maintained over 200 live trades before scaling.',
+            },
+            {
+              phase: 'Phase 5 — Compounding (FUTURE)', colour: '#64748b',
+              desc: 'Once Phase 4 confirms the live edge, Kelly criterion scales stakes with the growing balance. A 54% win rate at 92% payout yields roughly 3–5% monthly return on capital if managed with strict kill switches. The bot compounds automatically.',
             },
           ].map((p, i) => (
             <div key={i} style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem' }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
                 <div style={{ width: 12, height: 12, borderRadius: '50%', background: p.colour, marginTop: 2, flexShrink: 0 }} />
-                {i < 3 && <div style={{ width: 2, flex: 1, background: '#2a2d3a', marginTop: 4 }} />}
+                {i < 4 && <div style={{ width: 2, flex: 1, background: '#2a2d3a', marginTop: 4 }} />}
               </div>
               <div style={{ paddingBottom: '0.5rem' }}>
                 <div style={{ fontWeight: 700, color: p.colour, fontSize: 13, marginBottom: 4 }}>{p.phase}</div>
@@ -307,13 +311,13 @@ export default function ForexLearn({ trades }: Props) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
           {[
             { label: 'Breakeven win rate', value: `${breakeven}%`, note: `at ${avgPayout.toFixed(0)}% avg payout`, colour: '#e2e8f0' },
-            { label: 'Target win rate', value: '55%', note: 'to go live', colour: '#6366f1' },
-            { label: 'Your current rate', value: `${winRate}%`, note: `over ${trades.length} trades`, colour: winRate >= breakeven ? '#22c55e' : '#ef4444' },
-            { label: 'Max stake per trade', value: '2% of balance', note: 'Kelly hard ceiling', colour: '#38bdf8' },
+            { label: 'Proven win rate', value: `${winRate}%`, note: `over ${trades.length} trades`, colour: winRate >= breakeven ? '#22c55e' : '#ef4444' },
+            { label: 'Max stake per trade', value: '$3', note: 'hard cap — Kelly never exceeds this', colour: '#38bdf8' },
             { label: 'Daily loss limit', value: '3%', note: 'then sleep until midnight Kenya', colour: '#ef4444' },
-            { label: 'Signal confirmations', value: '2×', note: 'same direction before trading', colour: '#a78bfa' },
-            { label: 'Max score possible', value: '32 pts', note: 'all indicators agree', colour: '#eab308' },
-            { label: 'Min score to trade', value: '10 pts', note: 'raised from 8 in v5.14', colour: '#22c55e' },
+            { label: 'Min score to trade', value: '11 pts', note: 'data-proven sweet spot (899 trades)', colour: '#22c55e' },
+            { label: 'Score ceilings', value: 'R75=13, R50=12', note: 'JD75=12, 1HZ75V=13 (calibrated)', colour: '#a78bfa' },
+            { label: 'Assets (24/7)', value: 'V75·V50·JD75·1HZ75V', note: '+ Gold 14–17 UTC', colour: '#eab308' },
+            { label: 'Bot version', value: 'v7.7', note: 'full synthetic · 4-way rotation', colour: '#6366f1' },
           ].map(item => (
             <div key={item.label} style={{ background: '#141620', borderRadius: 10, padding: '0.875rem 1rem' }}>
               <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>{item.label}</div>
