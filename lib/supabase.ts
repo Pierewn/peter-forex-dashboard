@@ -50,6 +50,9 @@ export interface Trade {
   win_rate_at_entry: number | null   // overall win rate when Kelly was sized
   // ── v6.2 dynamic duration ──
   duration:          number | null   // trade duration in minutes (5 | 7 | 10)
+  // ── v7.8 analysis fields (columns added via Supabase SQL editor) ──
+  htf_bias:          string | null
+  reasons:           string | null
 }
 
 export interface Scan {

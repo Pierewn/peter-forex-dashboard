@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { Trade } from '@/lib/supabase'
 import { format } from 'date-fns'
 
@@ -85,8 +85,8 @@ export default function TradeLog({ trades }: Props) {
           </thead>
           <tbody>
             {shown.map((t, i) => (
-              <>
-                <tr key={t.id}
+              <React.Fragment key={t.id}>
+                <tr
                   style={{ borderBottom: '1px solid #1e2130', cursor: 'pointer', transition: 'background 0.15s' }}
                   onMouseEnter={e => (e.currentTarget.style.background = '#1e2130')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
@@ -99,15 +99,19 @@ export default function TradeLog({ trades }: Props) {
                     <span style={{ color: '#a78bfa', fontWeight: 700 }}>{t.score}/20</span>
                     <span style={{ color: '#64748b', marginLeft: 6, fontSize: 11 }}>{stars(t.score)}</span>
                   </td>
-                  <td style={{ padding: '10px 12px', color: '#e2e8f0' }}>${t.stake.toFixed(2)}</td>
+                  <td style={{ padding: '10px 12px', color: '#e2e8f0' }}>${(t.stake ?? 0).toFixed(2)}</td>
                   <td style={{ padding: '10px 12px', color: '#38bdf8' }}>
-                    ${t.payout.toFixed(2)}
-                    <span style={{ color: '#64748b', fontSize: 11, marginLeft: 4 }}>
-                      ({Math.round((t.payout / t.stake - 1) * 100)}%)
-                    </span>
+                    {t.payout != null ? (
+                      <>
+                        ${t.payout.toFixed(2)}
+                        <span style={{ color: '#64748b', fontSize: 11, marginLeft: 4 }}>
+                          ({Math.round((t.payout / (t.stake || 1) - 1) * 100)}%)
+                        </span>
+                      </>
+                    ) : <span style={{ color: '#64748b' }}>—</span>}
                   </td>
-                  <td style={{ padding: '10px 12px', color: t.pnl >= 0 ? '#22c55e' : '#ef4444', fontWeight: 700 }}>
-                    {t.pnl >= 0 ? '+' : ''}${t.pnl.toFixed(2)}
+                  <td style={{ padding: '10px 12px', color: (t.pnl ?? 0) >= 0 ? '#22c55e' : '#ef4444', fontWeight: 700 }}>
+                    {t.pnl != null ? `${t.pnl >= 0 ? '+' : ''}$${t.pnl.toFixed(2)}` : <span style={{ color: '#64748b' }}>—</span>}
                   </td>
                   <td style={{ padding: '10px 12px' }}>{badge(t.result)}</td>
                   <td style={{ padding: '10px 12px', color: '#64748b', fontSize: 11 }}>
@@ -116,7 +120,7 @@ export default function TradeLog({ trades }: Props) {
                 </tr>
 
                 {expanded === t.id && (
-                  <tr key={`${t.id}-detail`}>
+                  <tr>
                     <td colSpan={9} style={{ padding: '0 12px 16px', background: '#141620' }}>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, paddingTop: 12, fontSize: 12 }}>
 
@@ -201,7 +205,7 @@ export default function TradeLog({ trades }: Props) {
                     </td>
                   </tr>
                 )}
-              </>
+              </React.Fragment>
             ))}
           </tbody>
         </table>
