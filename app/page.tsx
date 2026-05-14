@@ -74,7 +74,7 @@ export default function Dashboard() {
             <span style={{ fontSize: 22 }}>🤖</span>
             <div>
               <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: '-0.02em' }}>Peter's Bot</div>
-              <div style={{ fontSize: 11, color: '#64748b' }}>V75 · V50 · JD75 · 1HZ75V · Gold · DEMO · v7.7</div>
+              <div style={{ fontSize: 11, color: '#64748b' }}>V75 · V50 · JD75 · 1HZ75V · Gold · DEMO · v7.9</div>
             </div>
           </div>
 
@@ -187,8 +187,8 @@ export default function Dashboard() {
                         desc: 'Z-Score measures how far price has stretched from its average. Fibonacci levels are mathematical price magnets where markets reverse. "History always tells a story."'
                       },
                       {
-                        icon: '🥇', title: 'Gold Trading (14:00–17:00 UTC)',
-                        desc: 'Gold (XAU/USD) trades during the London/NY overlap — peak institutional volume. All other times the bot rotates through 4 synthetic indices: R_75, R_50, JD75 and 1HZ75V — available 24/7.'
+                        icon: '🥇', title: 'Gold Trading (15:00–17:00 UTC)',
+                        desc: 'Gold (XAU/USD) trades 15:00–17:00 UTC — hour 14 was a losing window (45.7% WR on 35 trades, now blocked). All other times the bot rotates through 4 synthetic indices: R_75, R_50, JD75 and 1HZ75V — available 24/7.'
                       },
                       {
                         icon: '📡', title: 'Higher Timeframe Trend',
@@ -217,10 +217,10 @@ export default function Dashboard() {
                   <span style={{ fontSize: 28 }}>{wr >= 54 ? '🚀' : '🎯'}</span>
                   <div>
                     <div style={{ fontWeight: 700, marginBottom: 4 }}>
-                      {wr >= 54 ? 'Strategy proven profitable — 899-trade deep analysis complete' : 'Building calibration data — target 54%+ win rate'}
+                      {wr >= 54 ? 'Strategy proven profitable — 974-trade deep analysis complete' : 'Building calibration data — target 54%+ win rate'}
                     </div>
                     <div style={{ color: '#64748b', fontSize: 13 }}>
-                      Current: <strong style={{ color: wr >= 52 ? '#22c55e' : '#eab308' }}>{wr}%</strong> over {trades.length} trades · Breakeven: ~52.1% (at 92% payout) · Assets: V75, V50, JD75, 1HZ75V (24/7 synthetics) + Gold (14–17 UTC).{' '}
+                      Current: <strong style={{ color: wr >= 52 ? '#22c55e' : '#eab308' }}>{wr}%</strong> over {trades.length} trades · Breakeven: ~52.1% (at 92% payout) · Assets: V75, V50, JD75, 1HZ75V (24/7 synthetics) + Gold (15–17 UTC).{' '}
                       {wr >= 54 && trades.length >= 500
                         ? '✅ Edge confirmed. 4-way synthetic rotation live. Score ceilings calibrated from real data.'
                         : `Collecting synthetic trade data — ${trades.length} trades logged so far.`}

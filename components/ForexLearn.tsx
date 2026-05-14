@@ -143,7 +143,7 @@ export default function ForexLearn({ trades }: Props) {
           },
           {
             chart: 'Win Rate by Session (Signal Intelligence)',
-            what: 'Splits your trades by when they were taken: London AM (08–14 UTC), Gold overlap (14–17 UTC), NY (17–22 UTC), or overnight synthetics.',
+            what: 'Splits your trades by when they were taken: London AM (08–15 UTC), Gold overlap (15–17 UTC), NY (17–22 UTC), or overnight synthetics.',
             good: 'Synthetics trade 24/7 — session data helps identify which hours the signals perform best. Hours 10–11 UTC and 20–21 UTC are currently blocked (data-proven losing hours).',
             bad: 'If a session consistently underperforms, we raise the threshold for those hours or skip them entirely.',
           },
@@ -272,15 +272,15 @@ export default function ForexLearn({ trades }: Props) {
           {[
             {
               phase: 'Phase 1 — Calibration (COMPLETE ✅)', colour: '#22c55e',
-              desc: `899+ trades collected on V75, V50, JD75 and Gold. Deep analysis confirmed a 54.1% overall win rate — above the 52.1% breakeven at 92% payout. Score ceilings calibrated from real data: R_75=13, R_50=12, JD75=12. Hour blocks (10–11 UTC, 20–21 UTC), R_50 HTF BEARISH block, and Gold direction rules all data-proven. Strategy is profitable.`,
+              desc: `974 trades collected on V75, V50, JD75 and Gold. Deep analysis confirmed a profitable edge on synthetics (R_75 +$357 profit engine). Score ceilings calibrated: R_75=13, R_50=12, JD75=12, Gold=11. Hour blocks (10–11, 20–21 UTC), R_50 CALL permanently blocked, Gold window moved to 15:00 UTC, RSI<32 CALL guard, Box=2+SMC=0 guard, RANGING+no-deviation guard, ADX dead zone guard all data-proven.`,
             },
             {
               phase: 'Phase 2 — Full Synthetic Focus (COMPLETE ✅)', colour: '#22c55e',
-              desc: 'EUR/USD removed (Deriv doesn\'t offer it at 5-min digital options on this account — London slot was dead). Bot now runs 4 synthetic indices 24/7: R_75 → R_50 → JD75 → 1HZ75V rotating every ~2 min, with Gold during 14–17 UTC. 1HZ75V (Volatility 75, 1-second ticks) added as 4th index — calibrating.',
+              desc: 'EUR/USD removed (Deriv doesn\'t offer it at 5-min digital options on this account — London slot was dead). Bot now runs 4 synthetic indices 24/7: R_75 → R_50 → JD75 → 1HZ75V rotating every ~2 min, with Gold during 15–17 UTC. 1HZ75V (Volatility 75, 1-second ticks) added as 4th index — calibrating. Check Mark Pattern added as new signal layer.',
             },
             {
-              phase: 'Phase 3 — 1HZ75V Calibration + Go Live Decision (YOU ARE HERE 📍)', colour: '#6366f1',
-              desc: 'Collect 50+ 1HZ75V trades and calibrate its score ceiling (currently mirroring R_75=13). Review overall PnL curve — strategy is proven, account is negative only due to 4 early Kelly outlier trades ($190+ stakes, -$785 total). With $3 cap in place those can\'t recur. Decision point: stay demo or move to micro live ($500–$1,000)?',
+              phase: 'Phase 3 — Clean Data Collection (YOU ARE HERE 📍)', colour: '#6366f1',
+              desc: 'htf_bias and reasons fields were blank for all 974 trades (logging bug now fixed in v7.9). Collecting next 300–500 trades with complete indicator data. Then: deep analysis with full HTF + reasons breakdown to find remaining losing patterns. Decision point: once WR stabilises above 55% on clean data → move to micro live ($500–$1,000).',
             },
             {
               phase: 'Phase 4 — Micro Live (NEXT)', colour: '#64748b',
@@ -314,10 +314,10 @@ export default function ForexLearn({ trades }: Props) {
             { label: 'Proven win rate', value: `${winRate}%`, note: `over ${trades.length} trades`, colour: winRate >= breakeven ? '#22c55e' : '#ef4444' },
             { label: 'Max stake per trade', value: '$3', note: 'hard cap — Kelly never exceeds this', colour: '#38bdf8' },
             { label: 'Daily loss limit', value: '3%', note: 'then sleep until midnight Kenya', colour: '#ef4444' },
-            { label: 'Min score to trade', value: '11 pts', note: 'data-proven sweet spot (899 trades)', colour: '#22c55e' },
-            { label: 'Score ceilings', value: 'R75=13, R50=12', note: 'JD75=12, 1HZ75V=13 (calibrated)', colour: '#a78bfa' },
-            { label: 'Assets (24/7)', value: 'V75·V50·JD75·1HZ75V', note: '+ Gold 14–17 UTC', colour: '#eab308' },
-            { label: 'Bot version', value: 'v7.7', note: 'full synthetic · 4-way rotation', colour: '#6366f1' },
+            { label: 'Min score to trade', value: '11 pts', note: 'data-proven sweet spot (974 trades)', colour: '#22c55e' },
+            { label: 'Score ceilings', value: 'R75=13, R50=12', note: 'JD75=12, 1HZ75V=13, Gold=11, SMC cap=4', colour: '#a78bfa' },
+            { label: 'Assets (24/7)', value: 'V75·V50·JD75·1HZ75V', note: '+ Gold 15–17 UTC', colour: '#eab308' },
+            { label: 'Bot version', value: 'v7.9', note: 'full synthetic · 974-trade calibrated', colour: '#6366f1' },
           ].map(item => (
             <div key={item.label} style={{ background: '#141620', borderRadius: 10, padding: '0.875rem 1rem' }}>
               <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>{item.label}</div>
