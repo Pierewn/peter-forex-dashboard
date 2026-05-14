@@ -272,7 +272,7 @@ export default function ForexLearn({ trades }: Props) {
           {[
             {
               phase: 'Phase 1 — Calibration (COMPLETE ✅)', colour: '#22c55e',
-              desc: `974 trades collected on V75, V50, JD75 and Gold. Deep analysis confirmed a profitable edge on synthetics (R_75 +$357 profit engine). Score ceilings calibrated: R_75=13, R_50=12, JD75=12, Gold=11. Hour blocks (10–11, 20–21 UTC), R_50 CALL permanently blocked, Gold window moved to 15:00 UTC, RSI<32 CALL guard, Box=2+SMC=0 guard, RANGING+no-deviation guard, ADX dead zone guard all data-proven.`,
+              desc: `975 trades collected on V75, V50, JD75 and Gold. Backtest run (analyse_975.py) proved rules-applied system is profitable: WR 54.4%→63.4%, P&L -$165→+$147, max drawdown -$723→-$11. Score ceilings calibrated: R_75=13, R_50=12, JD75=12, Gold=11. Active guards: hour blocks (10–11, 20–21 UTC), R_50 CALL blocked, Gold window 15:00 UTC, RSI<32 +2pt penalty (all dirs), Box=2+SMC=0 blocked. Two over-filters removed after backtest: RANGING+no-deviation (was blocking 63.6% WR trades), ADX dead zone (60.5% WR trades).`,
             },
             {
               phase: 'Phase 2 — Full Synthetic Focus (COMPLETE ✅)', colour: '#22c55e',
@@ -280,7 +280,7 @@ export default function ForexLearn({ trades }: Props) {
             },
             {
               phase: 'Phase 3 — Clean Data Collection (YOU ARE HERE 📍)', colour: '#6366f1',
-              desc: 'htf_bias and reasons fields were blank for all 974 trades (logging bug now fixed in v7.9). Collecting next 300–500 trades with complete indicator data. Then: deep analysis with full HTF + reasons breakdown to find remaining losing patterns. Decision point: once WR stabilises above 55% on clean data → move to micro live ($500–$1,000).',
+              desc: 'htf_bias backfilled for all 856 historical trades. reasons column added — both fields live from v8.0. First 975-trade reasons analysis reconstructed from raw indicator columns (see analyse_975.py). Collecting next 300–500 trades with both fields fully live for the real reasons analysis. Decision point: once WR stabilises above 55% on clean data → move to micro live ($500–$1,000).',
             },
             {
               phase: 'Phase 4 — Micro Live (NEXT)', colour: '#64748b',
@@ -314,10 +314,10 @@ export default function ForexLearn({ trades }: Props) {
             { label: 'Proven win rate', value: `${winRate}%`, note: `over ${trades.length} trades`, colour: winRate >= breakeven ? '#22c55e' : '#ef4444' },
             { label: 'Max stake per trade', value: '$3', note: 'hard cap — Kelly never exceeds this', colour: '#38bdf8' },
             { label: 'Daily loss limit', value: '3%', note: 'then sleep until midnight Kenya', colour: '#ef4444' },
-            { label: 'Min score to trade', value: '11 pts', note: 'data-proven sweet spot (974 trades)', colour: '#22c55e' },
+            { label: 'Min score to trade', value: '11 pts', note: 'data-proven sweet spot (975 trades)', colour: '#22c55e' },
             { label: 'Score ceilings', value: 'R75=13, R50=12', note: 'JD75=12, 1HZ75V=13, Gold=11, SMC cap=4', colour: '#a78bfa' },
             { label: 'Assets (24/7)', value: 'V75·V50·JD75·1HZ75V', note: '+ Gold 15–17 UTC', colour: '#eab308' },
-            { label: 'Bot version', value: 'v7.9', note: 'full synthetic · 974-trade calibrated', colour: '#6366f1' },
+            { label: 'Bot version', value: 'v8.1', note: 'full synthetic · 975-trade backtested', colour: '#6366f1' },
           ].map(item => (
             <div key={item.label} style={{ background: '#141620', borderRadius: 10, padding: '0.875rem 1rem' }}>
               <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>{item.label}</div>
