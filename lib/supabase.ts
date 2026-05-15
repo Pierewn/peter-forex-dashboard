@@ -67,12 +67,26 @@ export interface Scan {
 }
 
 export async function fetchTrades(): Promise<Trade[]> {
-  const { data, error } = await supabase
-    .from('trades')
-    .select('*')
-    .order('ts', { ascending: true })
-  if (error) throw error
-  return data || []
+  // Supabase default cap is 1000 rows — paginate to get all trades
+  const pageSize = 1000
+  let page = 0
+  let all: Trade[] = []
+
+  while (true) {
+    const { data, error } = await supabase
+      .from('trades')
+      .select('*')
+      .order('ts', { ascending: true })
+      .range(page * pageSize, (page + 1) * pageSize - 1)
+
+    if (error) throw error
+    if (!data || data.length === 0) break
+    all = all.concat(data)
+    if (data.length < pageSize) break   // last page
+    page++
+  }
+
+  return all
 }
 
 export async function fetchScans(): Promise<Scan[]> {
