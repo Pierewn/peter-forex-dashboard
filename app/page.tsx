@@ -9,6 +9,7 @@ import LosingPatterns from '@/components/LosingPatterns'
 import SelfLearning from '@/components/SelfLearning'
 import LiveInsights from '@/components/LiveInsights'
 import ForexLearn from '@/components/ForexLearn'
+import AssetPerformance from '@/components/AssetPerformance'
 
 const NAV = ['Overview', 'Signal Intelligence', 'Patterns & Insights', 'Self-Learning', 'Trade Log', 'Learn']
 
@@ -74,7 +75,7 @@ export default function Dashboard() {
             <span style={{ fontSize: 22 }}>🤖</span>
             <div>
               <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: '-0.02em' }}>Peter's Bot</div>
-              <div style={{ fontSize: 11, color: '#64748b' }}>R75 · DEMO · v9.1</div>
+              <div style={{ fontSize: 11, color: '#64748b' }}>R75 · DEMO · v9.2</div>
             </div>
           </div>
 
@@ -165,6 +166,7 @@ export default function Dashboard() {
             {tab === 'Overview' && (
               <>
                 <LiveInsights trades={filtered} />
+                <AssetPerformance trades={filtered} />
                 <EquityCurve trades={filtered} />
 
                 {/* Insight box */}
