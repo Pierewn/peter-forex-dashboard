@@ -1,7 +1,14 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl  = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey  = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl  = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseKey  = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error(
+    'Missing Supabase env vars — set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY ' +
+    '(in .env.local locally, or in Vercel project settings for production)'
+  )
+}
 
 export const supabase = createClient(supabaseUrl, supabaseKey)
 
@@ -79,7 +86,11 @@ export async function fetchTrades(): Promise<Trade[]> {
       .order('ts', { ascending: true })
       .range(page * pageSize, (page + 1) * pageSize - 1)
 
-    if (error) throw error
+    if (error) {
+      // Surface the full Supabase error (code + message + details) for easier debugging
+      const msg = [error.message, error.code, error.details].filter(Boolean).join(' | ')
+      throw new Error(`Supabase error fetching trades: ${msg}`)
+    }
     if (!data || data.length === 0) break
     all = all.concat(data)
     if (data.length < pageSize) break   // last page
