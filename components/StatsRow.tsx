@@ -10,8 +10,13 @@ export default function StatsRow({ trades }: Props) {
   const losses    = trades.filter(t => t.result === 'LOSS').length
   const totalPnl  = trades.reduce((s, t) => s + (t.pnl || 0), 0)
   const winRate   = Math.round((wins / trades.length) * 1000) / 10
-  const lastBal   = trades[trades.length - 1]?.balance ?? 0
-  const avgScore  = Math.round(trades.reduce((s,t) => s + t.score, 0) / trades.length * 10) / 10
+  // Walk backwards to find last trade with a real balance
+  // (reconciled_from_deriv rows have balance=null — skip them)
+  const lastBal = [...trades].reverse().find(t => t.balance != null)?.balance ?? 0
+  const scoredTrades = trades.filter(t => t.score != null)
+  const avgScore  = scoredTrades.length
+    ? Math.round(scoredTrades.reduce((s,t) => s + t.score, 0) / scoredTrades.length * 10) / 10
+    : 0
   // Prefer stored payout_pct (v6.1+); fall back to computed for legacy trades
   const payoutSamples = trades.filter(t => t.payout_pct != null)
   const avgPayout = payoutSamples.length
