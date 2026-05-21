@@ -516,6 +516,15 @@ export default function SelfLearning({ trades }: Props) {
           { name: 'No sweep/EQ',   wr: wr(noSweepNoEq), count: noSweepNoEq.length },
         ].filter(d => d.count >= 2)
 
+        // ORB — Gold only (v10.2), parse from reasons
+        const orbTrades    = enriched.filter(t => t.reasons?.includes('ORB'))
+        const goldTrades   = enriched.filter(t => t.symbol === 'frxXAUUSD')
+        const goldNoOrb    = goldTrades.filter(t => !t.reasons?.includes('ORB'))
+        const orbData = [
+          ...(orbTrades.length >= 2 ? [{ name: '📊 ORB Match',  wr: wr(orbTrades),  count: orbTrades.length  }] : []),
+          ...(goldNoOrb.length >= 2 ? [{ name: 'Gold (no ORB)', wr: wr(goldNoOrb),  count: goldNoOrb.length  }] : []),
+        ]
+
         // Full strategy stack — all three firing together
         const fullStack = enriched.filter(t =>
           t.reasons?.includes('CRT') && t.ob_hit && t.ote && t.ote !== 'none'
@@ -539,7 +548,7 @@ export default function SelfLearning({ trades }: Props) {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.25rem', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.25rem', marginBottom: '1.25rem' }}>
 
               {/* Strategy 3: CRT */}
               <Section
@@ -592,6 +601,25 @@ export default function SelfLearning({ trades }: Props) {
                       <MiniBar data={eqSweepData} />
                       <div style={{ fontSize: 11, color: '#64748b', marginTop: 8 }}>
                         EQ Sweep should outperform generic sweeps — the equal level is the obvious retail trap.
+                      </div>
+                    </>
+                  )
+                }
+              </Section>
+
+              {/* ORB: Gold-only (v10.2) */}
+              <Section
+                title="📊 ORB — Gold h15"
+                badge="v10.2"
+                sub="Opening Range Breakout: Gold's 15:00 UTC first-15-min range, broken then retested. Scores +2."
+              >
+                {orbData.length < 1
+                  ? <Pending msg="Gold ORB trades collecting — fires only at 15:16–15:59 UTC." />
+                  : (
+                    <>
+                      <MiniBar data={orbData} />
+                      <div style={{ fontSize: 11, color: '#64748b', marginTop: 8 }}>
+                        ORB vs standard Gold: does the break-and-retest session level outperform?
                       </div>
                     </>
                   )
