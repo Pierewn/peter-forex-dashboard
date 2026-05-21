@@ -482,6 +482,127 @@ export default function SelfLearning({ trades }: Props) {
         </Section>
       )}
 
+      {/* ── Row 5b: v10.1 Hanre Retief 3-Strategy Intelligence ── */}
+      {enriched.length >= 5 && (() => {
+        // Strategy 3 — CRT (Candle Range Theory): parse reasons field
+        const crtTrades    = enriched.filter(t => t.reasons?.includes('CRT'))
+        const nonCrtTrades = enriched.filter(t => !t.reasons?.includes('CRT'))
+        const crtData = [
+          { name: '📐 CRT Match',  wr: wr(crtTrades),    count: crtTrades.length    },
+          { name: 'No CRT',        wr: wr(nonCrtTrades), count: nonCrtTrades.length },
+        ].filter(d => d.count >= 2)
+
+        // Strategy 1 — OTE + OB confluence: do they outperform individually?
+        const oteObBoth  = enriched.filter(t => t.ote && t.ote !== 'none' && t.ob_hit)
+        const oteOnly    = enriched.filter(t => t.ote && t.ote !== 'none' && !t.ob_hit)
+        const obOnly     = enriched.filter(t => t.ob_hit  && (!t.ote || t.ote === 'none'))
+        const neitherOO  = enriched.filter(t => !t.ob_hit && (!t.ote || t.ote === 'none'))
+        const oteObData = [
+          { name: 'OTE + OB 🎯',  wr: wr(oteObBoth), count: oteObBoth.length  },
+          { name: 'OTE only',     wr: wr(oteOnly),   count: oteOnly.length    },
+          { name: 'OB only',      wr: wr(obOnly),    count: obOnly.length     },
+          { name: 'Neither',      wr: wr(neitherOO), count: neitherOO.length  },
+        ].filter(d => d.count >= 2)
+
+        // Strategy 2 — Equal-level sweep quality: was the sweep targeting EQL/EQH?
+        const eqSweep    = enriched.filter(t => (t.eql_hit || t.eqh_hit) && t.sweep && t.sweep !== 'none')
+        const sweepNoEq  = enriched.filter(t => t.sweep && t.sweep !== 'none' && !t.eql_hit && !t.eqh_hit)
+        const eqNoSweep  = enriched.filter(t => (t.eql_hit || t.eqh_hit) && (!t.sweep || t.sweep === 'none'))
+        const noSweepNoEq = enriched.filter(t => !t.eql_hit && !t.eqh_hit && (!t.sweep || t.sweep === 'none'))
+        const eqSweepData = [
+          { name: 'EQ Sweep 💧🎯', wr: wr(eqSweep),     count: eqSweep.length     },
+          { name: 'Sweep (other)', wr: wr(sweepNoEq),   count: sweepNoEq.length   },
+          { name: 'EQ, no sweep',  wr: wr(eqNoSweep),   count: eqNoSweep.length   },
+          { name: 'No sweep/EQ',   wr: wr(noSweepNoEq), count: noSweepNoEq.length },
+        ].filter(d => d.count >= 2)
+
+        // Full strategy stack — all three firing together
+        const fullStack = enriched.filter(t =>
+          t.reasons?.includes('CRT') && t.ob_hit && t.ote && t.ote !== 'none'
+        )
+
+        return (
+          <>
+            <div style={{ borderTop: '1px solid #2a2d3a', margin: '0.5rem 0 1.25rem', paddingTop: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '1rem' }}>
+                <div style={{ fontSize: 11, color: '#64748b', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                  v10.1 Strategy Intelligence
+                </div>
+                <span style={{ fontSize: 10, background: 'rgba(34,197,94,0.12)', color: '#4ade80', borderRadius: 4, padding: '1px 6px', fontWeight: 600 }}>
+                  Hanre Retief 3 Strategies
+                </span>
+                {fullStack.length > 0 && (
+                  <span style={{ fontSize: 11, color: '#94a3b8', marginLeft: 'auto' }}>
+                    Full stack (CRT+OTE+OB): <strong style={{ color: wr(fullStack) >= 55 ? '#22c55e' : '#ef4444' }}>{wr(fullStack)}%</strong> ({fullStack.length}t)
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.25rem', marginBottom: '1.25rem' }}>
+
+              {/* Strategy 3: CRT */}
+              <Section
+                title="📐 Strategy 3 — CRT"
+                badge="v10.1"
+                sub="Candle Range Theory: C1→C2 sweeps range→C3 retests. Does the 3-candle trap-clear pattern deliver?"
+              >
+                {crtData.length < 2
+                  ? <Pending msg="Need CRT-tagged trades — collecting now." />
+                  : (
+                    <>
+                      <MiniBar data={crtData} />
+                      <div style={{ fontSize: 11, color: '#64748b', marginTop: 8 }}>
+                        Target: CRT match ≥56% to confirm the pattern adds real edge.
+                      </div>
+                    </>
+                  )
+                }
+              </Section>
+
+              {/* Strategy 1: OTE + OB confluence */}
+              <Section
+                title="🎯 Strategy 1 — OTE+OB"
+                badge="v10.1"
+                sub="Order Block inside the Fibonacci zone: does OTE+OB together outperform each signal alone?"
+              >
+                {oteObData.length < 2
+                  ? <Pending msg="Need OTE+OB combo trades — collecting now." />
+                  : (
+                    <>
+                      <MiniBar data={oteObData} />
+                      <div style={{ fontSize: 11, color: '#64748b', marginTop: 8 }}>
+                        If OTE+OB ≫ either alone, the Strategy 1 confluence is proven.
+                      </div>
+                    </>
+                  )
+                }
+              </Section>
+
+              {/* Strategy 2: Equal-level sweep quality */}
+              <Section
+                title="💧 Strategy 2 — EQ Sweep"
+                badge="v10.1"
+                sub="Sweep of equal highs/lows = retail stops hunted. Does targeting the EQL/EQH specifically deliver?"
+              >
+                {eqSweepData.length < 2
+                  ? <Pending msg="Need EQL/EQH+Sweep combo trades — collecting now." />
+                  : (
+                    <>
+                      <MiniBar data={eqSweepData} />
+                      <div style={{ fontSize: 11, color: '#64748b', marginTop: 8 }}>
+                        EQ Sweep should outperform generic sweeps — the equal level is the obvious retail trap.
+                      </div>
+                    </>
+                  )
+                }
+              </Section>
+
+            </div>
+          </>
+        )
+      })()}
+
       {/* ── Row 6: Time-of-day + Stake efficiency ── */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
         <TimeOfDayChart trades={trades} />
