@@ -8,18 +8,51 @@ function wr(trades: Trade[]) {
   return Math.round(trades.filter(t => t.result === 'WIN').length / trades.length * 1000) / 10
 }
 
+// Derive a human-friendly label + body for a session_name code
+function sessionLabel(code: string): { label: string; body: string } | null {
+  if (code === 'GOLD_LONDON')
+    return {
+      label: 'London/NY overlap — Gold (6pm–7pm Kenya)',
+      body:  'The London/NY overlap is when both European commodity desks and American traders are active — Gold sees its highest daily volume here. Big institutions move Gold in this window, creating the cleanest technical setups. Your bot is catching this.',
+    }
+  if (code.startsWith('LONDON_'))
+    return {
+      label: `London morning — ${code.replace('LONDON_', '')} (11am–5pm Kenya)`,
+      body:  'The London morning session is the most liquid window for synthetics. European desks are fully active, spreads are tight and price moves are deliberate. Your bot is picking up cleaner signals here than in the off-hours Asian window.',
+    }
+  if (code.startsWith('NEW_YORK_'))
+    return {
+      label: `New York session — ${code.replace('NEW_YORK_', '')} (8pm–1am Kenya)`,
+      body:  'The New York session adds US institutional flow on top of the European close. Volume is high and technical levels are respected. Your bot is identifying stronger edges during this window.',
+    }
+  if (code.startsWith('GOLD_'))
+    return {
+      label: `London/NY overlap — ${code.replace('GOLD_', '')} (filling Gold slot)`,
+      body:  'These trades fill in during the Gold hour when Gold is unavailable (weekend, news blackout). They pick up overflow institutional flow from the London/NY overlap window.',
+    }
+  // Pure off-hours codes (R75, HZ75V, R100, etc.) — no special label
+  return null
+}
+
 export default function LiveInsights({ trades }: Props) {
   if (trades.length < 5) return null
 
-  const wins   = trades.filter(t => t.result === 'WIN').length
-  const losses = trades.filter(t => t.result === 'LOSS').length
+  const wins    = trades.filter(t => t.result === 'WIN').length
+  const losses  = trades.filter(t => t.result === 'LOSS').length
   const winRate = wr(trades)
 
   // Payout-based breakeven
+  // Use payout_pct field where available; fallback uses WIN trades only
+  // (LOSS trades have payout=0 which would give -100% and destroy the average)
   const payoutSamples = trades.filter(t => t.payout_pct != null)
   const avgPayout = payoutSamples.length
     ? payoutSamples.reduce((s, t) => s + t.payout_pct!, 0) / payoutSamples.length
-    : trades.reduce((s, t) => s + ((t.payout / t.stake - 1) * 100), 0) / trades.length
+    : (() => {
+        const winTrades = trades.filter(t => t.result === 'WIN' && t.payout > 0 && t.stake > 0)
+        return winTrades.length
+          ? winTrades.reduce((s, t) => s + (t.payout / t.stake - 1) * 100, 0) / winTrades.length
+          : 85  // safe default if no data
+      })()
   const breakeven = Math.round(100 / (1 + avgPayout / 100) * 10) / 10
 
   // Best regime
@@ -34,7 +67,7 @@ export default function LiveInsights({ trades }: Props) {
     .filter(([, ts]) => ts.length >= 3)
     .sort(([, a], [, b]) => wr(b) - wr(a))[0]
 
-  // Best session
+  // Best session — only named sessions with a proper label (skip raw off-hours codes)
   const sessionMap: Record<string, Trade[]> = {}
   trades.forEach(t => {
     const s = t.session_name ?? 'R75'
@@ -42,7 +75,7 @@ export default function LiveInsights({ trades }: Props) {
     sessionMap[s].push(t)
   })
   const bestSession = Object.entries(sessionMap)
-    .filter(([, ts]) => ts.length >= 3)
+    .filter(([code, ts]) => ts.length >= 3 && sessionLabel(code) !== null)
     .sort(([, a], [, b]) => wr(b) - wr(a))[0]
 
   // Trend
@@ -50,9 +83,10 @@ export default function LiveInsights({ trades }: Props) {
   const recentWr  = wr(recent10)
   const trend = recentWr > winRate + 5 ? 'improving' : recentWr < winRate - 5 ? 'declining' : 'stable'
 
-  // Balance change
-  const firstBal = trades[0]?.balance ?? 0
-  const lastBal  = trades[trades.length - 1]?.balance ?? 0
+  // Balance change — only from trades that have balance logged
+  const balTrades = trades.filter(t => t.balance != null && t.balance > 0)
+  const firstBal  = balTrades[0]?.balance ?? 0
+  const lastBal   = balTrades[balTrades.length - 1]?.balance ?? 0
   const balChange = lastBal - firstBal
 
   // Kelly health — are we still positive EV?
@@ -73,37 +107,35 @@ export default function LiveInsights({ trades }: Props) {
     insights.push({
       icon: '⚠️', colour: '#eab308',
       title: `Still below breakeven — ${winRate}% vs ${breakeven}% needed`,
-      body: `At ${avgPayout.toFixed(1)}% average payout, you need to win ${breakeven}% of trades just to break even. You're at ${winRate}% right now. This is why we're on paper trading — the bot is still learning. The v5.14 threshold changes should push this up over the next 50 trades.`,
+      body: `At ${avgPayout.toFixed(1)}% average payout, you need to win ${breakeven}% of trades just to break even. You're at ${winRate}% right now. This is why we're on demo trading — the bot is still calibrating. The v10 signal improvements (CRT, OTE+OB, EQL/EQH sweep, ORB) are designed to push this higher over the next 200 trades.`,
     })
   }
 
   // 2. Regime insight
   if (bestRegime) {
     const [name, ts] = bestRegime
-    const label = name === 'RANGING' ? 'Ranging (sideways) markets'
-      : name === 'TRENDING_BULL' ? 'Bullish trending markets'
-      : name === 'TRENDING_BEAR' ? 'Bearish trending markets' : name
+    const label = name === 'RANGING'       ? 'Ranging (sideways) markets'
+      : name === 'TRENDING_BULL'           ? 'Bullish trending markets'
+      : name === 'TRENDING_BEAR'           ? 'Bearish trending markets'
+      : name === 'TRENDING'               ? 'Trending markets (all directions)'
+      : name
     insights.push({
       icon: '🔀', colour: '#6366f1',
       title: `Your bot's sweet spot: ${label} (${wr(ts)}% win rate)`,
       body: name === 'RANGING'
-        ? `Ranging means price is bouncing between a ceiling and a floor — not breaking out strongly in either direction. Your bot was built for this: it uses RSI, Bollinger Bands and Z-Score to catch those bounces. ${wr(ts)}% win rate here is real edge.`
-        : `Your bot wins ${wr(ts)}% of trades in ${label.toLowerCase()}. It uses ADX and Higher Timeframe Bias to detect these conditions and aligns its trades with the dominant direction.`,
+        ? `Ranging means price is bouncing between a ceiling and a floor — not breaking out strongly. Your bot was built for this: RSI, Bollinger Bands, Z-Score and OTE zones all catch these bounces. ${wr(ts)}% win rate here is real edge.`
+        : `Your bot wins ${wr(ts)}% of trades in ${label.toLowerCase()}. It uses ADX and HTF Bias to detect these conditions and aligns its direction with the dominant trend — then waits for a sweep + OB retrace to enter.`,
     })
   }
 
   // 3. Session insight
-  if (bestSession && bestSession[0] !== 'R75') {
-    const [name, ts] = bestSession
-    const label = name === 'LONDON' ? 'London morning — EUR/USD (11am–4pm Kenya)'
-      : name === 'GOLD_LONDON' ? 'London/NY overlap — Gold (4pm–8pm Kenya)'
-      : name === 'NEW_YORK' ? 'New York session — GBP/USD (8pm–1am Kenya)' : name
+  if (bestSession) {
+    const [code, ts] = bestSession
+    const info = sessionLabel(code)!
     insights.push({
       icon: '🕐', colour: '#38bdf8',
-      title: `Best trading window: ${label} at ${wr(ts)}% win rate`,
-      body: name === 'GOLD_LONDON'
-        ? `The London/NY overlap is when both European commodity desks and American traders are active simultaneously — Gold sees its highest daily volume in this window. Big institutions move Gold here, creating the cleanest technical setups. Your bot is catching this.`
-        : `The ${label} is when the most banks and institutions are actively trading. More volume = cleaner price moves = more reliable signals. Your bot is picking this up. Watch if this pattern holds as more trades build up.`,
+      title: `Best trading window: ${info.label} at ${wr(ts)}% win rate`,
+      body:  info.body,
     })
   }
 
@@ -123,23 +155,25 @@ export default function LiveInsights({ trades }: Props) {
   }
 
   // 5. Balance trajectory
-  insights.push({
-    icon: balChange >= 0 ? '💰' : '📊',
-    colour: balChange >= 0 ? '#22c55e' : '#94a3b8',
-    title: balChange >= 0
-      ? `Account up $${balChange.toFixed(2)} across ${trades.length} trades`
-      : `Account down $${Math.abs(balChange).toFixed(2)} across ${trades.length} trades — demo mode, keep learning`,
-    body: balChange >= 0
-      ? `Starting from $${firstBal.toFixed(2)}, you're now at $${lastBal.toFixed(2)}. The bot is compounding — as the balance grows, Kelly sizes up stakes proportionally. Every dollar earned is working for the next trade.`
-      : `You're currently at $${lastBal.toFixed(2)} from $${firstBal.toFixed(2)}. This is exactly what demo mode is for — testing the strategy with no real money at risk. The data you're collecting right now is what will make the live version profitable.`,
-  })
+  if (balTrades.length >= 2) {
+    insights.push({
+      icon: balChange >= 0 ? '💰' : '📊',
+      colour: balChange >= 0 ? '#22c55e' : '#94a3b8',
+      title: balChange >= 0
+        ? `Account up $${balChange.toFixed(2)} across ${trades.length} trades`
+        : `Account down $${Math.abs(balChange).toFixed(2)} across ${trades.length} trades — demo mode, keep learning`,
+      body: balChange >= 0
+        ? `Starting from $${firstBal.toFixed(2)}, you're now at $${lastBal.toFixed(2)}. The bot is compounding — as the balance grows, Kelly sizes up stakes proportionally. Every dollar earned is working for the next trade.`
+        : `You're currently at $${lastBal.toFixed(2)} from $${firstBal.toFixed(2)}. This is exactly what demo mode is for — testing the strategy with no real money at risk. The data you're collecting right now is what will make the live version profitable.`,
+    })
+  }
 
   // 6. EV signal
   if (!evPositive && trades.length >= 20) {
     insights.push({
       icon: '🧮', colour: '#ef4444',
       title: 'Expected value is currently negative — thresholds help fix this',
-      body: `Expected value (EV) is the mathematical profit you'd make per $1 bet over time. Right now it's slightly negative, which is why we raised the score threshold to 10+ in v5.14. EV improves as the win rate rises. Once you consistently hit ${breakeven}%+, EV turns positive and the bot prints money over time.`,
+      body: `Expected value (EV) is the mathematical profit you'd make per $1 bet over time. Right now it's slightly negative, which is why the score threshold is set at 11+ and the v10 signal quality improvements are active. EV turns positive once you consistently hit ${breakeven}%+ win rate. The bot is calibrating toward that.`,
     })
   }
 
