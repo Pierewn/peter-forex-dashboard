@@ -317,7 +317,7 @@ export default function ForexLearn({ trades }: Props) {
             { label: 'Min score to trade', value: '11 pts', note: 'data-proven sweet spot (975 trades)', colour: '#22c55e' },
             { label: 'Score ceilings', value: 'R75=13, R50=12', note: 'JD75=12, 1HZ75V=13, Gold=11, SMC cap=4', colour: '#a78bfa' },
             { label: 'Assets (24/7)', value: 'V75·V50·JD75·1HZ75V', note: '+ Gold 15–17 UTC', colour: '#eab308' },
-            { label: 'Bot version', value: 'v10.8', note: '5 assets · CALL sweep gate + Gold cap $5 + Gold floor 13 + 1HZ75V NEUTRAL block', colour: '#6366f1' },
+            { label: 'Bot version', value: 'v10.9', note: '6 assets · GBP/USD London+NY live · CALL sweep gate · Gold $5 cap · Gold floor 13', colour: '#6366f1' },
           ].map(item => (
             <div key={item.label} style={{ background: '#141620', borderRadius: 10, padding: '0.875rem 1rem' }}>
               <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>{item.label}</div>

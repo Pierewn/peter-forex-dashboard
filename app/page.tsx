@@ -19,8 +19,10 @@ const SYMBOL_LABELS: Record<string, string> = {
   'R_50':       'V50 (Synthetic)',
   'JD75':       'JD75 (Jump 75)',
   '1HZ75V':     '1HZ75V (V75 1s)',
+  'R_100':      'V100 (Synthetic)',
   'frxXAUUSD':  'Gold / USD',
-  'frxGBPUSD':  'GBP/USD',
+  'frxXAGUSD':  'Silver / USD',
+  'frxGBPUSD':  'GBP/USD (Forex)',
 }
 
 export default function Dashboard() {
@@ -75,7 +77,7 @@ export default function Dashboard() {
             <span style={{ fontSize: 22 }}>🤖</span>
             <div>
               <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: '-0.02em' }}>Peter's Bot</div>
-              <div style={{ fontSize: 11, color: '#64748b' }}>R75 · DEMO · v10.8</div>
+              <div style={{ fontSize: 11, color: '#64748b' }}>R75 · DEMO · v10.9</div>
             </div>
           </div>
 
@@ -189,8 +191,8 @@ export default function Dashboard() {
                         desc: 'Z-Score measures how far price has stretched from its average. Fibonacci levels are mathematical price magnets where markets reverse. "History always tells a story."'
                       },
                       {
-                        icon: '🥇', title: 'Gold Trading (15:00–17:00 UTC)',
-                        desc: 'Gold (XAU/USD) trades 15:00–17:00 UTC — hour 14 was a losing window (45.7% WR on 35 trades, now blocked). All other times the bot rotates through 4 synthetic indices: R_75, R_50, JD75 and 1HZ75V — available 24/7.'
+                        icon: '🥇', title: 'Real Market Assets (v10.9)',
+                        desc: 'GBP/USD trades London (11am–5pm Kenya) + NY (8pm–1am Kenya) sessions Mon–Fri. Gold (XAU/USD) at h15 UTC, Silver (XAG/USD) at h16 UTC. All three use real market data with news blackout ±15 min. Synthetics (R_75, 1HZ75V, R_100) run 24/7 outside these windows.'
                       },
                       {
                         icon: '📡', title: 'Higher Timeframe Trend',
@@ -222,10 +224,10 @@ export default function Dashboard() {
                       {wr >= 54 ? 'Strategy proven profitable — 1,814-trade audit: WR 54%→63%, P&L improving' : 'Building calibration data — target 54%+ win rate'}
                     </div>
                     <div style={{ color: '#64748b', fontSize: 13 }}>
-                      Current: <strong style={{ color: wr >= 52 ? '#22c55e' : '#eab308' }}>{wr}%</strong> over {trades.length} trades · Breakeven: ~52.1% (at 92% payout) · Assets: R75, 1HZ75V, R100 (24/7 rotation) + Gold (h15 UTC) + Silver (h16 UTC).{' '}
+                      Current: <strong style={{ color: wr >= 52 ? '#22c55e' : '#eab308' }}>{wr}%</strong> over {trades.length} trades · Breakeven: ~52.1% (at 92% payout) · Assets: R75, 1HZ75V, R100 (24/7) + GBP/USD (London+NY) + Gold (h15) + Silver (h16).{' '}
                       {wr >= 54 && trades.length >= 500
-                        ? '✅ Edge confirmed. v10.8: CALL sweep gate + Gold cap $5 + Gold floor 13 + 1HZ75V NEUTRAL block.'
-                        : `v10.8 live — 4 precision fixes from 1,814-trade audit. ${trades.length} trades logged so far.`}
+                        ? '✅ Edge confirmed. v10.9: GBP/USD live for data collection + v10.8 sweep gate + Gold cap + 1HZ75V NEUTRAL block.'
+                        : `v10.9 live — GBP/USD forex added. ${trades.length} trades logged so far. Goal: 50+ GBP/USD trades to calibrate forex edge.`}
                     </div>
                   </div>
                 </div>

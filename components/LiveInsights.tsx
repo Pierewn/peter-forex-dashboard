@@ -15,6 +15,16 @@ function sessionLabel(code: string): { label: string; body: string } | null {
       label: 'London/NY overlap — Gold (6pm–7pm Kenya)',
       body:  'The London/NY overlap is when both European commodity desks and American traders are active — Gold sees its highest daily volume here. Big institutions move Gold in this window, creating the cleanest technical setups. Your bot is catching this.',
     }
+  if (code === 'LONDON_GBPUSD')
+    return {
+      label: 'London session — GBP/USD (11am–6pm Kenya)',
+      body:  'The London session is the highest-volume window for GBP/USD — the Bank of England and major European banks are fully active. Price moves are institutional and technical levels are respected. This is the prime GBP/USD edge window.',
+    }
+  if (code === 'NEW_YORK_GBPUSD')
+    return {
+      label: 'New York session — GBP/USD (8pm–1am Kenya)',
+      body:  'The NY session adds US institutional flow on GBP/USD — dollar strength/weakness dominates this window. Strong economic data from the US moves GBP/USD decisively here. The bot is collecting data to prove whether signal edge exists in this window.',
+    }
   if (code.startsWith('LONDON_'))
     return {
       label: `London morning — ${code.replace('LONDON_', '')} (11am–5pm Kenya)`,
