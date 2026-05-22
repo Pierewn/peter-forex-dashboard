@@ -530,15 +530,35 @@ export default function SelfLearning({ trades }: Props) {
           t.reasons?.includes('CRT') && t.ob_hit && t.ote && t.ote !== 'none'
         )
 
+        // v10.5 — PDH/PDL Break+Retest
+        const pdhTrades  = enriched.filter(t => t.reasons?.includes('PDH'))
+        const pdlTrades  = enriched.filter(t => t.reasons?.includes('PDL'))
+        const pdhPdlAll  = enriched.filter(t => t.reasons?.includes('PDH') || t.reasons?.includes('PDL'))
+        const noPdhPdl   = enriched.filter(t => !t.reasons?.includes('PDH') && !t.reasons?.includes('PDL'))
+        const pdhPdlData = [
+          ...(pdhPdlAll.length  >= 2 ? [{ name: '📅 PDH/PDL match', wr: wr(pdhPdlAll),  count: pdhPdlAll.length  }] : []),
+          ...(pdhTrades.length  >= 2 ? [{ name: 'PDH (bullish)',     wr: wr(pdhTrades),  count: pdhTrades.length  }] : []),
+          ...(pdlTrades.length  >= 2 ? [{ name: 'PDL (bearish)',     wr: wr(pdlTrades),  count: pdlTrades.length  }] : []),
+          ...(noPdhPdl.length   >= 2 ? [{ name: 'No PDH/PDL',       wr: wr(noPdhPdl),   count: noPdhPdl.length   }] : []),
+        ].filter(d => d.count >= 2)
+
+        // v10.5 — 9 EMA Dynamic S/R
+        const ema9Trades   = enriched.filter(t => t.reasons?.includes('9 EMA'))
+        const noEma9Trades = enriched.filter(t => !t.reasons?.includes('9 EMA'))
+        const ema9Data = [
+          ...(ema9Trades.length   >= 2 ? [{ name: '📈 9 EMA Retest', wr: wr(ema9Trades),   count: ema9Trades.length   }] : []),
+          ...(noEma9Trades.length >= 2 ? [{ name: 'No EMA9',         wr: wr(noEma9Trades), count: noEma9Trades.length }] : []),
+        ]
+
         return (
           <>
             <div style={{ borderTop: '1px solid #2a2d3a', margin: '0.5rem 0 1.25rem', paddingTop: '1.25rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '1rem' }}>
                 <div style={{ fontSize: 11, color: '#64748b', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                  v10.1 Strategy Intelligence
+                  v10.1–v10.5 Strategy Intelligence
                 </div>
                 <span style={{ fontSize: 10, background: 'rgba(34,197,94,0.12)', color: '#4ade80', borderRadius: 4, padding: '1px 6px', fontWeight: 600 }}>
-                  Hanre Retief 3 Strategies
+                  Hanre Retief · Zoom Out · ORB
                 </span>
                 {fullStack.length > 0 && (
                   <span style={{ fontSize: 11, color: '#94a3b8', marginLeft: 'auto' }}>
@@ -548,6 +568,7 @@ export default function SelfLearning({ trades }: Props) {
               </div>
             </div>
 
+            {/* Row A: v10.1–v10.2 signals */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.25rem', marginBottom: '1.25rem' }}>
 
               {/* Strategy 3: CRT */}
@@ -620,6 +641,49 @@ export default function SelfLearning({ trades }: Props) {
                       <MiniBar data={orbData} />
                       <div style={{ fontSize: 11, color: '#64748b', marginTop: 8 }}>
                         ORB vs standard Gold: does the break-and-retest session level outperform?
+                      </div>
+                    </>
+                  )
+                }
+              </Section>
+
+            </div>
+
+            {/* Row B: v10.5 Zoom Out signals */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.25rem', marginBottom: '1.25rem' }}>
+
+              {/* PDH/PDL Break+Retest */}
+              <Section
+                title="📅 PDH/PDL Break+Retest"
+                badge="v10.5"
+                sub="Previous Day High/Low: the most-watched institutional levels. Break + retest = banks confirming direction. Scores +2."
+              >
+                {pdhPdlData.length < 1
+                  ? <Pending msg="PDH/PDL retest trades collecting — need break+retest of prev day level." />
+                  : (
+                    <>
+                      <MiniBar data={pdhPdlData} />
+                      <div style={{ fontSize: 11, color: '#64748b', marginTop: 8 }}>
+                        Target: PDH/PDL match ≥58% to confirm institutional level respect adds edge.
+                      </div>
+                    </>
+                  )
+                }
+              </Section>
+
+              {/* 9 EMA Dynamic S/R */}
+              <Section
+                title="📈 9 EMA Dynamic S/R"
+                badge="v10.5"
+                sub="Zoom Out: price retests 9 EMA from correct side in trending market AND daily EMA9 confirms trend intact. Scores +1."
+              >
+                {ema9Data.length < 1
+                  ? <Pending msg="9 EMA retest trades collecting — fires in BULLISH/BEARISH trend only." />
+                  : (
+                    <>
+                      <MiniBar data={ema9Data} />
+                      <div style={{ fontSize: 11, color: '#64748b', marginTop: 8 }}>
+                        9 EMA Retest should outperform — double-timeframe gate (intraday + daily) keeps this high quality.
                       </div>
                     </>
                   )
