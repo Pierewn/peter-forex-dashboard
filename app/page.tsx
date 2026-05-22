@@ -75,7 +75,7 @@ export default function Dashboard() {
             <span style={{ fontSize: 22 }}>🤖</span>
             <div>
               <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: '-0.02em' }}>Peter's Bot</div>
-              <div style={{ fontSize: 11, color: '#64748b' }}>R75 · DEMO · v10.7</div>
+              <div style={{ fontSize: 11, color: '#64748b' }}>R75 · DEMO · v10.8</div>
             </div>
           </div>
 
@@ -219,13 +219,13 @@ export default function Dashboard() {
                   <span style={{ fontSize: 28 }}>{wr >= 54 ? '🚀' : '🎯'}</span>
                   <div>
                     <div style={{ fontWeight: 700, marginBottom: 4 }}>
-                      {wr >= 54 ? 'Strategy proven profitable — 975-trade backtest: WR 54%→63%, P&L -$165→+$147' : 'Building calibration data — target 54%+ win rate'}
+                      {wr >= 54 ? 'Strategy proven profitable — 1,814-trade audit: WR 54%→63%, P&L improving' : 'Building calibration data — target 54%+ win rate'}
                     </div>
                     <div style={{ color: '#64748b', fontSize: 13 }}>
-                      Current: <strong style={{ color: wr >= 52 ? '#22c55e' : '#eab308' }}>{wr}%</strong> over {trades.length} trades · Breakeven: ~52.1% (at 92% payout) · Assets: V75, V50, JD75, 1HZ75V (24/7 synthetics) + Gold (15–17 UTC).{' '}
+                      Current: <strong style={{ color: wr >= 52 ? '#22c55e' : '#eab308' }}>{wr}%</strong> over {trades.length} trades · Breakeven: ~52.1% (at 92% payout) · Assets: R75, 1HZ75V, R100 (24/7 rotation) + Gold (h15 UTC) + Silver (h16 UTC).{' '}
                       {wr >= 54 && trades.length >= 500
-                        ? '✅ Edge confirmed. 4-way synthetic rotation live. Score ceilings calibrated from real data.'
-                        : `Collecting synthetic trade data — ${trades.length} trades logged so far.`}
+                        ? '✅ Edge confirmed. v10.8: CALL sweep gate + Gold cap $5 + Gold floor 13 + 1HZ75V NEUTRAL block.'
+                        : `v10.8 live — 4 precision fixes from 1,814-trade audit. ${trades.length} trades logged so far.`}
                     </div>
                   </div>
                 </div>
