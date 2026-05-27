@@ -42,7 +42,7 @@ function MiniBar({ data }: { data: { name: string; wr: number; count: number }[]
         <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
         <XAxis dataKey="name" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
         <YAxis domain={[0, 100]} tick={{ fill: '#71717a', fontSize: 11 }} unit="%" axisLine={false} tickLine={false} />
-        <Tooltip contentStyle={tooltipStyle} formatter={(v: number, n: string, p: { payload: { count: number } }) => [`${v}% (${p.payload.count} trades)`, 'Win Rate']} />
+        <Tooltip contentStyle={tooltipStyle} formatter={(v, n, p) => [`${v}% (${(p as { payload?: { count?: number } })?.payload?.count ?? 0} trades)`, 'Win Rate']} />
         <Bar dataKey="wr" radius={[4, 4, 0, 0]}>
           {data.map((d, i) => <Cell key={i} fill={colour(d.wr)} />)}
         </Bar>

@@ -164,7 +164,7 @@ export default function LosingPatterns({ trades }: Props) {
               <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
               <XAxis dataKey="name" tick={{ fill: '#71717a', fontSize: 12 }} axisLine={false} tickLine={false} />
               <YAxis domain={[0, 100]} tick={{ fill: '#71717a', fontSize: 11 }} unit="%" axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v}%`, 'Win Rate']} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`${v}%`, 'Win Rate']} />
               <Bar dataKey="wr" radius={[6, 6, 0, 0]}>
                 {dirData.map((d, i) => <Cell key={i} fill={wrColour(d.wr)} />)}
               </Bar>
@@ -207,7 +207,7 @@ export default function LosingPatterns({ trades }: Props) {
                 <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                 <XAxis dataKey="name" tick={{ fill: '#71717a', fontSize: 12 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: '#71717a', fontSize: 11 }} unit="$" axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`$${v}`, 'P&L']} />
+                <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`$${v}`, 'P&L']} />
                 <Bar dataKey="pnl" radius={[6, 6, 0, 0]}>
                   {scorePnl.map((d, i) => <Cell key={i} fill={d.pnl >= 0 ? '#10b981' : '#ef4444'} />)}
                 </Bar>
@@ -228,7 +228,7 @@ export default function LosingPatterns({ trades }: Props) {
                 <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                 <XAxis dataKey="name" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
                 <YAxis domain={[0, 100]} tick={{ fill: '#71717a', fontSize: 11 }} unit="%" axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={tooltipStyle} formatter={(v: number, n: string, p: { payload: { trades: number } }) => [`${v}% (${p.payload.trades} trades)`, 'Win Rate']} />
+                <Tooltip contentStyle={tooltipStyle} formatter={(v, n, p) => [`${v}% (${(p as { payload?: { trades?: number } })?.payload?.trades ?? 0} trades)`, 'Win Rate']} />
                 <Bar dataKey="wr" radius={[6, 6, 0, 0]}>
                   {adxData.map((d, i) => <Cell key={i} fill={wrColour(d.wr)} />)}
                 </Bar>
@@ -254,7 +254,7 @@ export default function LosingPatterns({ trades }: Props) {
               <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
               <XAxis dataKey="name" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
               <YAxis domain={[0, 100]} tick={{ fill: '#71717a', fontSize: 11 }} unit="%" axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(v: number, n: string, p: { payload: { trades: number } }) => [`${v}% (${p.payload.trades} trades)`, 'Win Rate']} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(v, n, p) => [`${v}% (${(p as { payload?: { trades?: number } })?.payload?.trades ?? 0} trades)`, 'Win Rate']} />
               <Bar dataKey="wr" radius={[6, 6, 0, 0]}>
                 {zData.map((d, i) => <Cell key={i} fill={wrColour(d.wr)} />)}
               </Bar>

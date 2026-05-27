@@ -146,7 +146,7 @@ export default function SignalIntelligence({ trades }: Props) {
             <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
             <XAxis dataKey="score" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
             <YAxis domain={[0, 100]} tick={{ fill: '#71717a', fontSize: 11 }} tickFormatter={v => `${v}%`} axisLine={false} tickLine={false} />
-            <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v}%`, 'Win Rate']} />
+            <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`${v}%`, 'Win Rate']} />
             <Bar dataKey="wr" radius={[4, 4, 0, 0]}>
               {scoreData.map((entry, i) => <Cell key={i} fill={BAR_COLOUR(entry.wr)} />)}
             </Bar>
@@ -161,7 +161,7 @@ export default function SignalIntelligence({ trades }: Props) {
             <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
             <XAxis dataKey="name" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
             <YAxis domain={[0, 100]} tick={{ fill: '#71717a', fontSize: 11 }} tickFormatter={v => `${v}%`} axisLine={false} tickLine={false} />
-            <Tooltip contentStyle={tooltipStyle} formatter={(v: number, n: string, p: { payload: { count: number } }) => [`${v}% (${p.payload.count} trades)`, 'Win Rate']} />
+            <Tooltip contentStyle={tooltipStyle} formatter={(v, n, p) => [`${v}% (${(p as { payload?: { count?: number } })?.payload?.count ?? 0} trades)`, 'Win Rate']} />
             <Bar dataKey="wr" radius={[4, 4, 0, 0]}>
               {dirData.map((entry, i) => <Cell key={i} fill={BAR_COLOUR(entry.wr)} />)}
             </Bar>
@@ -194,7 +194,7 @@ export default function SignalIntelligence({ trades }: Props) {
               <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
               <XAxis dataKey="fib" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
               <YAxis domain={[0, 100]} tick={{ fill: '#71717a', fontSize: 11 }} tickFormatter={v => `${v}%`} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(v: number, n: string, p: { payload: { count: number } }) => [`${v}% (${p.payload.count} trades)`, 'Win Rate']} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(v, n, p) => [`${v}% (${(p as { payload?: { count?: number } })?.payload?.count ?? 0} trades)`, 'Win Rate']} />
               <Bar dataKey="wr" radius={[4, 4, 0, 0]}>
                 {fibData.map((entry, i) => <Cell key={i} fill={BAR_COLOUR(entry.wr)} />)}
               </Bar>
@@ -210,7 +210,7 @@ export default function SignalIntelligence({ trades }: Props) {
             <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
             <XAxis dataKey="bucket" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
             <YAxis domain={[0, 100]} tick={{ fill: '#71717a', fontSize: 11 }} tickFormatter={v => `${v}%`} axisLine={false} tickLine={false} />
-            <Tooltip contentStyle={tooltipStyle} formatter={(v: number, n: string, p: { payload: { count: number } }) => [`${v}% (${p.payload.count} trades)`, 'Win Rate']} />
+            <Tooltip contentStyle={tooltipStyle} formatter={(v, n, p) => [`${v}% (${(p as { payload?: { count?: number } })?.payload?.count ?? 0} trades)`, 'Win Rate']} />
             <Bar dataKey="wr" radius={[4, 4, 0, 0]}>
               {adxData.map((entry, i) => <Cell key={i} fill={BAR_COLOUR(entry.wr)} />)}
             </Bar>
@@ -226,7 +226,7 @@ export default function SignalIntelligence({ trades }: Props) {
               <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
               <XAxis dataKey="name" tick={{ fill: '#71717a', fontSize: 12 }} axisLine={false} tickLine={false} />
               <YAxis domain={[0, 100]} tick={{ fill: '#71717a', fontSize: 11 }} tickFormatter={v => `${v}%`} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(v: number, n: string, p: { payload: { count: number } }) => [`${v}% (${p.payload.count} trades)`, 'Win Rate']} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(v, n, p) => [`${v}% (${(p as { payload?: { count?: number } })?.payload?.count ?? 0} trades)`, 'Win Rate']} />
               <Bar dataKey="wr" radius={[4, 4, 0, 0]}>
                 {symbolData.map((entry, i) => <Cell key={i} fill={BAR_COLOUR(entry.wr)} />)}
               </Bar>
@@ -243,7 +243,7 @@ export default function SignalIntelligence({ trades }: Props) {
               <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
               <XAxis dataKey="day" tick={{ fill: '#71717a', fontSize: 12 }} axisLine={false} tickLine={false} />
               <YAxis domain={[0, 100]} tick={{ fill: '#71717a', fontSize: 11 }} tickFormatter={v => `${v}%`} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(v: number, n: string, p: { payload: { count: number } }) => [`${v}% (${p.payload.count} trades)`, 'Win Rate']} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(v, n, p) => [`${v}% (${(p as { payload?: { count?: number } })?.payload?.count ?? 0} trades)`, 'Win Rate']} />
               <Bar dataKey="wr" radius={[4, 4, 0, 0]}>
                 {dowData.map((entry, i) => <Cell key={i} fill={BAR_COLOUR(entry.wr)} />)}
               </Bar>
