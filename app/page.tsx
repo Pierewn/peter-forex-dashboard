@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { fetchTrades, Trade } from '@/lib/supabase'
+import Header from '@/components/Header'
 import StatsRow from '@/components/StatsRow'
 import EquityCurve from '@/components/EquityCurve'
 import SignalIntelligence from '@/components/SignalIntelligence'
@@ -10,6 +11,7 @@ import SelfLearning from '@/components/SelfLearning'
 import LiveInsights from '@/components/LiveInsights'
 import ForexLearn from '@/components/ForexLearn'
 import AssetPerformance from '@/components/AssetPerformance'
+import QuickActions from '@/components/QuickActions'
 
 const NAV = ['Overview', 'Signal Intelligence', 'Patterns & Insights', 'Self-Learning', 'Trade Log', 'Learn']
 
@@ -26,13 +28,13 @@ const SYMBOL_LABELS: Record<string, string> = {
 }
 
 export default function Dashboard() {
-  const [trades, setTrades]   = useState<Trade[]>([])
+  const [trades, setTrades] = useState<Trade[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError]     = useState('')
-  const [tab, setTab]         = useState('Overview')
-  const [symbol, setSymbol]   = useState('ALL')
+  const [error, setError] = useState('')
+  const [tab, setTab] = useState('Overview')
+  const [symbol, setSymbol] = useState('ALL')
   const [lastRefresh, setLastRefresh] = useState(new Date())
-  const [refreshing, setRefreshing]   = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
 
   const load = async (manual = false) => {
     if (manual) setRefreshing(true)
@@ -41,8 +43,8 @@ export default function Dashboard() {
       const data = await fetchTrades()
       setTrades(data)
       setLastRefresh(new Date())
-    } catch (e: any) {
-      setError(e.message)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Unknown error')
     } finally {
       setLoading(false)
       setRefreshing(false)
@@ -51,186 +53,107 @@ export default function Dashboard() {
 
   useEffect(() => {
     load()
-    // Auto-refresh every 2 minutes
     const interval = setInterval(() => load(), 120_000)
     return () => clearInterval(interval)
   }, [])
 
-  // Filter by selected asset symbol — all components receive the filtered slice
   const filtered = symbol === 'ALL' ? trades : trades.filter(t => (t.symbol ?? 'R_75') === symbol)
-
-  const wins   = filtered.filter(t => t.result === 'WIN').length
+  const wins = filtered.filter(t => t.result === 'WIN').length
   const losses = filtered.filter(t => t.result === 'LOSS').length
-  const wr     = filtered.length ? Math.round(wins / filtered.length * 1000) / 10 : 0
-
-  // Available symbols derived from actual data (always show ALL + any seen)
+  const wr = filtered.length ? Math.round(wins / filtered.length * 1000) / 10 : 0
   const seenSymbols = Array.from(new Set(trades.map(t => t.symbol ?? 'R_75')))
   const symbolOptions = ['ALL', ...seenSymbols]
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0f1117', color: '#e2e8f0' }}>
+    <div className="min-h-screen bg-background">
+      <Header
+        symbol={symbol}
+        setSymbol={setSymbol}
+        symbolOptions={symbolOptions}
+        symbolLabels={SYMBOL_LABELS}
+        trades={trades}
+        filtered={filtered}
+        wins={wins}
+        losses={losses}
+        wr={wr}
+        refreshing={refreshing}
+        onRefresh={() => load(true)}
+        lastRefresh={lastRefresh}
+      />
 
-      {/* Header */}
-      <div style={{ background: '#1a1d27', borderBottom: '1px solid #2a2d3a', padding: '0 2rem' }}>
-        <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 60 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontSize: 22 }}>🤖</span>
-            <div>
-              <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: '-0.02em' }}>Peter's Bot</div>
-              <div style={{ fontSize: 11, color: '#64748b' }}>R75 · DEMO · v10.9</div>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            {/* Asset filter */}
-            {trades.length > 0 && (
-              <select
-                value={symbol}
-                onChange={e => setSymbol(e.target.value)}
-                style={{ background: '#2a2d3a', border: '1px solid #3a3d4a', color: '#e2e8f0', padding: '5px 10px', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>
-                {symbolOptions.map(s => (
-                  <option key={s} value={s}>{SYMBOL_LABELS[s] ?? s}</option>
-                ))}
-              </select>
-            )}
-
-            {/* Live stats in header */}
-            {trades.length > 0 && (
-              <div style={{ display: 'flex', gap: 16, fontSize: 13 }}>
-                <span style={{ color: '#64748b' }}>
-                  {filtered.length} trades ·{' '}
-                  <span style={{ color: wr >= 55 ? '#22c55e' : '#ef4444', fontWeight: 700 }}>{wr}% win rate</span>
-                </span>
-                <span style={{ color: '#22c55e', fontWeight: 700 }}>
-                  {wins}W
-                </span>
-                <span style={{ color: '#ef4444', fontWeight: 700 }}>
-                  {losses}L
-                </span>
-              </div>
-            )}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#64748b' }}>
-              <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', display: 'inline-block', boxShadow: '0 0 6px #22c55e' }} />
-              Live · refreshes every 2 min
-            </div>
-            <button onClick={() => load(true)} disabled={refreshing}
-              style={{ background: refreshing ? '#1a1d27' : '#2a2d3a', border: 'none', color: refreshing ? '#6366f1' : '#94a3b8', padding: '6px 14px', borderRadius: 8, fontSize: 12, cursor: refreshing ? 'default' : 'pointer', fontWeight: 600, transition: 'all 0.2s' }}>
-              {refreshing ? '↻ Refreshing...' : '↻ Refresh'}
-            </button>
-          </div>
-        </div>
-
-        {/* Nav tabs */}
-        <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', gap: 4 }}>
-          {NAV.map(n => (
-            <button key={n} onClick={() => setTab(n)}
-              style={{
-                padding: '10px 18px', background: 'none', border: 'none', cursor: 'pointer',
-                fontSize: 13, fontWeight: 600, borderBottom: tab === n ? '2px solid #6366f1' : '2px solid transparent',
-                color: tab === n ? '#6366f1' : '#64748b',
-                marginBottom: -1,
-              }}>
-              {n}
-            </button>
-          ))}
+      {/* Navigation Tabs */}
+      <div className="border-b border-border sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="max-w-[1600px] mx-auto px-6">
+          <nav className="flex gap-1 -mb-px overflow-x-auto">
+            {NAV.map(n => (
+              <button
+                key={n}
+                onClick={() => setTab(n)}
+                className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-all border-b-2 ${
+                  tab === n
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+                }`}
+              >
+                {n}
+              </button>
+            ))}
+          </nav>
         </div>
       </div>
 
-      {/* Body */}
-      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '2rem' }}>
-
+      {/* Main Content */}
+      <main className="max-w-[1600px] mx-auto px-6 py-6">
         {loading && (
-          <div style={{ textAlign: 'center', padding: '4rem', color: '#64748b' }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>⏳</div>
-            Loading trade data from Supabase...
+          <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
+            <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin mb-4" />
+            <p className="text-muted-foreground">Loading trade data from Supabase...</p>
           </div>
         )}
 
         {error && (
-          <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 12, padding: '1.5rem', color: '#ef4444', marginBottom: '1.5rem' }}>
-            <strong>Error loading data:</strong> {error}
+          <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-6 mb-6 animate-fade-in">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-destructive/20 flex items-center justify-center">
+                <span className="text-destructive text-lg">!</span>
+              </div>
+              <div>
+                <p className="font-semibold text-destructive">Error loading data</p>
+                <p className="text-sm text-muted-foreground">{error}</p>
+              </div>
+            </div>
           </div>
         )}
 
         {!loading && !error && trades.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '4rem', color: '#64748b' }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>📊</div>
-            <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>No trades yet</div>
-            <div style={{ fontSize: 14 }}>The bot needs to place its first trade. Check back soon — it runs 24/7.</div>
+          <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
+            <div className="w-20 h-20 rounded-2xl bg-card flex items-center justify-center mb-6">
+              <span className="text-4xl">📊</span>
+            </div>
+            <h2 className="text-xl font-bold mb-2">No trades yet</h2>
+            <p className="text-muted-foreground text-center max-w-md">
+              The bot needs to place its first trade. Check back soon — it runs 24/7.
+            </p>
           </div>
         )}
 
         {!loading && trades.length > 0 && (
-          <>
-            {/* Stats always visible */}
+          <div className="space-y-6 animate-fade-in">
             <StatsRow trades={filtered} />
 
             {tab === 'Overview' && (
               <>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2">
+                    <EquityCurve trades={filtered} />
+                  </div>
+                  <div>
+                    <QuickActions trades={filtered} wr={wr} />
+                  </div>
+                </div>
                 <LiveInsights trades={filtered} />
                 <AssetPerformance trades={filtered} />
-                <EquityCurve trades={filtered} />
-
-                {/* Insight box */}
-                <div style={{ background: '#1a1d27', border: '1px solid #2a2d3a', borderRadius: 12, padding: '1.5rem', marginBottom: '1.5rem' }}>
-                  <div style={{ fontSize: 11, color: '#64748b', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '1rem' }}>
-                    What The Bot Is Doing — In Plain English
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem', fontSize: 13 }}>
-                    {[
-                      {
-                        icon: '📊', title: 'Technical Indicators',
-                        desc: 'RSI tells it if price is oversold (likely to rise) or overbought (likely to fall). MACD shows momentum direction. Bollinger Bands show if price is stretched too far.'
-                      },
-                      {
-                        icon: '📦', title: 'Box Theory (S&R Levels)',
-                        desc: 'Like invisible walls — price bounces off Monthly, Weekly and Daily highs and lows repeatedly. The bot only trades near these walls where bounces are most likely.'
-                      },
-                      {
-                        icon: '📐', title: 'Z-Score + Fibonacci',
-                        desc: 'Z-Score measures how far price has stretched from its average. Fibonacci levels are mathematical price magnets where markets reverse. "History always tells a story."'
-                      },
-                      {
-                        icon: '🥇', title: 'Real Market Assets (v10.9)',
-                        desc: 'GBP/USD trades London (11am–5pm Kenya) + NY (8pm–1am Kenya) sessions Mon–Fri. Gold (XAU/USD) at h15 UTC, Silver (XAG/USD) at h16 UTC. All three use real market data with news blackout ±15 min. Synthetics (R_75, 1HZ75V, R_100) run 24/7 outside these windows.'
-                      },
-                      {
-                        icon: '📡', title: 'Higher Timeframe Trend',
-                        desc: 'The bot checks the 1-hour and 4-hour charts. If both point UP, it favours BUY trades (+2 pts). If both point DOWN, it favours SELL. Never fights the bigger trend.'
-                      },
-                      {
-                        icon: '✅', title: 'Signal Confirmation',
-                        desc: 'A signal must score 11+ points before the bot trades — a strong quality gate across 10+ indicators. Each scan takes ~10 seconds so valid setups are caught quickly.'
-                      },
-                      {
-                        icon: '💹', title: 'Kelly Criterion',
-                        desc: 'Instead of random stake sizes, the bot uses the mathematically optimal amount based on your real win rate. Bet more when your edge is proven, less when it isn\'t.'
-                      },
-                    ].map(item => (
-                      <div key={item.title} style={{ background: '#141620', borderRadius: 10, padding: '1rem 1.25rem' }}>
-                        <div style={{ fontSize: 20, marginBottom: 6 }}>{item.icon}</div>
-                        <div style={{ fontWeight: 700, marginBottom: 4, color: '#e2e8f0' }}>{item.title}</div>
-                        <div style={{ color: '#64748b', lineHeight: 1.6 }}>{item.desc}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Status box */}
-                <div style={{ background: wr >= 54 ? 'rgba(34,197,94,0.08)' : 'rgba(99,102,241,0.08)', border: `1px solid ${wr >= 54 ? 'rgba(34,197,94,0.25)' : 'rgba(99,102,241,0.25)'}`, borderRadius: 12, padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', gap: 16 }}>
-                  <span style={{ fontSize: 28 }}>{wr >= 54 ? '🚀' : '🎯'}</span>
-                  <div>
-                    <div style={{ fontWeight: 700, marginBottom: 4 }}>
-                      {wr >= 54 ? 'Strategy proven profitable — 1,814-trade audit: WR 54%→63%, P&L improving' : 'Building calibration data — target 54%+ win rate'}
-                    </div>
-                    <div style={{ color: '#64748b', fontSize: 13 }}>
-                      Current: <strong style={{ color: wr >= 52 ? '#22c55e' : '#eab308' }}>{wr}%</strong> over {trades.length} trades · Breakeven: ~52.1% (at 92% payout) · Assets: R75, 1HZ75V, R100 (24/7) + GBP/USD (London+NY) + Gold (h15) + Silver (h16).{' '}
-                      {wr >= 54 && trades.length >= 500
-                        ? '✅ Edge confirmed. v10.9: GBP/USD live for data collection + v10.8 sweep gate + Gold cap + 1HZ75V NEUTRAL block.'
-                        : `v10.9 live — GBP/USD forex added. ${trades.length} trades logged so far. Goal: 50+ GBP/USD trades to calibrate forex edge.`}
-                    </div>
-                  </div>
-                </div>
+                <BotStrategy wr={wr} trades={trades} />
               </>
             )}
 
@@ -239,13 +162,71 @@ export default function Dashboard() {
             {tab === 'Self-Learning' && <SelfLearning trades={filtered} />}
             {tab === 'Trade Log' && <TradeLog trades={filtered} />}
             {tab === 'Learn' && <ForexLearn trades={filtered} />}
-          </>
+          </div>
         )}
-      </div>
+      </main>
 
       {/* Footer */}
-      <div style={{ textAlign: 'center', padding: '2rem', color: '#2a2d3a', fontSize: 12 }}>
-        Last refreshed {lastRefresh.toLocaleTimeString()} · Data from Supabase · Bot runs 24/7 on Railway
+      <footer className="border-t border-border py-6 mt-12">
+        <div className="max-w-[1600px] mx-auto px-6 flex items-center justify-between text-sm text-muted-foreground">
+          <p>Last refreshed {lastRefresh.toLocaleTimeString()}</p>
+          <p>Data from Supabase &middot; Bot runs 24/7 on Railway</p>
+        </div>
+      </footer>
+    </div>
+  )
+}
+
+function BotStrategy({ wr, trades }: { wr: number; trades: Trade[] }) {
+  const strategies = [
+    { icon: '📊', title: 'Technical Indicators', desc: 'RSI, MACD, Bollinger Bands detect overbought/oversold conditions and momentum shifts.' },
+    { icon: '📦', title: 'Box Theory (S&R)', desc: 'Monthly, Weekly and Daily highs/lows act as invisible walls where price bounces.' },
+    { icon: '📐', title: 'Z-Score + Fibonacci', desc: 'Statistical deviation and mathematical price magnets identify reversal points.' },
+    { icon: '📡', title: 'HTF Trend Alignment', desc: '1-hour and 4-hour charts confirm direction — never fights the bigger trend.' },
+    { icon: '✅', title: 'Signal Confirmation', desc: 'Requires 11+ points across 10+ indicators before entering any trade.' },
+    { icon: '💹', title: 'Kelly Criterion', desc: 'Mathematically optimal stake sizing based on real win rate and edge.' },
+  ]
+
+  return (
+    <div className="bg-card border border-border rounded-xl p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+            Bot Strategy Overview
+          </h3>
+          <p className="text-sm text-muted-foreground">What the bot is doing — in plain English</p>
+        </div>
+        <div className={`px-3 py-1.5 rounded-full text-sm font-semibold ${
+          wr >= 54 ? 'bg-success/20 text-success' : 'bg-primary/20 text-primary'
+        }`}>
+          {wr >= 54 ? 'Edge Confirmed' : 'Calibrating'}
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {strategies.map(item => (
+          <div key={item.title} className="bg-secondary/50 rounded-lg p-4 card-hover cursor-default">
+            <div className="text-2xl mb-3">{item.icon}</div>
+            <h4 className="font-semibold text-foreground mb-1">{item.title}</h4>
+            <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className={`mt-6 p-4 rounded-lg border ${
+        wr >= 54 ? 'bg-success/5 border-success/20' : 'bg-primary/5 border-primary/20'
+      }`}>
+        <div className="flex items-start gap-4">
+          <span className="text-3xl">{wr >= 54 ? '🚀' : '🎯'}</span>
+          <div>
+            <p className="font-semibold text-foreground">
+              {wr >= 54 ? 'Strategy proven profitable' : 'Building calibration data — target 54%+ win rate'}
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Current: <span className={`font-bold ${wr >= 52 ? 'text-success' : 'text-warning'}`}>{wr}%</span> over {trades.length} trades &middot; Breakeven: ~52.1% (at 92% payout)
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   )

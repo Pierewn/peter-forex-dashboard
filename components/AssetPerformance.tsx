@@ -4,33 +4,42 @@ import { Trade } from '@/lib/supabase'
 interface Props { trades: Trade[] }
 
 const SYMBOL_LABELS: Record<string, string> = {
-  R_75:       'R_75  (V75)',
-  R_50:       'R_50  (V50)',
-  JD75:       'JD75  (Jump75)',
-  '1HZ75V':   '1HZ75V (V75 1s)',
-  frxXAUUSD:  'Gold / USD',
-  frxGBPUSD:  'GBP / USD',
+  R_75: 'R_75 (V75)',
+  R_50: 'R_50 (V50)',
+  JD75: 'JD75 (Jump75)',
+  '1HZ75V': '1HZ75V (V75 1s)',
+  frxXAUUSD: 'Gold / USD',
+  frxGBPUSD: 'GBP / USD',
 }
 
 function wr(ts: Trade[]) {
   if (!ts.length) return 0
   return Math.round(ts.filter(t => t.result === 'WIN').length / ts.length * 1000) / 10
 }
+
 function pnl(ts: Trade[]) {
   return ts.reduce((s, t) => s + (t.pnl ?? 0), 0)
 }
-function wrColour(w: number) {
-  if (w >= 60) return '#22c55e'
-  if (w >= 54) return '#86efac'
-  if (w >= 52) return '#eab308'
-  return '#ef4444'
+
+function wrColor(w: number) {
+  if (w >= 60) return 'text-success'
+  if (w >= 54) return 'text-success/80'
+  if (w >= 52) return 'text-warning'
+  return 'text-destructive'
 }
-function pnlColour(p: number) { return p >= 0 ? '#22c55e' : '#ef4444' }
+
+function wrBg(w: number) {
+  if (w >= 60) return 'bg-success/20'
+  if (w >= 54) return 'bg-success/10'
+  if (w >= 52) return 'bg-warning/10'
+  return 'bg-destructive/10'
+}
+
+function pnlColor(p: number) { return p >= 0 ? 'text-success' : 'text-destructive' }
 
 export default function AssetPerformance({ trades }: Props) {
   if (trades.length < 10) return null
 
-  // ── 1. By-symbol breakdown ────────────────────────────────────────────
   const symbolMap: Record<string, Trade[]> = {}
   trades.forEach(t => {
     const s = t.symbol ?? 'R_75'
@@ -41,8 +50,7 @@ export default function AssetPerformance({ trades }: Props) {
     .filter(([, ts]) => ts.length >= 3)
     .sort(([, a], [, b]) => b.length - a.length)
 
-  // ── 2. R_75 hour heatmap ─────────────────────────────────────────────
-  const r75Trades  = trades.filter(t => (t.symbol ?? 'R_75') === 'R_75')
+  const r75Trades = trades.filter(t => (t.symbol ?? 'R_75') === 'R_75')
   const hourBuckets: Record<number, Trade[]> = {}
   for (let h = 0; h < 24; h++) hourBuckets[h] = []
   r75Trades.forEach(t => {
@@ -50,75 +58,72 @@ export default function AssetPerformance({ trades }: Props) {
     if (h >= 0 && h < 24) hourBuckets[h].push(t)
   })
 
-  // ── 3. Bias breakdown ────────────────────────────────────────────────
   const biasMap: Record<string, Trade[]> = { BULLISH: [], BEARISH: [], NEUTRAL: [] }
   trades.forEach(t => {
     const b = t.trend_bias ?? 'NEUTRAL'
     if (biasMap[b]) biasMap[b].push(t)
   })
 
-  // cell bg for hour heatmap
   function hourBg(h: number) {
     const ts = hourBuckets[h]
-    if (ts.length < 3) return '#1a1d27'
+    if (ts.length < 3) return 'bg-secondary'
     const w = wr(ts)
-    if (w >= 70) return 'rgba(34,197,94,0.30)'
-    if (w >= 60) return 'rgba(34,197,94,0.15)'
-    if (w >= 52) return 'rgba(234,179,8,0.15)'
-    return 'rgba(239,68,68,0.20)'
+    if (w >= 70) return 'bg-success/30'
+    if (w >= 60) return 'bg-success/15'
+    if (w >= 52) return 'bg-warning/15'
+    return 'bg-destructive/20'
   }
 
   return (
-    <div style={{ marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-
-      {/* ── Asset table ─────────────────────────────────────────── */}
-      <div style={{ background: '#1a1d27', border: '1px solid #2a2d3a', borderRadius: 12, padding: '1.5rem' }}>
-        <div style={{ fontSize: 11, color: '#64748b', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '1rem' }}>
-          📊 Performance By Asset
-        </div>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+    <div className="space-y-6">
+      {/* Asset Table */}
+      <div className="bg-card border border-border rounded-xl p-6">
+        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+          Performance By Asset
+        </h3>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
             <thead>
-              <tr style={{ color: '#64748b', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                <th style={{ textAlign: 'left', padding: '6px 12px', fontWeight: 700 }}>Asset</th>
-                <th style={{ textAlign: 'right', padding: '6px 12px', fontWeight: 700 }}>Trades</th>
-                <th style={{ textAlign: 'right', padding: '6px 12px', fontWeight: 700 }}>Wins</th>
-                <th style={{ textAlign: 'right', padding: '6px 12px', fontWeight: 700 }}>WR %</th>
-                <th style={{ textAlign: 'right', padding: '6px 12px', fontWeight: 700 }}>P&L</th>
-                <th style={{ textAlign: 'right', padding: '6px 12px', fontWeight: 700 }}>Avg Stake</th>
-                <th style={{ textAlign: 'right', padding: '6px 12px', fontWeight: 700 }}>Status</th>
+              <tr className="text-xs text-muted-foreground uppercase tracking-wider">
+                <th className="text-left pb-3 font-semibold">Asset</th>
+                <th className="text-right pb-3 font-semibold">Trades</th>
+                <th className="text-right pb-3 font-semibold">Wins</th>
+                <th className="text-right pb-3 font-semibold">WR %</th>
+                <th className="text-right pb-3 font-semibold">P&L</th>
+                <th className="text-right pb-3 font-semibold">Avg Stake</th>
+                <th className="text-right pb-3 font-semibold">Status</th>
               </tr>
             </thead>
             <tbody>
               {symbols.map(([sym, ts]) => {
-                const w     = wr(ts)
-                const p     = pnl(ts)
-                const wins  = ts.filter(t => t.result === 'WIN').length
+                const w = wr(ts)
+                const p = pnl(ts)
+                const wins = ts.filter(t => t.result === 'WIN').length
                 const avgSt = ts.reduce((s, t) => s + (t.stake ?? 0), 0) / ts.length
-                const status =
-                  sym === 'R_75'     ? '✅ Active'
-                  : sym === '1HZ75V' ? '🔥 Re-enabled v9.2'
-                  : sym === 'JD75'   ? '🚫 Suspended'
-                  : sym === 'R_50'   ? '⚠️ Excluded'
-                  : sym === 'frxXAUUSD' ? '⏱ h15–16 UTC only'
+                const status = sym === 'R_75' ? 'Active'
+                  : sym === '1HZ75V' ? 'Re-enabled'
+                  : sym === 'JD75' ? 'Suspended'
+                  : sym === 'R_50' ? 'Excluded'
+                  : sym === 'frxXAUUSD' ? 'h15–16 UTC'
                   : '—'
+                const statusColor = sym === 'R_75' || sym === '1HZ75V' ? 'text-success' : 'text-muted-foreground'
                 return (
-                  <tr key={sym} style={{ borderTop: '1px solid #2a2d3a' }}>
-                    <td style={{ padding: '10px 12px', color: '#e2e8f0', fontWeight: 600 }}>
+                  <tr key={sym} className="border-t border-border">
+                    <td className="py-3 font-semibold text-foreground">
                       {SYMBOL_LABELS[sym] ?? sym}
                     </td>
-                    <td style={{ padding: '10px 12px', textAlign: 'right', color: '#94a3b8' }}>{ts.length}</td>
-                    <td style={{ padding: '10px 12px', textAlign: 'right', color: '#94a3b8' }}>{wins}</td>
-                    <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 700, color: wrColour(w) }}>
-                      {w}%
+                    <td className="py-3 text-right text-muted-foreground">{ts.length}</td>
+                    <td className="py-3 text-right text-muted-foreground">{wins}</td>
+                    <td className="py-3 text-right">
+                      <span className={`font-bold ${wrColor(w)}`}>{w}%</span>
                     </td>
-                    <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 700, color: pnlColour(p) }}>
+                    <td className={`py-3 text-right font-bold ${pnlColor(p)}`}>
                       {p >= 0 ? '+' : ''}${p.toFixed(2)}
                     </td>
-                    <td style={{ padding: '10px 12px', textAlign: 'right', color: '#94a3b8' }}>
+                    <td className="py-3 text-right text-muted-foreground">
                       ${avgSt.toFixed(2)}
                     </td>
-                    <td style={{ padding: '10px 12px', textAlign: 'right', fontSize: 12, color: '#64748b' }}>
+                    <td className={`py-3 text-right text-xs ${statusColor}`}>
                       {status}
                     </td>
                   </tr>
@@ -129,86 +134,93 @@ export default function AssetPerformance({ trades }: Props) {
         </div>
       </div>
 
-      {/* ── Row 2: Hour heatmap + Bias breakdown ────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
-
-        {/* Hour heatmap (R_75 only) */}
-        <div style={{ background: '#1a1d27', border: '1px solid #2a2d3a', borderRadius: 12, padding: '1.5rem' }}>
-          <div style={{ fontSize: 11, color: '#64748b', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '1rem' }}>
-            🕐 R_75 Win Rate By Hour (UTC)
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: 4 }}>
+      {/* Hour Heatmap + Bias */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Hour Heatmap */}
+        <div className="lg:col-span-2 bg-card border border-border rounded-xl p-6">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+            R_75 Win Rate By Hour (UTC)
+          </h3>
+          <div className="grid grid-cols-8 gap-2">
             {Array.from({ length: 24 }, (_, h) => {
-              const ts  = hourBuckets[h]
-              const w   = ts.length >= 3 ? wr(ts) : null
+              const ts = hourBuckets[h]
+              const w = ts.length >= 3 ? wr(ts) : null
               return (
-                <div key={h} style={{
-                  background: hourBg(h),
-                  border: '1px solid #2a2d3a',
-                  borderRadius: 6,
-                  padding: '8px 4px',
-                  textAlign: 'center',
-                }}>
-                  <div style={{ fontSize: 10, color: '#64748b', fontWeight: 700 }}>h{String(h).padStart(2, '0')}</div>
+                <div
+                  key={h}
+                  className={`${hourBg(h)} rounded-lg p-2 text-center border border-border/50`}
+                >
+                  <div className="text-[10px] text-muted-foreground font-semibold">
+                    h{String(h).padStart(2, '0')}
+                  </div>
                   {w !== null ? (
-                    <div style={{ fontSize: 12, fontWeight: 700, color: wrColour(w), marginTop: 2 }}>{w}%</div>
+                    <div className={`text-xs font-bold ${wrColor(w)} mt-0.5`}>{w}%</div>
                   ) : (
-                    <div style={{ fontSize: 11, color: '#334155', marginTop: 2 }}>—</div>
+                    <div className="text-[10px] text-muted-foreground/50 mt-0.5">—</div>
                   )}
-                  <div style={{ fontSize: 10, color: '#475569', marginTop: 1 }}>{ts.length}t</div>
+                  <div className="text-[10px] text-muted-foreground/70">{ts.length}t</div>
                 </div>
               )
             })}
           </div>
-          <div style={{ marginTop: '0.75rem', display: 'flex', gap: 16, fontSize: 11, color: '#64748b' }}>
-            <span><span style={{ display: 'inline-block', width: 10, height: 10, background: 'rgba(34,197,94,0.30)', borderRadius: 2, marginRight: 4 }}/>≥70%</span>
-            <span><span style={{ display: 'inline-block', width: 10, height: 10, background: 'rgba(34,197,94,0.15)', borderRadius: 2, marginRight: 4 }}/>60–70%</span>
-            <span><span style={{ display: 'inline-block', width: 10, height: 10, background: 'rgba(234,179,8,0.15)', borderRadius: 2, marginRight: 4 }}/>52–60%</span>
-            <span><span style={{ display: 'inline-block', width: 10, height: 10, background: 'rgba(239,68,68,0.20)', borderRadius: 2, marginRight: 4 }}/>&lt;52%</span>
-            <span style={{ marginLeft: 'auto' }}>Needs 3+ trades to show</span>
+          <div className="flex items-center gap-4 mt-4 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded bg-success/30" />70%+
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded bg-success/15" />60–70%
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded bg-warning/15" />52–60%
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded bg-destructive/20" />&lt;52%
+            </span>
+            <span className="ml-auto">Needs 3+ trades</span>
           </div>
         </div>
 
-        {/* Bias breakdown */}
-        <div style={{ background: '#1a1d27', border: '1px solid #2a2d3a', borderRadius: 12, padding: '1.5rem' }}>
-          <div style={{ fontSize: 11, color: '#64748b', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '1rem' }}>
-            📡 By HTF Bias
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        {/* Bias Breakdown */}
+        <div className="bg-card border border-border rounded-xl p-6">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+            By HTF Bias
+          </h3>
+          <div className="space-y-3">
             {[
-              { label: '📈 BULLISH', key: 'BULLISH', icon: '#22c55e' },
-              { label: '📉 BEARISH', key: 'BEARISH', icon: '#ef4444' },
-              { label: '↔️ NEUTRAL', key: 'NEUTRAL', icon: '#64748b' },
-            ].map(({ label, key, icon }) => {
-              const ts  = biasMap[key] ?? []
-              const w   = wr(ts)
-              const p   = pnl(ts)
+              { label: 'BULLISH', key: 'BULLISH', icon: '📈', color: 'text-success' },
+              { label: 'BEARISH', key: 'BEARISH', icon: '📉', color: 'text-destructive' },
+              { label: 'NEUTRAL', key: 'NEUTRAL', icon: '↔️', color: 'text-muted-foreground' },
+            ].map(({ label, key, icon, color }) => {
+              const ts = biasMap[key] ?? []
+              const w = wr(ts)
+              const p = pnl(ts)
               if (!ts.length) return null
               return (
-                <div key={key} style={{ background: '#141620', borderRadius: 8, padding: '0.75rem 1rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                    <span style={{ fontWeight: 700, fontSize: 13, color: icon }}>{label}</span>
-                    <span style={{ fontSize: 12, color: '#64748b' }}>{ts.length} trades</span>
+                <div key={key} className="bg-secondary/50 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`font-semibold ${color}`}>{icon} {label}</span>
+                    <span className="text-xs text-muted-foreground">{ts.length} trades</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-                    <span style={{ fontWeight: 700, color: wrColour(w) }}>WR {w}%</span>
-                    <span style={{ fontWeight: 700, color: pnlColour(p) }}>
+                  <div className="flex items-center justify-between text-sm mb-2">
+                    <span className={`font-bold ${wrColor(w)}`}>WR {w}%</span>
+                    <span className={`font-bold ${pnlColor(p)}`}>
                       {p >= 0 ? '+' : ''}${p.toFixed(0)}
                     </span>
                   </div>
-                  {/* WR bar */}
-                  <div style={{ marginTop: 6, height: 4, background: '#2a2d3a', borderRadius: 2 }}>
-                    <div style={{ height: '100%', width: `${Math.min(100, w)}%`, background: wrColour(w), borderRadius: 2 }} />
+                  <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+                    <div
+                      className={`h-full ${wrBg(w)} transition-all duration-500`}
+                      style={{ width: `${Math.min(100, w)}%` }}
+                    />
                   </div>
                 </div>
               )
             })}
           </div>
-          <div style={{ marginTop: '1rem', fontSize: 11, color: '#334155', borderTop: '1px solid #2a2d3a', paddingTop: '0.75rem' }}>
-            Breakeven at 92% payout: <strong style={{ color: '#64748b' }}>52.1% WR</strong>
+          <div className="mt-4 pt-4 border-t border-border text-xs text-muted-foreground">
+            Breakeven at 92% payout: <span className="font-semibold text-foreground">52.1% WR</span>
           </div>
         </div>
-
       </div>
     </div>
   )

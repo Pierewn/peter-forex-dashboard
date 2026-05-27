@@ -1,11 +1,12 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Activity, Lock, ArrowRight, Loader2 } from 'lucide-react'
 
 export default function Login() {
   const [password, setPassword] = useState('')
-  const [error, setError]       = useState('')
-  const [loading, setLoading]   = useState(false)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
 
   const submit = async (e: React.FormEvent) => {
@@ -33,72 +34,80 @@ export default function Login() {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh', background: '#0f1117',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-    }}>
-      <div style={{
-        background: '#1a1d27', border: '1px solid #2a2d3a',
-        borderRadius: 16, padding: '2.5rem', width: '100%', maxWidth: 380,
-      }}>
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>🤖</div>
-          <div style={{ fontWeight: 800, fontSize: 20, color: '#e2e8f0', marginBottom: 4 }}>
-            Peter's Bot Dashboard
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      {/* Background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-background" />
+      
+      <div className="relative w-full max-w-sm">
+        <div className="bg-card border border-border rounded-2xl p-8 shadow-2xl">
+          {/* Logo */}
+          <div className="flex flex-col items-center mb-8">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-success flex items-center justify-center mb-4">
+              <Activity className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-xl font-bold text-foreground">Peter&apos;s Trading Bot</h1>
+            <p className="text-sm text-muted-foreground mt-1">Volatility 75 &middot; Trade Intelligence</p>
           </div>
-          <div style={{ fontSize: 13, color: '#64748b' }}>
-            Volatility 75 · Trade Intelligence
+
+          <form onSubmit={submit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  autoFocus
+                  placeholder="Enter password"
+                  className="w-full pl-10 pr-4 py-3 bg-secondary border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                />
+              </div>
+            </div>
+
+            {error && (
+              <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-3 flex items-center gap-2">
+                <span className="text-destructive text-sm">{error}</span>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading || !password}
+              className={`w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all ${
+                loading || !password
+                  ? 'bg-secondary text-muted-foreground cursor-not-allowed'
+                  : 'bg-primary text-primary-foreground hover:bg-primary/90'
+              }`}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Checking...
+                </>
+              ) : (
+                <>
+                  Enter Dashboard
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="mt-6 pt-6 border-t border-border text-center">
+            <p className="text-xs text-muted-foreground">
+              Private Dashboard &middot; Peter Waweru
+            </p>
           </div>
         </div>
 
-        <form onSubmit={submit}>
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', fontSize: 12, color: '#64748b', fontWeight: 600, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              autoFocus
-              placeholder="Enter password"
-              style={{
-                width: '100%', padding: '10px 14px',
-                background: '#141620', border: '1px solid #2a2d3a',
-                borderRadius: 8, color: '#e2e8f0', fontSize: 14,
-                outline: 'none', boxSizing: 'border-box',
-              }}
-            />
-          </div>
-
-          {error && (
-            <div style={{
-              background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
-              borderRadius: 8, padding: '8px 12px', fontSize: 13,
-              color: '#ef4444', marginBottom: '1rem',
-            }}>
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading || !password}
-            style={{
-              width: '100%', padding: '11px',
-              background: loading || !password ? '#2a2d3a' : '#6366f1',
-              border: 'none', borderRadius: 8,
-              color: loading || !password ? '#64748b' : '#fff',
-              fontSize: 14, fontWeight: 700, cursor: loading || !password ? 'not-allowed' : 'pointer',
-              transition: 'background 0.2s',
-            }}
-          >
-            {loading ? 'Checking...' : 'Enter Dashboard'}
-          </button>
-        </form>
-
-        <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: 12, color: '#2a2d3a' }}>
-          Private · Peter Waweru
+        {/* Features hint */}
+        <div className="mt-6 text-center">
+          <p className="text-xs text-muted-foreground">
+            Real-time analytics &middot; Signal intelligence &middot; Self-learning AI
+          </p>
         </div>
       </div>
     </div>
