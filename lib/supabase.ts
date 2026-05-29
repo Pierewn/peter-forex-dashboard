@@ -1,16 +1,16 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl  = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseKey  = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const supabaseUrl  = process.env.NEXT_PUBLIC_SUPABASE_URL  ?? ''
+const supabaseKey  = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error(
-    'Missing Supabase env vars — set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY ' +
-    '(in .env.local locally, or in Vercel project settings for production)'
-  )
-}
+// Don't throw at module level — surface the error at query time instead
+// so the page renders and shows a proper error message rather than crashing.
+export const supabase = createClient(
+  supabaseUrl  || 'https://placeholder.supabase.co',
+  supabaseKey  || 'placeholder'
+)
 
-export const supabase = createClient(supabaseUrl, supabaseKey)
+export const SUPABASE_CONFIGURED = !!(supabaseUrl && supabaseKey)
 
 export interface Trade {
   id: number
