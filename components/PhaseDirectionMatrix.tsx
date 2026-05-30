@@ -1,10 +1,18 @@
 'use client'
 import { Trade } from '@/lib/supabase'
 
-const PHASES = ['PULLBACK_BULL','MARKUP','DISTRIBUTION','PULLBACK_BEAR','MARKDOWN','ACCUMULATION','RANGING']
+const PHASES = ['PULLBACK_BULL','MARKUP','DISTRIBUTION','PULLBACK_BEAR','MARKDOWN','ACCUMULATION','RANGING','TRENDING_BULL']
 const PHASE_SHORT: Record<string, string> = {
   PULLBACK_BULL: 'PB Bull', MARKUP: 'Markup', DISTRIBUTION: 'Dist.',
-  PULLBACK_BEAR: 'PB Bear', MARKDOWN: 'Markdown', ACCUMULATION: 'Accum.', RANGING: 'Ranging',
+  PULLBACK_BEAR: 'PB Bear', MARKDOWN: 'Markdown', ACCUMULATION: 'Accum.',
+  RANGING: 'Ranging',
+  TRENDING_BULL: '🆕 Trend Bull',  // newly unblocked — collecting data
+}
+
+// TRENDING_BULL is a regime classification — read directly from the regime field
+// (different from the htf_bias-derived phases above)
+function isTrendingBull(r: Trade): boolean {
+  return (r as any).regime === 'TRENDING_BULL'
 }
 
 function derivePhase(r: Trade): string {
@@ -75,8 +83,12 @@ export default function PhaseDirectionMatrix({ trades }: { trades: Trade[] }) {
         </thead>
         <tbody>
           {PHASES.map(phase => {
-            const phaseT = trades.filter(t => derivePhase(t) === phase)
-            if (!phaseT.length) return null
+            // TRENDING_BULL uses the regime field (different classifier from htf_bias phases)
+            const phaseT = phase === 'TRENDING_BULL'
+              ? trades.filter(isTrendingBull)
+              : trades.filter(t => derivePhase(t) === phase)
+            // Show empty rows for TRENDING_BULL so operator knows it's being tracked
+            if (!phaseT.length && phase !== 'TRENDING_BULL') return null
 
             const callT  = phaseT.filter(t => t.direction === 'CALL')
             const putT   = phaseT.filter(t => t.direction === 'PUT')
@@ -85,10 +97,28 @@ export default function PhaseDirectionMatrix({ trades }: { trades: Trade[] }) {
             const cCell  = cell(callW, callT.length)
             const pCell  = cell(putW, putT.length)
 
-            return (
-              <tr key={phase} style={{ borderBottom: '1px solid #1e293b' }}>
-                <td style={{ padding: '8px 10px', fontWeight: 600, color: '#e2e8f0' }}>
+            // Empty TRENDING_BULL row — shows it's being tracked, fills as data comes in
+            if (!phaseT.length && phase === 'TRENDING_BULL') return (
+              <tr key={phase} style={{ borderBottom: '1px solid #1e293b', opacity: 0.5 }}>
+                <td style={{ padding: '8px 10px', fontWeight: 600, color: '#6366f1', fontSize: 12 }}>
                   {PHASE_SHORT[phase]}
+                  <div style={{ fontSize: 10, color: '#475569' }}>unblocked — collecting data</div>
+                </td>
+                <td colSpan={5} style={{ textAlign: 'center', padding: '8px', color: '#334155', fontSize: 11 }}>
+                  Waiting for TRENDING_BULL regime trades…
+                </td>
+              </tr>
+            )
+
+            return (
+              <tr key={phase} style={{ borderBottom: '1px solid #1e293b',
+                background: phase === 'TRENDING_BULL' ? 'rgba(99,102,241,0.03)' : undefined }}>
+                <td style={{ padding: '8px 10px', fontWeight: 600,
+                  color: phase === 'TRENDING_BULL' ? '#6366f1' : '#e2e8f0' }}>
+                  {PHASE_SHORT[phase]}
+                  {phase === 'TRENDING_BULL' && phaseT.length > 0 && (
+                    <div style={{ fontSize: 10, color: '#475569' }}>regime-based · newly unblocked</div>
+                  )}
                 </td>
 
                 {/* CALL */}

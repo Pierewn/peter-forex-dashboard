@@ -13,6 +13,8 @@ import AssetPerformance from '@/components/AssetPerformance'
 import LivePosition from '@/components/LivePosition'
 import PhasePerformance from '@/components/PhasePerformance'
 import PhaseDirectionMatrix from '@/components/PhaseDirectionMatrix'
+import ConfidenceTiers from '@/components/ConfidenceTiers'
+import TrailingStats from '@/components/TrailingStats'
 
 const NAV = ['Overview', 'Signal Intelligence', 'Patterns & Insights', 'Self-Learning', 'Trade Log', 'Learn']
 
@@ -174,6 +176,8 @@ export default function Dashboard() {
             {tab === 'Overview' && (
               <>
                 <LiveInsights trades={filtered} />
+                <ConfidenceTiers />
+                <TrailingStats trades={filtered} />
                 <PhasePerformance trades={filtered} />
                 <PhaseDirectionMatrix trades={filtered} />
                 <AssetPerformance trades={filtered} />

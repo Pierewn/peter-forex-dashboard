@@ -60,6 +60,18 @@ export interface Trade {
   // ── v7.8 analysis fields (columns added via Supabase SQL editor) ──
   htf_bias:          string | null
   reasons:           string | null
+  // ── v13.1 multiplier fields ──
+  instrument:         string | null  // "MULTIPLIER" | null
+  trailing_activated: boolean | null // did SL ratchet to break-even?
+}
+
+export interface TradePattern {
+  pattern_key: string
+  symbol:      string
+  direction:   string
+  phase:       string
+  wins:        number
+  losses:      number
 }
 
 export interface Scan {
@@ -71,6 +83,15 @@ export interface Scan {
   adx: number
   signal: string
   score: number
+}
+
+export async function fetchPatterns(): Promise<TradePattern[]> {
+  const { data, error } = await supabase
+    .from('trade_patterns')
+    .select('*')
+    .order('pattern_key')
+  if (error) throw new Error(`Supabase patterns: ${error.message}`)
+  return data || []
 }
 
 export async function fetchTrades(): Promise<Trade[]> {
