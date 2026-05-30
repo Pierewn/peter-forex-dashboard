@@ -10,6 +10,7 @@ import SelfLearning from '@/components/SelfLearning'
 import LiveInsights from '@/components/LiveInsights'
 import ForexLearn from '@/components/ForexLearn'
 import AssetPerformance from '@/components/AssetPerformance'
+import LivePosition from '@/components/LivePosition'
 
 const NAV = ['Overview', 'Signal Intelligence', 'Patterns & Insights', 'Self-Learning', 'Trade Log', 'Learn']
 
@@ -162,6 +163,9 @@ export default function Dashboard() {
 
         {!loading && trades.length > 0 && (
           <>
+            {/* Live multiplier position — shows when trade is open */}
+            <LivePosition />
+
             {/* Stats always visible */}
             <StatsRow trades={filtered} />
 
