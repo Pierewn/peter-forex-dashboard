@@ -77,7 +77,7 @@ export default function Dashboard() {
             <span style={{ fontSize: 22 }}>🤖</span>
             <div>
               <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: '-0.02em' }}>Peter's Bot</div>
-              <div style={{ fontSize: 11, color: '#64748b' }}>R75 · DEMO · v10.9</div>
+              <div style={{ fontSize: 11, color: '#64748b' }}>R75+R100 · DEMO · v12.0 · Multiplier 1:2</div>
             </div>
           </div>
 
@@ -179,32 +179,32 @@ export default function Dashboard() {
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem', fontSize: 13 }}>
                     {[
                       {
-                        icon: '📊', title: 'Technical Indicators',
-                        desc: 'RSI tells it if price is oversold (likely to rise) or overbought (likely to fall). MACD shows momentum direction. Bollinger Bands show if price is stretched too far.'
+                        icon: '🌊', title: 'Full Top-Down Read (v12.0)',
+                        desc: 'Monthly → Weekly → Daily → 4H → 1H → 15M → 5M → 1M. Every timeframe votes before a trade fires. Monthly/Weekly set the macro bias. Daily BOS gives phase (pullback or continuation). 1H shows institutional zones. 15M confirms the structure shift. 5M confirms momentum is building. 1M executes.'
                       },
                       {
-                        icon: '📦', title: 'Box Theory (S&R Levels)',
-                        desc: 'Like invisible walls — price bounces off Monthly, Weekly and Daily highs and lows repeatedly. The bot only trades near these walls where bounces are most likely.'
+                        icon: '🔢', title: 'Multiplier Contracts (v11.9)',
+                        desc: 'Switched from binary options to multiplier contracts. Same signals, better math: at 52% WR, binary options lose -$0.038/trade. Multipliers (1:2 RR, SL=$0.35, TP=$0.70) earn +$0.196/trade. Breakeven drops from 54% WR to 33% WR. The instrument now matches the edge.'
                       },
                       {
-                        icon: '📐', title: 'Z-Score + Fibonacci',
-                        desc: 'Z-Score measures how far price has stretched from its average. Fibonacci levels are mathematical price magnets where markets reverse. "History always tells a story."'
+                        icon: '🧠', title: 'Market Phase Intelligence (v11.3)',
+                        desc: '7-phase market classifier: PULLBACK_BULL, MARKUP, DISTRIBUTION, PULLBACK_BEAR, MARKDOWN, ACCUMULATION, RANGING. Derived from 5 timeframe votes. Counter-phase trades require +2 extra score. Prime setups (buying the dip in an uptrend) get a -1 threshold discount. Same signal, different context = completely different outcome.'
                       },
                       {
-                        icon: '🥇', title: 'Real Market Assets (v10.9)',
-                        desc: 'GBP/USD trades London (11am–5pm Kenya) + NY (8pm–1am Kenya) sessions Mon–Fri. Gold (XAU/USD) at h15 UTC, Silver (XAG/USD) at h16 UTC. All three use real market data with news blackout ±15 min. Synthetics (R_75, 1HZ75V, R_100) run 24/7 outside these windows.'
+                        icon: '📚', title: 'PatternLearner (v11.7)',
+                        desc: 'Every settled trade teaches the bot. Tracks (asset, direction, phase) win rates. After 10 trades per pattern: automatically adjusts thresholds. Below 38% WR → +2 threshold (near-block). Above 70% WR → -2 threshold (star setup discount). No human needed. Bot learns from its own mistakes in real time.'
                       },
                       {
-                        icon: '📡', title: 'Higher Timeframe Trend',
-                        desc: 'The bot checks the 1-hour and 4-hour charts. If both point UP, it favours BUY trades (+2 pts). If both point DOWN, it favours SELL. Never fights the bigger trend.'
+                        icon: '🏦', title: 'Institutional Signals (SMC/ICT)',
+                        desc: 'Fair Value Gaps, Order Blocks, Liquidity Sweeps, Break of Structure, CRT patterns — the signals institutional traders use. Bearish FVG = price fills an imbalance then rejects. Bear Sweep = smart money hunts stops above highs then reverses. BOS = structure confirmed broken. All gated by market phase and signal coherence.'
                       },
                       {
-                        icon: '✅', title: 'Signal Confirmation',
-                        desc: 'A signal must score 11+ points before the bot trades — a strong quality gate across 10+ indicators. Each scan takes ~10 seconds so valid setups are caught quickly.'
+                        icon: '⚡', title: 'Signal Coherence (v11.3)',
+                        desc: '5 independent signal layers tracked: Technical, Box/S&R, Deviation, SMC, Candlestick. If 3+ layers oppose the trade direction, the bot requires +1 extra conviction. A mixed-signal trade (most signals say PUT but CALL is being placed) = coin flip. Coherence gate catches this before it fires.'
                       },
                       {
-                        icon: '💹', title: 'Kelly Criterion',
-                        desc: 'Instead of random stake sizes, the bot uses the mathematically optimal amount based on your real win rate. Bet more when your edge is proven, less when it isn\'t.'
+                        icon: '🤖', title: 'Autonomous Management (v11.8)',
+                        desc: 'The bot manages its own asset roster without human intervention. Every midnight Kenya: checks last 30 trades per asset. WR below 45% → auto-suspend + Telegram alert. WR recovered to 58%+ → auto-reactivate. COT (CFTC institutional positioning) adds weekly contrarian signals for GBP/USD. No code deploy needed.'
                       },
                     ].map(item => (
                       <div key={item.title} style={{ background: '#141620', borderRadius: 10, padding: '1rem 1.25rem' }}>
@@ -221,13 +221,12 @@ export default function Dashboard() {
                   <span style={{ fontSize: 28 }}>{wr >= 54 ? '🚀' : '🎯'}</span>
                   <div>
                     <div style={{ fontWeight: 700, marginBottom: 4 }}>
-                      {wr >= 54 ? 'Strategy proven profitable — 1,814-trade audit: WR 54%→63%, P&L improving' : 'Building calibration data — target 54%+ win rate'}
+                      {wr >= 52 ? `v12.0 Multiplier Engine — ${trades.length} trades · WR ${wr}% · At 52%+ WR multipliers are profitable (+$0.196/trade)` : `Building multiplier calibration data — ${trades.length} trades · WR ${wr}%`}
                     </div>
                     <div style={{ color: '#64748b', fontSize: 13 }}>
-                      Current: <strong style={{ color: wr >= 52 ? '#22c55e' : '#eab308' }}>{wr}%</strong> over {trades.length} trades · Breakeven: ~52.1% (at 92% payout) · Assets: R75, 1HZ75V, R100 (24/7) + GBP/USD (London+NY) + Gold (h15) + Silver (h16).{' '}
-                      {wr >= 54 && trades.length >= 500
-                        ? '✅ Edge confirmed. v10.9: GBP/USD live for data collection + v10.8 sweep gate + Gold cap + 1HZ75V NEUTRAL block.'
-                        : `v10.9 live — GBP/USD forex added. ${trades.length} trades logged so far. Goal: 50+ GBP/USD trades to calibrate forex edge.`}
+                      Instrument: <strong style={{ color: '#6366f1' }}>Multiplier 1:2 RR</strong> · Breakeven: 33% WR (was 54% binary) ·
+                      Assets: R75 × R100 (24/7 synthetic) + GBP/USD (London+NY) + Gold PUT (h15) + Silver (h16){' '}
+                      · Stack: Monthly→Weekly→Daily→4H→1H→15M→5M→1M · PatternLearner: {trades.length} patterns tracked
                     </div>
                   </div>
                 </div>
@@ -245,7 +244,7 @@ export default function Dashboard() {
 
       {/* Footer */}
       <div style={{ textAlign: 'center', padding: '2rem', color: '#2a2d3a', fontSize: 12 }}>
-        Last refreshed {lastRefresh.toLocaleTimeString()} · Data from Supabase · Bot runs 24/7 on Railway
+        Last refreshed {lastRefresh.toLocaleTimeString()} · Data from Supabase · Bot v12.0 runs 24/7 on Railway
       </div>
     </div>
   )
