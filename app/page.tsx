@@ -12,6 +12,7 @@ import ForexLearn from '@/components/ForexLearn'
 import AssetPerformance from '@/components/AssetPerformance'
 import LivePosition from '@/components/LivePosition'
 import PhasePerformance from '@/components/PhasePerformance'
+import PhaseDirectionMatrix from '@/components/PhaseDirectionMatrix'
 
 const NAV = ['Overview', 'Signal Intelligence', 'Patterns & Insights', 'Self-Learning', 'Trade Log', 'Learn']
 
@@ -174,6 +175,7 @@ export default function Dashboard() {
               <>
                 <LiveInsights trades={filtered} />
                 <PhasePerformance trades={filtered} />
+                <PhaseDirectionMatrix trades={filtered} />
                 <AssetPerformance trades={filtered} />
                 <EquityCurve trades={filtered} />
 
