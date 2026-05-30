@@ -11,6 +11,7 @@ import LiveInsights from '@/components/LiveInsights'
 import ForexLearn from '@/components/ForexLearn'
 import AssetPerformance from '@/components/AssetPerformance'
 import LivePosition from '@/components/LivePosition'
+import PhasePerformance from '@/components/PhasePerformance'
 
 const NAV = ['Overview', 'Signal Intelligence', 'Patterns & Insights', 'Self-Learning', 'Trade Log', 'Learn']
 
@@ -172,6 +173,7 @@ export default function Dashboard() {
             {tab === 'Overview' && (
               <>
                 <LiveInsights trades={filtered} />
+                <PhasePerformance trades={filtered} />
                 <AssetPerformance trades={filtered} />
                 <EquityCurve trades={filtered} />
 
