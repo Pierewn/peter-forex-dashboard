@@ -38,18 +38,30 @@ export default function StatsRow({ trades }: Props) {
     ? `${bestSession[0].replace('_', ' ')} ${Math.round(bestSession[1].w / bestSession[1].t * 100)}%`
     : '—'
 
+  // Binary vs multiplier split
+  const binaryTrades     = trades.filter(t => !t.instrument || t.instrument !== 'MULTIPLIER')
+  const multiplierTrades = trades.filter(t => t.instrument === 'MULTIPLIER')
+  const binaryWins       = binaryTrades.filter(t => t.result === 'WIN').length
+  const binaryWr         = binaryTrades.length ? Math.round(binaryWins / binaryTrades.length * 1000) / 10 : 0
+
+  // Recent 20-trade win rate
+  const recent20  = [...trades].reverse().slice(0, 20)
+  const recent20W = recent20.filter(t => t.result === 'WIN').length
+  const recent20Wr = recent20.length ? Math.round(recent20W / recent20.length * 1000) / 10 : 0
+
   const pnlColour = totalPnl >= 0 ? '#22c55e' : '#ef4444'
-  const wrColour  = winRate >= 55  ? '#22c55e' : winRate >= 45 ? '#eab308' : '#ef4444'
+  // Binary breakeven is 52.1% — colour thresholds adjusted
+  const wrColour  = winRate >= 55  ? '#22c55e' : winRate >= 52.1 ? '#86efac' : winRate >= 48 ? '#eab308' : '#ef4444'
 
   const cards = [
-    { label: 'Total Trades',    value: trades.length,             colour: '#6366f1' },
-    { label: 'Win Rate',        value: `${winRate}%`,             colour: wrColour  },
-    { label: 'Wins / Losses',   value: `${wins} / ${losses}`,     colour: '#94a3b8' },
-    { label: 'Total P&L',       value: `$${totalPnl.toFixed(2)}`, colour: pnlColour },
-    { label: 'Balance',         value: `$${lastBal.toFixed(2)}`,  colour: '#e2e8f0' },
-    { label: 'Avg Score',       value: `${avgScore}/32`,          colour: '#a78bfa' },
-    { label: 'Avg Payout',      value: `${avgPayout}%`,           colour: '#38bdf8' },
-    { label: 'Best Session',    value: bestSessionLabel,           colour: '#22c55e' },
+    { label: 'Total Trades',      value: trades.length,                                  colour: '#6366f1' },
+    { label: 'Win Rate',          value: `${winRate}%`,                                  colour: wrColour  },
+    { label: 'Binary Trades',     value: `${binaryTrades.length} · ${binaryWr}% WR`,     colour: binaryWr >= 52.1 ? '#22c55e' : '#eab308' },
+    { label: 'Multiplier Trades', value: multiplierTrades.length > 0 ? `${multiplierTrades.length}` : '—', colour: '#f59e0b' },
+    { label: 'Last 20 Trades WR', value: `${recent20Wr}%`,                               colour: recent20Wr >= 52.1 ? '#22c55e' : '#ef4444' },
+    { label: 'Balance',           value: `$${lastBal.toFixed(2)}`,                        colour: '#e2e8f0' },
+    { label: 'Total P&L',         value: `$${totalPnl.toFixed(2)}`,                       colour: pnlColour },
+    { label: 'Best Session',      value: bestSessionLabel,                                 colour: '#22c55e' },
   ]
 
   return (

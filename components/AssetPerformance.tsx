@@ -6,10 +6,11 @@ interface Props { trades: Trade[] }
 const SYMBOL_LABELS: Record<string, string> = {
   R_75:       'R_75  (V75)',
   R_50:       'R_50  (V50)',
-  JD75:       'JD75  (Jump75)',
+  R_100:      'R_100 (V100)',
   '1HZ75V':   '1HZ75V (V75 1s)',
   frxXAUUSD:  'Gold / USD',
-  frxGBPUSD:  'GBP / USD',
+  frxXAGUSD:  'Silver / USD',
+  frxGBPUSD:  'GBP / USD',  // kept for historical display only
 }
 
 function wr(ts: Trade[]) {
@@ -96,11 +97,14 @@ export default function AssetPerformance({ trades }: Props) {
                 const wins  = ts.filter(t => t.result === 'WIN').length
                 const avgSt = ts.reduce((s, t) => s + (t.stake ?? 0), 0) / ts.length
                 const status =
-                  sym === 'R_75'     ? '✅ Active'
-                  : sym === '1HZ75V' ? '🔥 Re-enabled v9.2'
-                  : sym === 'JD75'   ? '🚫 Suspended'
-                  : sym === 'R_50'   ? '⚠️ Excluded'
-                  : sym === 'frxXAUUSD' ? '⏱ h15–16 UTC only'
+                  sym === 'R_75'        ? '✅ Active'
+                  : sym === 'R_100'     ? '✅ Active — top performer'
+                  : sym === '1HZ75V'    ? '✅ Active (V75 1s)'
+                  : sym === 'R_50'      ? '✅ Active'
+                  : sym === 'frxXAUUSD' ? '✅ Active (Gold PUT)'
+                  : sym === 'frxXAGUSD' ? '✅ Active (Silver)'
+                  : sym === 'JD75'      ? '🚫 Suspended'
+                  : sym === 'frxGBPUSD' ? '🚫 Removed (27% WR)'
                   : '—'
                 return (
                   <tr key={sym} style={{ borderTop: '1px solid #2a2d3a' }}>
@@ -205,7 +209,7 @@ export default function AssetPerformance({ trades }: Props) {
             })}
           </div>
           <div style={{ marginTop: '1rem', fontSize: 11, color: '#334155', borderTop: '1px solid #2a2d3a', paddingTop: '0.75rem' }}>
-            Breakeven at 92% payout: <strong style={{ color: '#64748b' }}>52.1% WR</strong>
+            Binary breakeven (92% payout): <strong style={{ color: '#64748b' }}>52.1% WR</strong> · Current overall: <strong style={{ color: '#22c55e' }}>53.7% WR</strong>
           </div>
         </div>
 
