@@ -16,6 +16,7 @@ import PhaseDirectionMatrix from '@/components/PhaseDirectionMatrix'
 import ConfidenceTiers from '@/components/ConfidenceTiers'
 import TrailingStats from '@/components/TrailingStats'
 import MT5Accounts from '@/components/MT5Accounts'
+import PerformanceMetrics from '@/components/PerformanceMetrics'
 
 const NAV = ['Overview', 'Signal Intelligence', 'Patterns & Insights', 'Self-Learning', 'Trade Log', 'Learn']
 
@@ -179,6 +180,7 @@ export default function Dashboard() {
                 <MT5Accounts />
 
                 <LiveInsights trades={filtered} />
+                <PerformanceMetrics />
                 <ConfidenceTiers />
                 <TrailingStats trades={filtered} />
                 <PhasePerformance trades={filtered} />
