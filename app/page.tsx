@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useEffect, useState } from 'react'
 import { fetchTrades, Trade } from '@/lib/supabase'
 import StatsRow from '@/components/StatsRow'
@@ -28,7 +28,7 @@ const SYMBOL_LABELS: Record<string, string> = {
   '1HZ75V':     '1HZ75V (V75 1s)',
   'frxXAUUSD':  'Gold / USD',
   'frxXAGUSD':  'Silver / USD',
-  // GBP/USD removed — suspended (27% WR)
+  // GBP/USD removed â€” suspended (27% WR)
 }
 
 export default function Dashboard() {
@@ -62,7 +62,7 @@ export default function Dashboard() {
     return () => clearInterval(interval)
   }, [])
 
-  // Filter by selected asset symbol — all components receive the filtered slice
+  // Filter by selected asset symbol â€” all components receive the filtered slice
   const filtered = symbol === 'ALL' ? trades : trades.filter(t => (t.symbol ?? 'R_75') === symbol)
 
   const wins   = filtered.filter(t => t.result === 'WIN').length
@@ -80,10 +80,10 @@ export default function Dashboard() {
       <div style={{ background: '#1a1d27', borderBottom: '1px solid #2a2d3a', padding: '0 2rem' }}>
         <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 60 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontSize: 22 }}>🤖</span>
+            <span style={{ fontSize: 22 }}>ðŸ¤–</span>
             <div>
               <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: '-0.02em' }}>Peter's Bot</div>
-              <div style={{ fontSize: 11, color: '#64748b' }}>R75+R100+R50+1HZ75V+Gold · DEMO · v15.5 · Binary (Multiplier premium)</div>
+              <div style={{ fontSize: 11, color: '#64748b' }}>R75+R100+R50+1HZ75V+Gold+BTC+ETH+GBP+EUR · DEMO · v16.1 · Binary+Mult+Accu+Turbo+Vanilla</div>
             </div>
           </div>
 
@@ -104,7 +104,7 @@ export default function Dashboard() {
             {trades.length > 0 && (
               <div style={{ display: 'flex', gap: 16, fontSize: 13 }}>
                 <span style={{ color: '#64748b' }}>
-                  {filtered.length} trades ·{' '}
+                  {filtered.length} trades Â·{' '}
                   <span style={{ color: wr >= 55 ? '#22c55e' : '#ef4444', fontWeight: 700 }}>{wr}% win rate</span>
                 </span>
                 <span style={{ color: '#22c55e', fontWeight: 700 }}>
@@ -117,11 +117,11 @@ export default function Dashboard() {
             )}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#64748b' }}>
               <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', display: 'inline-block', boxShadow: '0 0 6px #22c55e' }} />
-              Live · refreshes every 2 min
+              Live Â· refreshes every 2 min
             </div>
             <button onClick={() => load(true)} disabled={refreshing}
               style={{ background: refreshing ? '#1a1d27' : '#2a2d3a', border: 'none', color: refreshing ? '#6366f1' : '#94a3b8', padding: '6px 14px', borderRadius: 8, fontSize: 12, cursor: refreshing ? 'default' : 'pointer', fontWeight: 600, transition: 'all 0.2s' }}>
-              {refreshing ? '↻ Refreshing...' : '↻ Refresh'}
+              {refreshing ? 'â†» Refreshing...' : 'â†» Refresh'}
             </button>
           </div>
         </div>
@@ -147,7 +147,7 @@ export default function Dashboard() {
 
         {loading && (
           <div style={{ textAlign: 'center', padding: '4rem', color: '#64748b' }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>⏳</div>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>â³</div>
             Loading trade data from Supabase...
           </div>
         )}
@@ -160,15 +160,15 @@ export default function Dashboard() {
 
         {!loading && !error && trades.length === 0 && (
           <div style={{ textAlign: 'center', padding: '4rem', color: '#64748b' }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>📊</div>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>ðŸ“Š</div>
             <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>No trades yet</div>
-            <div style={{ fontSize: 14 }}>The bot needs to place its first trade. Check back soon — it runs 24/7.</div>
+            <div style={{ fontSize: 14 }}>The bot needs to place its first trade. Check back soon â€” it runs 24/7.</div>
           </div>
         )}
 
         {!loading && trades.length > 0 && (
           <>
-            {/* Live multiplier position — shows when trade is open */}
+            {/* Live multiplier position â€” shows when trade is open */}
             <LivePosition />
 
             {/* Stats always visible */}
@@ -176,7 +176,7 @@ export default function Dashboard() {
 
             {tab === 'Overview' && (
               <>
-                {/* MT5 Demo Accounts — shown at top of Overview */}
+                {/* MT5 Demo Accounts â€” shown at top of Overview */}
                 <MT5Accounts />
 
                 <LiveInsights trades={filtered} />
@@ -191,7 +191,7 @@ export default function Dashboard() {
                 {/* Instrument Mode Banner */}
                 <div style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(99,102,241,0.04))', border: '1px solid rgba(99,102,241,0.4)', borderRadius: 12, padding: '1rem 1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 20 }}>🎛️</span>
+                    <span style={{ fontSize: 20 }}>ðŸŽ›ï¸</span>
                     <div>
                       <div style={{ fontSize: 11, color: '#6366f1', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Instrument Mode</div>
                       <div style={{ fontWeight: 800, fontSize: 15, color: '#e2e8f0' }}>Adaptive Binary / Multiplier</div>
@@ -201,17 +201,17 @@ export default function Dashboard() {
                     <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 8, padding: '6px 14px' }}>
                       <div style={{ fontSize: 10, color: '#64748b', fontWeight: 700 }}>DEFAULT</div>
                       <div style={{ fontWeight: 700, color: '#22c55e', fontSize: 13 }}>Binary Options</div>
-                      <div style={{ fontSize: 11, color: '#64748b' }}>53.7% WR · BE 52.1%</div>
+                      <div style={{ fontSize: 11, color: '#64748b' }}>53.7% WR Â· BE 52.1%</div>
                     </div>
                     <div style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 8, padding: '6px 14px' }}>
                       <div style={{ fontSize: 10, color: '#64748b', fontWeight: 700 }}>PREMIUM UPGRADE</div>
                       <div style={{ fontWeight: 700, color: '#f59e0b', fontSize: 13 }}>Multiplier</div>
-                      <div style={{ fontSize: 11, color: '#64748b' }}>TRENDING + ADX≥25 + score 13+</div>
+                      <div style={{ fontSize: 11, color: '#64748b' }}>TRENDING + ADXâ‰¥25 + score 13+</div>
                     </div>
                     <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 8, padding: '6px 14px' }}>
                       <div style={{ fontSize: 10, color: '#64748b', fontWeight: 700 }}>BLOCKED</div>
                       <div style={{ fontWeight: 700, color: '#ef4444', fontSize: 13 }}>CALL+RANGING</div>
-                      <div style={{ fontSize: 11, color: '#64748b' }}>229 trades · 48% WR</div>
+                      <div style={{ fontSize: 11, color: '#64748b' }}>229 trades Â· 48% WR</div>
                     </div>
                     <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 8, padding: '6px 14px' }}>
                       <div style={{ fontSize: 10, color: '#64748b', fontWeight: 700 }}>PUT DOMINANCE</div>
@@ -224,37 +224,37 @@ export default function Dashboard() {
                 {/* Insight box */}
                 <div style={{ background: '#1a1d27', border: '1px solid #2a2d3a', borderRadius: 12, padding: '1.5rem', marginBottom: '1.5rem' }}>
                   <div style={{ fontSize: 11, color: '#64748b', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '1rem' }}>
-                    What The Bot Is Doing — In Plain English
+                    What The Bot Is Doing â€” In Plain English
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem', fontSize: 13 }}>
                     {[
                       {
-                        icon: '🌊', title: 'Full Top-Down Read (v15.5)',
-                        desc: 'Monthly → Weekly → Daily → 4H → 1H → 15M → 5M → 1M. Every timeframe votes before a trade fires. Monthly/Weekly set the macro bias. Daily BOS gives phase. 1H shows institutional zones. 15M confirms structure shift. 5M confirms momentum. 1M executes. 2,271 trades reconciled with Deriv statement.'
+                        icon: 'ðŸŒŠ', title: 'Full Top-Down Read (v16.1)',
+                        desc: 'Monthly â†’ Weekly â†’ Daily â†’ 4H â†’ 1H â†’ 15M â†’ 5M â†’ 1M. Every timeframe votes before a trade fires. Monthly/Weekly set the macro bias. Daily BOS gives phase. 1H shows institutional zones. 15M confirms structure shift. 5M confirms momentum. 1M executes. 2,420 trades reconciled with Deriv statement.'
                       },
                       {
-                        icon: '🎛️', title: 'Adaptive Instrument (v15.5)',
-                        desc: 'Binary options by default (53.7% WR, above 52.1% breakeven = profitable). Upgrades to Multiplier as premium when: TRENDING regime + ADX≥25 + aligned HTF direction + score 13+. The instrument now matches the market condition. Binary EV: +$0.03/trade. Multiplier EV at 52%+ WR: +$0.196/trade.'
+                        icon: 'ðŸŽ›ï¸', title: 'Adaptive Instrument (v16.1)',
+                        desc: 'Binary options by default (53.7% WR, above 52.1% breakeven = profitable). Upgrades to Multiplier as premium when: TRENDING regime + ADXâ‰¥25 + aligned HTF direction + score 13+. The instrument now matches the market condition. Binary EV: +$0.03/trade. Multiplier EV at 52%+ WR: +$0.196/trade.'
                       },
                       {
-                        icon: '🧠', title: 'Market Phase Intelligence (v15.0)',
-                        desc: '7-phase market classifier: PULLBACK_BULL, MARKUP, DISTRIBUTION, PULLBACK_BEAR, MARKDOWN, ACCUMULATION, RANGING. CALL+RANGING is now permanently blocked (was 229 trades at 48% WR — biggest losing pattern). Top phases: DISTRIBUTION PUT (85% WR), PULLBACK_BEAR PUT (72% WR).'
+                        icon: 'ðŸ§ ', title: 'Market Phase Intelligence (v16.1)',
+                        desc: '7-phase market classifier: PULLBACK_BULL, MARKUP, DISTRIBUTION, PULLBACK_BEAR, MARKDOWN, ACCUMULATION, RANGING. CALL+RANGING is now permanently blocked (was 229 trades at 48% WR â€” biggest losing pattern). Top phases: DISTRIBUTION PUT (85% WR), PULLBACK_BEAR PUT (72% WR).'
                       },
                       {
-                        icon: '📚', title: 'PatternLearner Recalibrated (v15.3)',
-                        desc: 'Recalibrated for binary 52.1% breakeven. Every settled trade teaches the bot. Below 38% WR → +2 threshold (near-block). Above 70% WR → -2 threshold (star setup discount). Top 5-star patterns: R_100 PUT DISTRIBUTION 85%, R_75 PUT PULLBACK_BEAR 72%, R_50 PUT DISTRIBUTION 77%.'
+                        icon: 'ðŸ“š', title: 'PatternLearner (v16.1)',
+                        desc: 'Recalibrated for binary 52.1% breakeven. Every settled trade teaches the bot. Below 38% WR â†’ +2 threshold (near-block). Above 70% WR â†’ -2 threshold (star setup discount). Top 5-star patterns: R_100 PUT DISTRIBUTION 85%, R_75 PUT PULLBACK_BEAR 72%, R_50 PUT DISTRIBUTION 77%.'
                       },
                       {
-                        icon: '🏦', title: 'Institutional Signals (SMC/ICT)',
+                        icon: 'ðŸ¦', title: 'Institutional Signals (SMC/ICT)',
                         desc: 'Fair Value Gaps, Order Blocks, Liquidity Sweeps, Break of Structure, CRT patterns. Bearish FVG = price fills an imbalance then rejects. Bear Sweep = smart money hunts stops above highs then reverses. BOS = structure confirmed broken. All gated by market phase and signal coherence.'
                       },
                       {
-                        icon: '🚫', title: 'Blocked & Suspended (v15.5)',
-                        desc: 'GBP/USD permanently removed (27% WR). JD75 suspended. CALL+RANGING blocked — was the single biggest losing pattern at 229 trades and 48% WR. Active assets: R_75, 1HZ75V, R_100, R_50, Gold, Silver. PUT direction dominates: 54.3% WR vs CALL 47.9%.'
+                        icon: 'ðŸš«', title: 'Assets & Coverage (v16.1)',
+                        desc: 'v16.1: 7 instruments, every market condition covered. Synthetics (R_75, 1HZ75V, R_100, R_50) 24/7. Gold h15, Silver h16. GBP/USD + EUR/USD via multiplier (London+NY). BTC/ETH crypto overnight. Accumulator for ranging. Turbo for strong trends. Vanilla for weekly plays. JD75 suspended (-EV).'
                       },
                       {
-                        icon: '🐛', title: 'Critical Bug Fixed (v15.5)',
-                        desc: 'WIN/LOSS Telegram logging was silenced due to a _learn_line unbound variable bug. Trades were winning but PatternLearner was not receiving feedback — thresholds were stale. Now fixed: every settled trade correctly feeds the learning loop and updates confidence tiers in real time.'
+                        icon: 'ðŸ›', title: 'Bug-Free & Verified (v16.1)',
+                        desc: 'v16.1 sweep: 6 bugs fixed including critical take_profit=0 bug (would have closed all winning multipliers at break-even), trailing SL ratchet logic corrected (now fires every $0.35 extension), Sharpe/Sortino/Drawdown on dashboard, Kelly uses correct breakeven per instrument.'
                       },
                     ].map(item => (
                       <div key={item.title} style={{ background: '#141620', borderRadius: 10, padding: '1rem 1.25rem' }}>
@@ -268,19 +268,19 @@ export default function Dashboard() {
 
                 {/* Status box */}
                 <div style={{ background: wr >= 52.1 ? 'rgba(34,197,94,0.08)' : 'rgba(99,102,241,0.08)', border: `1px solid ${wr >= 52.1 ? 'rgba(34,197,94,0.25)' : 'rgba(99,102,241,0.25)'}`, borderRadius: 12, padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', gap: 16 }}>
-                  <span style={{ fontSize: 28 }}>{wr >= 52.1 ? '🚀' : '🎯'}</span>
+                  <span style={{ fontSize: 28 }}>{wr >= 52.1 ? 'ðŸš€' : 'ðŸŽ¯'}</span>
                   <div>
                     <div style={{ fontWeight: 700, marginBottom: 4 }}>
                       {wr >= 52.1
-                        ? `v15.5 Adaptive Binary Engine — ${trades.length} trades · WR ${wr}% · Above 52.1% BE = profitable on binary (+EV)`
-                        : `Below binary breakeven — ${trades.length} trades · WR ${wr}% · BE is 52.1% for binary`}
+                        ? `v16.1 Five-Instrument Engine â€” ${trades.length} trades Â· WR ${wr}% Â· Above 52.1% BE = profitable on binary (+EV)`
+                        : `Below binary breakeven â€” ${trades.length} trades Â· WR ${wr}% Â· BE is 52.1% for binary`}
                     </div>
                     <div style={{ color: '#64748b', fontSize: 13 }}>
-                      Default: <strong style={{ color: '#22c55e' }}>Binary Options</strong> (53.7% WR · BE 52.1%) ·
-                      Premium: <strong style={{ color: '#f59e0b' }}>Multiplier</strong> when TRENDING+ADX≥25+score 13+ ·
-                      Assets: R_75 · 1HZ75V · R_100 · R_50 · Gold · Silver ·
-                      Blocked: CALL+RANGING · GBP/USD removed (27% WR) · JD75 suspended ·
-                      Stack: Monthly→Daily→4H→1H→15M→5M→1M
+                      Default: <strong style={{ color: '#22c55e' }}>Binary Options</strong> (53.7% WR Â· BE 52.1%) Â·
+                      Premium: <strong style={{ color: '#f59e0b' }}>Multiplier</strong> when TRENDING+ADXâ‰¥25+score 13+ Â·
+                      Assets: R_75 Â· 1HZ75V Â· R_100 Â· R_50 Â· Gold Â· Silver Â·
+                      Blocked: CALL+RANGING Â· GBP/USD removed (27% WR) Â· JD75 suspended Â·
+                      Stack: Monthlyâ†’Dailyâ†’4Hâ†’1Hâ†’15Mâ†’5Mâ†’1M
                     </div>
                   </div>
                 </div>
@@ -298,8 +298,9 @@ export default function Dashboard() {
 
       {/* Footer */}
       <div style={{ textAlign: 'center', padding: '2rem', color: '#2a2d3a', fontSize: 12 }}>
-        Last refreshed {lastRefresh.toLocaleTimeString()} · Data from Supabase · Bot v15.5 runs 24/7 on Railway
+        Last refreshed {lastRefresh.toLocaleTimeString()} Â· Data from Supabase Â· Bot v16.1 runs 24/7 on Railway
       </div>
     </div>
   )
 }
+
