@@ -14,13 +14,19 @@ interface MetricCard {
 export default function HeroMetrics({ trades }: Props) {
   if (!trades.length) return null
 
-  const wins   = trades.filter(t => t.result === 'WIN').length
-  const losses = trades.filter(t => t.result === 'LOSS').length
-  const wr     = trades.length ? Math.round(wins / trades.length * 1000) / 10 : 0
+  // Filter to post-$3-cap era (May 2026+) for accurate current-strategy metrics
+  // Pre-cap era had Kelly stakes of $50-200 which skew drawdown and Sharpe badly
+  const POST_CAP = '2026-05-01'
+  const current = trades.filter(t => (t.ts ?? '') >= POST_CAP)
+  const base    = current.length >= 20 ? current : trades  // fallback to all if not enough data
+
+  const wins   = base.filter(t => t.result === 'WIN').length
+  const losses = base.filter(t => t.result === 'LOSS').length
+  const wr     = base.length ? Math.round(wins / base.length * 1000) / 10 : 0
 
   const lastBal = [...trades].reverse().find(t => t.balance != null)?.balance ?? 0
 
-  const pnls = trades.filter(t => t.result === 'WIN' || t.result === 'LOSS').map(t => t.pnl || 0)
+  const pnls = base.filter(t => t.result === 'WIN' || t.result === 'LOSS').map(t => t.pnl || 0)
   const avgReturn = pnls.length ? pnls.reduce((a, b) => a + b, 0) / pnls.length : 0
   const variance  = pnls.reduce((a, b) => a + (b - avgReturn) ** 2, 0) / Math.max(pnls.length, 1)
   const stdDev    = Math.sqrt(variance)
@@ -34,10 +40,11 @@ export default function HeroMetrics({ trades }: Props) {
     if (dd > maxDD) maxDD = dd
   }
 
-  // Current win streak
+  // Current win streak (from most recent trades)
   let streak = 0
-  for (let i = trades.length - 1; i >= 0; i--) {
-    if (trades[i].result === 'WIN') streak++
+  const recentSettled = [...trades].reverse().filter(t => t.result === 'WIN' || t.result === 'LOSS')
+  for (const t of recentSettled) {
+    if (t.result === 'WIN') streak++
     else break
   }
 
@@ -65,7 +72,7 @@ export default function HeroMetrics({ trades }: Props) {
     {
       label: 'WIN RATE',
       value: `${wr}%`,
-      sub: `${wins}W / ${losses}L · BE 52.1%`,
+      sub: `${wins}W / ${losses}L · May 2026+`,
       color: wrColor,
       borderColor: wr >= 52.1 ? 'rgba(0,212,170,0.2)' : 'rgba(239,68,68,0.2)',
     },
