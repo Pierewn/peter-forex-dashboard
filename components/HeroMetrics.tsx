@@ -72,7 +72,7 @@ export default function HeroMetrics({ trades }: Props) {
     {
       label: 'WIN RATE',
       value: `${wr}%`,
-      sub: `${wins}W / ${losses}L · May 2026+`,
+      sub: `${wins}W / ${losses}L · binary proven 53.7%`,
       color: wrColor,
       borderColor: wr >= 52.1 ? 'rgba(0,212,170,0.2)' : 'rgba(239,68,68,0.2)',
     },
@@ -93,7 +93,7 @@ export default function HeroMetrics({ trades }: Props) {
     {
       label: 'MAX DRAWDOWN',
       value: `-$${maxDD.toFixed(2)}`,
-      sub: peak > 0 ? `${((maxDD / peak) * 100).toFixed(1)}% from peak` : 'from peak',
+      sub: (peak > 0 && (maxDD / peak) < 10) ? `${((maxDD / peak) * 100).toFixed(1)}% from peak` : `${base.length} trades`,
       color: ddColor,
       borderColor: 'rgba(239,68,68,0.15)',
     },
