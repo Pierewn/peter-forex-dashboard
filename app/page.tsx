@@ -227,7 +227,7 @@ export default function Dashboard() {
                     What The Bot Is Doing — In Plain English
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem', fontSize: 13 }}>
-                    [
+                    {[
                       {
                         icon: '🌊', title: 'Full Top-Down Read (v15.5)',
                         desc: 'Monthly → Weekly → Daily → 4H → 1H → 15M → 5M → 1M. Every timeframe votes before a trade fires. Monthly/Weekly set the macro bias. Daily BOS gives phase. 1H shows institutional zones. 15M confirms structure shift. 5M confirms momentum. 1M executes. 2,271 trades reconciled with Deriv statement.'
