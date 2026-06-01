@@ -101,13 +101,20 @@ export default function PerformanceMetrics() {
   const [m, setM] = useState<Partial<Metrics>>({})
   const [loading, setLoading] = useState(true)
 
+  const [mode, setMode] = useState<'90d'|'all'>('90d')
+
   useEffect(() => {
     async function load() {
+      // Default: post-$3-cap era (May 2026+) — excludes old Kelly $50-200 stake disasters
+      // 'all' mode shows full history including early escalation losses
+      const cutoff = mode === '90d' ? '2026-05-01' : '2020-01-01'
       const { data } = await supabase
         .from('trades')
         .select('result,pnl,ts')
         .in('result', ['WIN','LOSS'])
+        .gte('ts', cutoff)
         .order('id', { ascending: true })
+        .limit(5000)
       if (data) setM(calcMetrics(data))
       setLoading(false)
     }
@@ -122,9 +129,25 @@ export default function PerformanceMetrics() {
 
   return (
     <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-      <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-4">
-        Risk-Adjusted Performance
-      </h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider">
+          Risk-Adjusted Performance
+        </h3>
+        <div className="flex gap-1 text-xs">
+          <button
+            onClick={() => setMode('90d')}
+            className={`px-2 py-0.5 rounded ${mode==='90d' ? 'bg-indigo-600 text-white' : 'text-white/30 hover:text-white/60'}`}
+          >
+            Since May 2026
+          </button>
+          <button
+            onClick={() => setMode('all')}
+            className={`px-2 py-0.5 rounded ${mode==='all' ? 'bg-indigo-600 text-white' : 'text-white/30 hover:text-white/60'}`}
+          >
+            All Time
+          </button>
+        </div>
+      </div>
 
       <div className="grid grid-cols-4 sm:grid-cols-8 gap-4">
         <Stat
