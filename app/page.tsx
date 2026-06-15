@@ -116,7 +116,7 @@ export default function Dashboard() {
                 PETERBOT
               </span>
               <span className="ml-2 text-xs font-mono" style={{ color: '#64748B' }}>
-                v16.7
+                v16.9
               </span>
             </div>
             <span
@@ -236,7 +236,7 @@ export default function Dashboard() {
           <div className="flex flex-col items-center justify-center py-24 gap-4">
             <div className="text-3xl font-mono font-bold" style={{ color: '#64748B' }}>—</div>
             <div className="text-lg font-semibold" style={{ color: '#94A3B8' }}>No trades yet</div>
-            <div className="text-sm" style={{ color: '#64748B' }}>Bot v16.7 runs 24/7 on Railway. First trade incoming.</div>
+            <div className="text-sm" style={{ color: '#64748B' }}>Bot v16.9 runs 24/7 on Railway. First trade incoming.</div>
           </div>
         )}
 
@@ -282,7 +282,7 @@ export default function Dashboard() {
                   }}
                 >
                   <div className="text-xs font-bold tracking-widest mb-4" style={{ color: '#64748B' }}>
-                    INSTRUMENT MODE — v16.7 ADAPTIVE ENGINE
+                    INSTRUMENT MODE — v16.9 ADAPTIVE ENGINE
                   </div>
                   <div className="flex flex-wrap gap-3">
                     {[
@@ -349,7 +349,7 @@ export default function Dashboard() {
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                     {[
                       {
-                        title: 'Full Top-Down Read (v16.7)',
+                        title: 'Full Top-Down Read (v16.9)',
                         desc: 'Monthly→Weekly→Daily→4H→1H→15M→5M→1M. Every timeframe votes before a trade fires. Monthly/Weekly set macro bias. Daily BOS gives phase. 1H shows institutional zones. 5M confirms momentum. 1M executes. 2,420 trades reconciled with Deriv statement.',
                         color: '#818CF8',
                       },
@@ -374,7 +374,7 @@ export default function Dashboard() {
                         color: '#E879F9',
                       },
                       {
-                        title: 'Asset Coverage (v16.7)',
+                        title: 'Asset Coverage (v16.9)',
                         desc: 'Synthetics (R_75, 1HZ75V, R_100, R_50) 24/7. Gold h15, Silver h16. BTC/ETH crypto overnight. Accumulator ranging. Turbo strong trends. Vanilla weekly. JD75 suspended (-EV). GBP/USD removed 27% WR.',
                         color: '#34D399',
                       },
@@ -410,7 +410,7 @@ export default function Dashboard() {
                   <div>
                     <div className="text-sm font-bold mb-1" style={{ color: '#F1F5F9' }}>
                       {wr >= 52.1
-                        ? `v16.7 Five-Instrument Engine — ${trades.length} trades · WR ${wr}% · Above 52.1% BE = +EV`
+                        ? `v16.9 Five-Instrument Engine — ${trades.length} trades · WR ${wr}% · Above 52.1% BE = +EV`
                         : `Below binary breakeven — ${trades.length} trades · WR ${wr}% · BE is 52.1%`}
                     </div>
                     <div className="text-xs" style={{ color: '#64748B' }}>
@@ -438,7 +438,7 @@ export default function Dashboard() {
         className="text-center py-5 text-xs font-mono"
         style={{ borderTop: '1px solid rgba(255,255,255,0.04)', color: '#334155' }}
       >
-        Last refresh {lastRefresh.toLocaleTimeString()} · Supabase · Railway · PeterBot v16.7 · {new Date().toISOString().slice(0, 10)}
+        Last refresh {lastRefresh.toLocaleTimeString()} · Supabase · Railway · PeterBot v16.9 · {new Date().toISOString().slice(0, 10)}
       </div>
     </div>
   )
