@@ -12,6 +12,7 @@ const VERSION_MILESTONES: Record<string, string> = {
   'v12.0': '2025-09-01',
   'v15.0': '2026-01-01',
   'v16.0': '2026-04-01',
+  'v17.0': '2026-06-18',
 }
 
 const CustomTooltip = ({ active, payload }: any) => {

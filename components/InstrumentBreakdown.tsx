@@ -127,7 +127,7 @@ export default function InstrumentBreakdown({ trades }: Props) {
       <div className="mt-4 pt-3 flex gap-4 text-xs" style={{ borderTop: '1px solid rgba(255,255,255,0.04)', color: '#64748B' }}>
         <span>Binary BE: 52.1%</span>
         <span>Multiplier BE: 33.3%</span>
-        <span>v16.9 engine · 7 instruments</span>
+        <span>v17.0 engine · 4 instruments live</span>
       </div>
     </div>
   )
