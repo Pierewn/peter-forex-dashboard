@@ -34,6 +34,8 @@ const SYMBOL_LABELS: Record<string, string> = {
   frxXAGUSD:  'Silver',
 }
 
+const FRESH_START = '2026-06-18'  // v17.0 clean slate deployment
+
 export default function Dashboard() {
   const [trades, setTrades]           = useState<Trade[]>([])
   const [loading, setLoading]         = useState(true)
@@ -42,6 +44,7 @@ export default function Dashboard() {
   const [symbol, setSymbol]           = useState('ALL')
   const [lastRefresh, setLastRefresh] = useState(new Date())
   const [refreshing, setRefreshing]   = useState(false)
+  const [freshOnly, setFreshOnly]     = useState(true)
 
   const load = async (manual = false) => {
     if (manual) setRefreshing(true)
@@ -64,7 +67,10 @@ export default function Dashboard() {
     return () => clearInterval(interval)
   }, [])
 
-  const filtered = symbol === 'ALL' ? trades : trades.filter(t => (t.symbol ?? 'R_75') === symbol)
+  // Fresh start filter — default ON (v17.0 era only), toggle for full history
+  const displayTrades = freshOnly ? trades.filter(t => (t.ts ?? '') >= FRESH_START) : trades
+
+  const filtered = symbol === 'ALL' ? displayTrades : displayTrades.filter(t => (t.symbol ?? 'R_75') === symbol)
 
   const wins   = filtered.filter(t => t.result === 'WIN').length
   const losses = filtered.filter(t => t.result === 'LOSS').length
@@ -73,13 +79,13 @@ export default function Dashboard() {
   const lastBal = [...trades].reverse().find(t => t.balance != null)?.balance ?? 0
 
   const today      = new Date().toISOString().slice(0, 10)
-  const todayPnl   = trades.filter(t => t.ts?.slice(0, 10) === today).reduce((s, t) => s + (t.pnl || 0), 0)
+  const todayPnl   = displayTrades.filter(t => t.ts?.slice(0, 10) === today).reduce((s, t) => s + (t.pnl || 0), 0)
   const todayColor = todayPnl >= 0 ? '#00D4AA' : '#EF4444'
 
-  const seenSymbols    = Array.from(new Set(trades.map(t => t.symbol ?? 'R_75')))
+  const seenSymbols    = Array.from(new Set(displayTrades.map(t => t.symbol ?? 'R_75')))
   const symbolOptions  = ['ALL', ...seenSymbols]
 
-  const isActive = trades.length > 0
+  const isActive = displayTrades.length > 0
 
   return (
     <div className="min-h-screen" style={{ background: '#060B14', color: '#F1F5F9' }}>
@@ -125,6 +131,19 @@ export default function Dashboard() {
             >
               DEMO
             </span>
+            <button
+              onClick={() => setFreshOnly(f => !f)}
+              className="text-xs px-2 py-0.5 rounded font-bold tracking-wider"
+              style={{
+                background: freshOnly ? 'rgba(0,212,170,0.12)' : 'rgba(100,116,139,0.15)',
+                color: freshOnly ? '#00D4AA' : '#64748B',
+                border: `1px solid ${freshOnly ? 'rgba(0,212,170,0.3)' : 'rgba(100,116,139,0.2)'}`,
+                cursor: 'pointer',
+              }}
+              title={freshOnly ? 'Showing v17.0 era only — click for full history' : 'Showing full history — click for v17.0 era only'}
+            >
+              {freshOnly ? '📍 v17.0 ERA' : '📂 ALL HISTORY'}
+            </button>
           </div>
 
           {/* Center: Key stats */}
