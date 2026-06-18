@@ -15,7 +15,7 @@ export const SUPABASE_CONFIGURED = !!(supabaseUrl && supabaseKey)
 export interface Trade {
   id: number
   ts: string
-  direction: 'CALL' | 'PUT'
+  direction: 'CALL' | 'PUT' | 'BUY' | 'SELL'
   stake: number
   payout: number
   score: number
@@ -29,7 +29,7 @@ export interface Trade {
   tech_score: number
   box_score: number
   dev_score: number
-  result: 'WIN' | 'LOSS' | 'EVEN'
+  result: 'WIN' | 'LOSS' | 'EVEN' | 'OPEN' | 'CANCELLED' | 'UNKNOWN'
   pnl: number
   balance: number
   hour:         number | null

@@ -20,8 +20,9 @@ import ConfidenceTiers from '@/components/ConfidenceTiers'
 import TrailingStats from '@/components/TrailingStats'
 import MT5Accounts from '@/components/MT5Accounts'
 import PerformanceMetrics from '@/components/PerformanceMetrics'
+import AlpacaPanel from '@/components/AlpacaPanel'
 
-const NAV = ['Overview', 'Signal Intelligence', 'Patterns & Insights', 'Self-Learning', 'Trade Log', 'Learn'] as const
+const NAV = ['Overview', 'Signal Intelligence', 'Patterns & Insights', 'Self-Learning', 'Trade Log', 'Learn', 'Alpaca Bot'] as const
 type NavTab = typeof NAV[number]
 
 const SYMBOL_LABELS: Record<string, string> = {
@@ -45,7 +46,7 @@ export default function Dashboard() {
   const [lastRefresh, setLastRefresh] = useState(new Date())
   const [refreshing, setRefreshing]   = useState(false)
   const [freshOnly, setFreshOnly]     = useState(true)
-  const [botFilter, setBotFilter]     = useState<'all' | 'peter' | 'alice'>('all')
+  const [botFilter, setBotFilter]     = useState<'all' | 'peter' | 'alice' | 'peter_alpaca'>('all')
 
   const load = async (manual = false) => {
     if (manual) setRefreshing(true)
@@ -147,23 +148,23 @@ export default function Dashboard() {
             >
               {freshOnly ? '📍 v17.0 ERA' : '📂 ALL HISTORY'}
             </button>
-            {(['all', 'peter', 'alice'] as const).map(b => (
+            {(['all', 'peter', 'alice', 'peter_alpaca'] as const).map(b => (
               <button key={b} onClick={() => setBotFilter(b)}
                 className="text-xs px-2 py-0.5 rounded font-bold tracking-wider"
                 style={{
                   background: botFilter === b
-                    ? b === 'peter' ? 'rgba(99,102,241,0.15)' : b === 'alice' ? 'rgba(168,85,247,0.15)' : 'rgba(100,116,139,0.15)'
+                    ? b === 'peter' ? 'rgba(99,102,241,0.15)' : b === 'alice' ? 'rgba(168,85,247,0.15)' : b === 'peter_alpaca' ? 'rgba(0,212,170,0.12)' : 'rgba(100,116,139,0.15)'
                     : 'rgba(30,35,50,0.5)',
                   color: botFilter === b
-                    ? b === 'peter' ? '#818CF8' : b === 'alice' ? '#C084FC' : '#94A3B8'
+                    ? b === 'peter' ? '#818CF8' : b === 'alice' ? '#C084FC' : b === 'peter_alpaca' ? '#00D4AA' : '#94A3B8'
                     : '#475569',
                   border: `1px solid ${botFilter === b
-                    ? b === 'peter' ? 'rgba(99,102,241,0.35)' : b === 'alice' ? 'rgba(168,85,247,0.35)' : 'rgba(100,116,139,0.25)'
+                    ? b === 'peter' ? 'rgba(99,102,241,0.35)' : b === 'alice' ? 'rgba(168,85,247,0.35)' : b === 'peter_alpaca' ? 'rgba(0,212,170,0.3)' : 'rgba(100,116,139,0.25)'
                     : 'rgba(71,85,105,0.2)'}`,
                   cursor: 'pointer',
                 }}
               >
-                {b === 'all' ? 'BOTH' : b.toUpperCase()}
+                {b === 'all' ? 'BOTH' : b === 'peter_alpaca' ? 'ALPACA' : b.toUpperCase()}
               </button>
             ))}
           </div>
@@ -470,6 +471,7 @@ export default function Dashboard() {
             {tab === 'Self-Learning'         && <SelfLearning trades={filtered} />}
             {tab === 'Trade Log'             && <TradeLog trades={filtered} />}
             {tab === 'Learn'                 && <ForexLearn trades={filtered} />}
+            {tab === 'Alpaca Bot'            && <AlpacaPanel trades={trades} />}
           </>
         )}
       </div>
