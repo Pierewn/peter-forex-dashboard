@@ -45,6 +45,7 @@ export default function Dashboard() {
   const [lastRefresh, setLastRefresh] = useState(new Date())
   const [refreshing, setRefreshing]   = useState(false)
   const [freshOnly, setFreshOnly]     = useState(true)
+  const [botFilter, setBotFilter]     = useState<'all' | 'peter' | 'alice'>('all')
 
   const load = async (manual = false) => {
     if (manual) setRefreshing(true)
@@ -68,7 +69,9 @@ export default function Dashboard() {
   }, [])
 
   // Fresh start filter — default ON (v17.0 era only), toggle for full history
-  const displayTrades = freshOnly ? trades.filter(t => (t.ts ?? '') >= FRESH_START) : trades
+  const eraFiltered = freshOnly ? trades.filter(t => (t.ts ?? '') >= FRESH_START) : trades
+  // Bot filter — Peter / Alice / All
+  const displayTrades = botFilter === 'all' ? eraFiltered : eraFiltered.filter(t => (t.bot ?? 'peter') === botFilter)
 
   const filtered = symbol === 'ALL' ? displayTrades : displayTrades.filter(t => (t.symbol ?? 'R_75') === symbol)
 
@@ -144,6 +147,25 @@ export default function Dashboard() {
             >
               {freshOnly ? '📍 v17.0 ERA' : '📂 ALL HISTORY'}
             </button>
+            {(['all', 'peter', 'alice'] as const).map(b => (
+              <button key={b} onClick={() => setBotFilter(b)}
+                className="text-xs px-2 py-0.5 rounded font-bold tracking-wider"
+                style={{
+                  background: botFilter === b
+                    ? b === 'peter' ? 'rgba(99,102,241,0.15)' : b === 'alice' ? 'rgba(168,85,247,0.15)' : 'rgba(100,116,139,0.15)'
+                    : 'rgba(30,35,50,0.5)',
+                  color: botFilter === b
+                    ? b === 'peter' ? '#818CF8' : b === 'alice' ? '#C084FC' : '#94A3B8'
+                    : '#475569',
+                  border: `1px solid ${botFilter === b
+                    ? b === 'peter' ? 'rgba(99,102,241,0.35)' : b === 'alice' ? 'rgba(168,85,247,0.35)' : 'rgba(100,116,139,0.25)'
+                    : 'rgba(71,85,105,0.2)'}`,
+                  cursor: 'pointer',
+                }}
+              >
+                {b === 'all' ? 'BOTH' : b.toUpperCase()}
+              </button>
+            ))}
           </div>
 
           {/* Center: Key stats */}

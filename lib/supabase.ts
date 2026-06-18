@@ -34,6 +34,7 @@ export interface Trade {
   balance: number
   hour:         number | null
   symbol:       string | null   // R_75 | frxEURUSD | frxGBPUSD
+  bot:          string | null   // 'peter' | 'alice'
   // ── self-optimisation columns (v5.11) ──
   regime:       string | null
   trend_bias:   string | null
