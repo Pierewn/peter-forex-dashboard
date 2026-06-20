@@ -1,6 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { useState } from 'react'
 
 interface Metrics {
   sharpe:        number
@@ -99,33 +98,16 @@ const Stat = ({ label, value, sub, color = '#F1F5F9' }: StatProps) => (
   </div>
 )
 
-export default function PerformanceMetrics() {
-  const [m, setM]       = useState<Partial<Metrics>>({})
-  const [loading, setLoading] = useState(true)
+interface PerformanceMetricsProps {
+  trades: any[]
+}
+
+export default function PerformanceMetrics({ trades }: PerformanceMetricsProps) {
   const [mode, setMode] = useState<'90d' | 'all'>('90d')
 
-  useEffect(() => {
-    async function load() {
-      const cutoff = mode === '90d' ? '2026-05-01' : '2020-01-01'
-      const { data } = await supabase
-        .from('trades')
-        .select('result,pnl,ts')
-        .in('result', ['WIN', 'LOSS'])
-        .gte('ts', cutoff)
-        .order('id', { ascending: true })
-        .limit(5000)
-      if (data) setM(calcMetrics(data))
-      setLoading(false)
-    }
-    load()
-  }, [mode])
-
-  if (loading) return (
-    <div
-      className="rounded-xl h-24 mb-5 animate-pulse"
-      style={{ background: '#0B1120', border: '1px solid rgba(255,255,255,0.06)' }}
-    />
-  )
+  const cutoff = mode === '90d' ? '2026-05-01' : '2020-01-01'
+  const filtered = trades.filter(t => (t.result === 'WIN' || t.result === 'LOSS') && (t.ts ?? '') >= cutoff)
+  const m = calcMetrics(filtered)
 
   const sharpeColor = (m.sharpe ?? 0) > 1 ? '#00D4AA' : (m.sharpe ?? 0) > 0 ? '#F59E0B' : '#EF4444'
   const pfColor     = (m.profitFactor ?? 0) > 1.5 ? '#00D4AA' : (m.profitFactor ?? 0) > 1 ? '#F59E0B' : '#EF4444'
