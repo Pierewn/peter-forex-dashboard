@@ -297,7 +297,7 @@ export default function Dashboard() {
               <>
                 <MT5Accounts />
                 <LiveInsights trades={filtered} />
-                <PerformanceMetrics />
+                <PerformanceMetrics trades={displayTrades} />
 
                 {/* Two-column grid: equity curve + instrument breakdown */}
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-5">
