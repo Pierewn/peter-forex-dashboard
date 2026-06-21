@@ -46,7 +46,7 @@ export default function Dashboard() {
   const [lastRefresh, setLastRefresh] = useState(new Date())
   const [refreshing, setRefreshing]   = useState(false)
   const [freshOnly, setFreshOnly]     = useState(true)
-  const [botFilter, setBotFilter]     = useState<'all' | 'peter' | 'alice' | 'peter_alpaca'>('all')
+  const [botFilter, setBotFilter]     = useState<'all' | 'peter' | 'alice' | 'peter_alpaca' | 'peter_grid' | 'peter_dca'>('all')
 
   const load = async (manual = false) => {
     if (manual) setRefreshing(true)
@@ -148,23 +148,23 @@ export default function Dashboard() {
             >
               {freshOnly ? '📍 v17.0 ERA' : '📂 ALL HISTORY'}
             </button>
-            {(['all', 'peter', 'alice', 'peter_alpaca'] as const).map(b => (
+            {(['all', 'peter', 'alice', 'peter_alpaca', 'peter_grid', 'peter_dca'] as const).map(b => (
               <button key={b} onClick={() => setBotFilter(b)}
                 className="text-xs px-2 py-0.5 rounded font-bold tracking-wider"
                 style={{
                   background: botFilter === b
-                    ? b === 'peter' ? 'rgba(99,102,241,0.15)' : b === 'alice' ? 'rgba(168,85,247,0.15)' : b === 'peter_alpaca' ? 'rgba(0,212,170,0.12)' : 'rgba(100,116,139,0.15)'
+                    ? b === 'peter' ? 'rgba(99,102,241,0.15)' : b === 'alice' ? 'rgba(168,85,247,0.15)' : b === 'peter_alpaca' ? 'rgba(0,212,170,0.12)' : b === 'peter_grid' ? 'rgba(245,158,11,0.15)' : b === 'peter_dca' ? 'rgba(236,72,153,0.15)' : 'rgba(100,116,139,0.15)'
                     : 'rgba(30,35,50,0.5)',
                   color: botFilter === b
-                    ? b === 'peter' ? '#818CF8' : b === 'alice' ? '#C084FC' : b === 'peter_alpaca' ? '#00D4AA' : '#94A3B8'
+                    ? b === 'peter' ? '#818CF8' : b === 'alice' ? '#C084FC' : b === 'peter_alpaca' ? '#00D4AA' : b === 'peter_grid' ? '#F59E0B' : b === 'peter_dca' ? '#EC4899' : '#94A3B8'
                     : '#475569',
                   border: `1px solid ${botFilter === b
-                    ? b === 'peter' ? 'rgba(99,102,241,0.35)' : b === 'alice' ? 'rgba(168,85,247,0.35)' : b === 'peter_alpaca' ? 'rgba(0,212,170,0.3)' : 'rgba(100,116,139,0.25)'
+                    ? b === 'peter' ? 'rgba(99,102,241,0.35)' : b === 'alice' ? 'rgba(168,85,247,0.35)' : b === 'peter_alpaca' ? 'rgba(0,212,170,0.3)' : b === 'peter_grid' ? 'rgba(245,158,11,0.35)' : b === 'peter_dca' ? 'rgba(236,72,153,0.35)' : 'rgba(100,116,139,0.25)'
                     : 'rgba(71,85,105,0.2)'}`,
                   cursor: 'pointer',
                 }}
               >
-                {b === 'all' ? 'BOTH' : b === 'peter_alpaca' ? 'ALPACA' : b.toUpperCase()}
+                {b === 'all' ? 'BOTH' : b === 'peter_alpaca' ? 'ALPACA' : b === 'peter_grid' ? 'GRID' : b === 'peter_dca' ? 'DCA' : b.toUpperCase()}
               </button>
             ))}
           </div>
