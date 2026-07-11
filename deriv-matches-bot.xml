@@ -1,114 +1,140 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xml>
-  <chart>
-    <type>chart</type>
-  </chart>
-  <block type="variables_set" id="1">
-    <field name="VAR">account_balance</field>
+<xml xmlns="http://www.w3.org/1999/xhtml">
+  <variables>
+    <variable id="stake">stake</variable>
+    <variable id="profit_goal">profit_goal</variable>
+    <variable id="daily_profit">daily_profit</variable>
+  </variables>
+  <block type="variables_set" id="init_stake" x="13" y="63">
+    <field name="VAR" id="stake">stake</field>
     <value name="VALUE">
-      <block type="math_number" id="2">
-        <field name="NUM">1000</field>
+      <block type="math_number" id="stake_value">
+        <field name="NUM">1</field>
       </block>
     </value>
     <next>
-      <block type="variables_set" id="3">
-        <field name="VAR">stake_amount</field>
+      <block type="variables_set" id="init_profit_goal">
+        <field name="VAR" id="profit_goal">profit_goal</field>
         <value name="VALUE">
-          <block type="math_arithmetic" id="4">
-            <field name="OP">MULTIPLY</field>
-            <value name="A">
-              <block type="variables_get" id="5">
-                <field name="VAR">account_balance</field>
-              </block>
-            </value>
-            <value name="B">
-              <block type="math_number" id="6">
-                <field name="NUM">0.01</field>
-              </block>
-            </value>
+          <block type="math_number" id="profit_goal_value">
+            <field name="NUM">100</field>
           </block>
         </value>
         <next>
-          <block type="variables_set" id="7">
-            <field name="VAR">profit_target</field>
+          <block type="variables_set" id="init_daily_profit">
+            <field name="VAR" id="daily_profit">daily_profit</field>
             <value name="VALUE">
-              <block type="math_arithmetic" id="8">
-                <field name="OP">MULTIPLY</field>
-                <value name="A">
-                  <block type="variables_get" id="9">
-                    <field name="VAR">stake_amount</field>
-                  </block>
-                </value>
-                <value name="B">
-                  <block type="math_number" id="10">
-                    <field name="NUM">0.5</field>
-                  </block>
-                </value>
+              <block type="math_number" id="daily_profit_value">
+                <field name="NUM">0</field>
               </block>
             </value>
             <next>
-              <block type="variables_set" id="11">
-                <field name="VAR">loss_limit</field>
-                <value name="VALUE">
-                  <block type="math_arithmetic" id="12">
-                    <field name="OP">MULTIPLY</field>
-                    <value name="A">
-                      <block type="variables_get" id="13">
-                        <field name="VAR">stake_amount</field>
-                      </block>
-                    </value>
-                    <value name="B">
-                      <block type="math_number" id="14">
-                        <field name="NUM">0.5</field>
-                      </block>
-                    </value>
-                  </block>
+              <block type="controls_repeat_ext" id="main_loop">
+                <value name="TIMES">
+                  <shadow type="math_number" id="loop_times">
+                    <field name="NUM">1000</field>
+                  </shadow>
                 </value>
-                <next>
-                  <block type="controls_repeat_ext" id="15">
-                    <value name="TIMES">
-                      <block type="math_number" id="16">
-                        <field name="NUM">100</field>
+                <statement name="DO">
+                  <block type="trade" id="trade_even_odd">
+                    <field name="TRADETYPE">match_diff</field>
+                    <field name="SYMBOL">R_25</field>
+                    <field name="DURATION">1</field>
+                    <field name="DURATION_UNIT">t</field>
+                    <value name="STAKE">
+                      <block type="variables_get" id="get_stake">
+                        <field name="VAR">stake</field>
                       </block>
                     </value>
-                    <statement name="DO">
-                      <block type="trade_matches" id="17">
-                        <field name="SYMBOL">frxEURUSD</field>
-                        <field name="PREDICTION">rise</field>
-                        <field name="DURATION">1</field>
-                        <field name="DURATION_TYPE">m</field>
-                        <value name="STAKE">
-                          <block type="variables_get" id="18">
-                            <field name="VAR">stake_amount</field>
+                    <value name="PREDICTION">
+                      <shadow type="text" id="pred_even">
+                        <field name="TEXT">even</field>
+                      </shadow>
+                    </value>
+                    <next>
+                      <block type="logic_if" id="check_win">
+                        <value name="IF">
+                          <block type="logic_compare" id="is_win">
+                            <field name="OP">EQ</field>
+                            <value name="A">
+                              <block type="trade_result" id="trade_is_win">
+                                <field name="RESULT">is_win</field>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="logic_boolean" id="true_val">
+                                <field name="BOOL">TRUE</field>
+                              </block>
+                            </value>
                           </block>
                         </value>
-                        <next>
-                          <block type="logic_if" id="19">
-                            <value name="IF">
-                              <block type="logic_compare" id="20">
-                                <field name="OP">GT</field>
+                        <statement name="DO0">
+                          <block type="variables_set" id="add_profit">
+                            <field name="VAR">daily_profit</field>
+                            <value name="VALUE">
+                              <block type="math_arithmetic" id="calc_add_profit">
+                                <field name="OP">ADD</field>
                                 <value name="A">
-                                  <block type="trade_result" id="21">
-                                    <field name="RESULT">payout</field>
+                                  <block type="variables_get" id="get_profit_1">
+                                    <field name="VAR">daily_profit</field>
                                   </block>
                                 </value>
                                 <value name="B">
-                                  <block type="variables_get" id="22">
-                                    <field name="VAR">profit_target</field>
+                                  <shadow type="math_number" id="win_amount">
+                                    <field name="NUM">8</field>
+                                  </shadow>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </statement>
+                        <statement name="DO1">
+                          <block type="variables_set" id="subtract_loss">
+                            <field name="VAR">daily_profit</field>
+                            <value name="VALUE">
+                              <block type="math_arithmetic" id="calc_sub_profit">
+                                <field name="OP">MINUS</field>
+                                <value name="A">
+                                  <block type="variables_get" id="get_profit_2">
+                                    <field name="VAR">daily_profit</field>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <shadow type="math_number" id="loss_amount">
+                                    <field name="NUM">1</field>
+                                  </shadow>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </statement>
+                        <next>
+                          <block type="logic_if" id="check_goal">
+                            <value name="IF">
+                              <block type="logic_compare" id="goal_reached">
+                                <field name="OP">GTE</field>
+                                <value name="A">
+                                  <block type="variables_get" id="get_daily_profit">
+                                    <field name="VAR">daily_profit</field>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="variables_get" id="get_profit_goal">
+                                    <field name="VAR">profit_goal</field>
                                   </block>
                                 </value>
                               </block>
                             </value>
                             <statement name="DO0">
-                              <block type="trade_stop" id="23">
+                              <block type="bot_stop" id="stop_on_goal">
                               </block>
                             </statement>
                           </block>
                         </next>
                       </block>
-                    </statement>
+                    </next>
                   </block>
-                </next>
+                </statement>
               </block>
             </next>
           </block>
@@ -116,16 +142,4 @@
       </block>
     </next>
   </block>
-  <variables>
-    <variable id="account_balance_id">account_balance</variable>
-    <variable id="stake_amount_id">stake_amount</variable>
-    <variable id="profit_target_id">profit_target</variable>
-    <variable id="loss_limit_id">loss_limit</variable>
-  </variables>
-  <metadata>
-    <name>Deriv Matches Bot - Conservative Strategy</name>
-    <description>Conservative Matches trading bot for EUR/USD with 1-2% risk per trade</description>
-    <created>2026-07-11</created>
-    <author>Peter Forex Dashboard</author>
-  </metadata>
 </xml>
