@@ -4,153 +4,100 @@
     "blocks": [
       {
         "type": "variables_set",
-        "id": "init_balance",
+        "id": "set_stake",
         "x": 13,
         "y": 63,
         "fields": {
-          "VAR": "account_balance"
+          "VAR": "stake"
         },
         "inputs": {
           "VALUE": {
             "shadow": {
               "type": "math_number",
-              "id": "init_balance_value",
+              "id": "stake_value",
               "fields": {
-                "NUM": 1000
+                "NUM": 1
               }
             }
           }
         },
         "next": {
-          "block": "init_stake"
+          "block": "set_profit_goal"
         }
       },
       {
         "type": "variables_set",
-        "id": "init_stake",
+        "id": "set_profit_goal",
         "fields": {
-          "VAR": "stake_amount"
+          "VAR": "profit_goal"
         },
         "inputs": {
           "VALUE": {
-            "block": {
-              "type": "math_arithmetic",
-              "id": "calc_stake",
+            "shadow": {
+              "type": "math_number",
+              "id": "profit_goal_value",
               "fields": {
-                "OP": "MULTIPLY"
-              },
-              "inputs": {
-                "A": {
-                  "shadow": {
-                    "type": "variables_get",
-                    "fields": {
-                      "VAR": "account_balance"
-                    }
-                  }
-                },
-                "B": {
-                  "shadow": {
-                    "type": "math_number",
-                    "fields": {
-                      "NUM": 0.01
-                    }
-                  }
-                }
+                "NUM": 100
               }
             }
           }
         },
         "next": {
-          "block": "init_profit_target"
+          "block": "set_daily_profit"
         }
       },
       {
         "type": "variables_set",
-        "id": "init_profit_target",
+        "id": "set_daily_profit",
         "fields": {
-          "VAR": "profit_target"
+          "VAR": "daily_profit"
         },
         "inputs": {
           "VALUE": {
-            "block": {
-              "type": "math_arithmetic",
-              "id": "calc_profit",
+            "shadow": {
+              "type": "math_number",
+              "id": "daily_profit_value",
               "fields": {
-                "OP": "MULTIPLY"
-              },
-              "inputs": {
-                "A": {
-                  "shadow": {
-                    "type": "variables_get",
-                    "fields": {
-                      "VAR": "stake_amount"
-                    }
-                  }
-                },
-                "B": {
-                  "shadow": {
-                    "type": "math_number",
-                    "fields": {
-                      "NUM": 0.5
-                    }
-                  }
-                }
+                "NUM": 0
               }
             }
           }
         },
         "next": {
-          "block": "init_loss_limit"
+          "block": "set_last_result"
         }
       },
       {
         "type": "variables_set",
-        "id": "init_loss_limit",
+        "id": "set_last_result",
         "fields": {
-          "VAR": "loss_limit"
+          "VAR": "last_result"
         },
         "inputs": {
           "VALUE": {
-            "block": {
-              "type": "math_arithmetic",
-              "id": "calc_loss",
+            "shadow": {
+              "type": "text",
+              "id": "last_result_value",
               "fields": {
-                "OP": "MULTIPLY"
-              },
-              "inputs": {
-                "A": {
-                  "shadow": {
-                    "type": "variables_get",
-                    "fields": {
-                      "VAR": "stake_amount"
-                    }
-                  }
-                },
-                "B": {
-                  "shadow": {
-                    "type": "math_number",
-                    "fields": {
-                      "NUM": 0.5
-                    }
-                  }
-                }
+                "TEXT": "even"
               }
             }
           }
         },
         "next": {
-          "block": "main_loop"
+          "block": "main_trading_loop"
         }
       },
       {
         "type": "controls_repeat_ext",
-        "id": "main_loop",
+        "id": "main_trading_loop",
         "inputs": {
           "TIMES": {
             "shadow": {
               "type": "math_number",
+              "id": "loop_count",
               "fields": {
-                "NUM": 100
+                "NUM": 1000
               }
             }
           }
@@ -159,113 +106,64 @@
           "DO": [
             {
               "type": "trade",
-              "id": "trade_eur",
+              "id": "trade_even_odd",
               "fields": {
                 "TRADETYPE": "match_diff",
-                "SYMBOL": "frxEURUSD",
-                "DURATION": 5,
-                "DURATION_UNIT": "m"
+                "SYMBOL": "R_25",
+                "DURATION": 1,
+                "DURATION_UNIT": "t"
               },
               "inputs": {
                 "STAKE": {
                   "shadow": {
                     "type": "variables_get",
+                    "id": "get_stake_1",
                     "fields": {
-                      "VAR": "stake_amount"
+                      "VAR": "stake"
                     }
                   }
                 },
                 "PREDICTION": {
                   "shadow": {
                     "type": "text",
+                    "id": "pred_even",
                     "fields": {
-                      "TEXT": "rise"
+                      "TEXT": "even"
                     }
                   }
                 }
-              }
-            },
-            {
-              "type": "trade",
-              "id": "trade_gbp",
-              "fields": {
-                "TRADETYPE": "match_diff",
-                "SYMBOL": "frxGBPUSD",
-                "DURATION": 3,
-                "DURATION_UNIT": "m"
               },
-              "inputs": {
-                "STAKE": {
-                  "shadow": {
-                    "type": "variables_get",
-                    "fields": {
-                      "VAR": "stake_amount"
-                    }
-                  }
-                },
-                "PREDICTION": {
-                  "shadow": {
-                    "type": "text",
-                    "fields": {
-                      "TEXT": "fall"
-                    }
-                  }
-                }
-              }
-            },
-            {
-              "type": "trade",
-              "id": "trade_btc",
-              "fields": {
-                "TRADETYPE": "match_diff",
-                "SYMBOL": "cryBTCUSD",
-                "DURATION": 5,
-                "DURATION_UNIT": "m"
-              },
-              "inputs": {
-                "STAKE": {
-                  "shadow": {
-                    "type": "variables_get",
-                    "fields": {
-                      "VAR": "stake_amount"
-                    }
-                  }
-                },
-                "PREDICTION": {
-                  "shadow": {
-                    "type": "text",
-                    "fields": {
-                      "TEXT": "rise"
-                    }
-                  }
-                }
+              "next": {
+                "block": "check_win"
               }
             },
             {
               "type": "logic_if",
-              "id": "check_profit",
+              "id": "check_win",
               "inputs": {
                 "IF": {
                   "block": {
                     "type": "logic_compare",
-                    "id": "compare_profit",
+                    "id": "is_win",
                     "fields": {
-                      "OP": "GTE"
+                      "OP": "EQ"
                     },
                     "inputs": {
                       "A": {
                         "shadow": {
                           "type": "trade_result",
+                          "id": "check_result",
                           "fields": {
-                            "RESULT": "total_profit"
+                            "RESULT": "is_win"
                           }
                         }
                       },
                       "B": {
                         "shadow": {
-                          "type": "variables_get",
+                          "type": "logic_boolean",
+                          "id": "true_value",
                           "fields": {
-                            "VAR": "profit_target"
+                            "BOOL": "TRUE"
                           }
                         }
                       }
@@ -276,58 +174,162 @@
               "statement": {
                 "DO0": [
                   {
-                    "type": "bot_stop",
-                    "id": "stop_on_profit"
-                  }
-                ]
-              }
-            },
-            {
-              "type": "logic_if",
-              "id": "check_loss",
-              "inputs": {
-                "IF": {
-                  "block": {
-                    "type": "logic_compare",
-                    "id": "compare_loss",
+                    "type": "variables_set",
+                    "id": "update_profit_win",
                     "fields": {
-                      "OP": "LTE"
+                      "VAR": "daily_profit"
                     },
                     "inputs": {
-                      "A": {
-                        "shadow": {
-                          "type": "trade_result",
-                          "fields": {
-                            "RESULT": "total_profit"
-                          }
-                        }
-                      },
-                      "B": {
-                        "shadow": {
+                      "VALUE": {
+                        "block": {
                           "type": "math_arithmetic",
+                          "id": "calc_profit_win",
                           "fields": {
-                            "OP": "MINUS"
+                            "OP": "ADD"
                           },
                           "inputs": {
                             "A": {
                               "shadow": {
-                                "type": "math_number",
+                                "type": "variables_get",
+                                "id": "get_profit_1",
                                 "fields": {
-                                  "NUM": 0
+                                  "VAR": "daily_profit"
                                 }
                               }
                             },
                             "B": {
                               "shadow": {
-                                "type": "variables_get",
+                                "type": "math_number",
+                                "id": "win_amount",
                                 "fields": {
-                                  "VAR": "loss_limit"
+                                  "NUM": 8
                                 }
                               }
                             }
                           }
                         }
                       }
+                    },
+                    "next": {
+                      "block": "set_last_win"
+                    }
+                  },
+                  {
+                    "type": "variables_set",
+                    "id": "set_last_win",
+                    "fields": {
+                      "VAR": "last_result"
+                    },
+                    "inputs": {
+                      "VALUE": {
+                        "shadow": {
+                          "type": "text",
+                          "id": "last_result_win",
+                          "fields": {
+                            "TEXT": "win"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              "elseif": [
+                {
+                  "DO0": [
+                    {
+                      "type": "variables_set",
+                      "id": "update_profit_loss",
+                      "fields": {
+                        "VAR": "daily_profit"
+                      },
+                      "inputs": {
+                        "VALUE": {
+                          "block": {
+                            "type": "math_arithmetic",
+                            "id": "calc_profit_loss",
+                            "fields": {
+                              "OP": "MINUS"
+                            },
+                            "inputs": {
+                              "A": {
+                                "shadow": {
+                                  "type": "variables_get",
+                                  "id": "get_profit_2",
+                                  "fields": {
+                                    "VAR": "daily_profit"
+                                  }
+                                }
+                              },
+                              "B": {
+                                "shadow": {
+                                  "type": "math_number",
+                                  "id": "loss_amount",
+                                  "fields": {
+                                    "NUM": 1
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "next": {
+                        "block": "set_last_loss"
+                      }
+                    },
+                    {
+                      "type": "variables_set",
+                      "id": "set_last_loss",
+                      "fields": {
+                        "VAR": "last_result"
+                      },
+                      "inputs": {
+                        "VALUE": {
+                          "shadow": {
+                            "type": "text",
+                            "id": "last_result_loss",
+                            "fields": {
+                              "TEXT": "loss"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "logic_if",
+              "id": "check_profit_goal",
+              "inputs": {
+                "IF": {
+                  "block": {
+                    "type": "logic_compare",
+                    "id": "profit_reached",
+                    "fields": {
+                      "OP": "GTE"
+                    },
+                    "inputs": {
+                      "A": {
+                        "shadow": {
+                          "type": "variables_get",
+                          "id": "get_daily_profit",
+                          "fields": {
+                            "VAR": "daily_profit"
+                          }
+                        }
+                      },
+                      "B": {
+                        "shadow": {
+                          "type": "variables_get",
+                          "id": "get_profit_goal",
+                          "fields": {
+                            "VAR": "profit_goal"
+                          }
+                        }
+                      }
                     }
                   }
                 }
@@ -336,7 +338,7 @@
                 "DO0": [
                   {
                     "type": "bot_stop",
-                    "id": "stop_on_loss"
+                    "id": "stop_bot"
                   }
                 ]
               }
@@ -347,46 +349,55 @@
     ],
     "variables": [
       {
-        "name": "account_balance",
-        "id": "account_balance_var",
+        "name": "stake",
+        "id": "var_stake",
         "type": "Number",
-        "value": 1000
+        "value": 1
       },
       {
-        "name": "stake_amount",
-        "id": "stake_amount_var",
+        "name": "profit_goal",
+        "id": "var_profit_goal",
         "type": "Number",
-        "value": 10
+        "value": 100
       },
       {
-        "name": "profit_target",
-        "id": "profit_target_var",
+        "name": "daily_profit",
+        "id": "var_daily_profit",
         "type": "Number",
-        "value": 5
+        "value": 0
       },
       {
-        "name": "loss_limit",
-        "id": "loss_limit_var",
-        "type": "Number",
-        "value": 5
+        "name": "last_result",
+        "id": "var_last_result",
+        "type": "Text",
+        "value": "even"
       }
     ]
   },
   "config": {
-    "name": "Deriv Matches Bot - Conservative Strategy",
-    "description": "Conservative Matches trading bot for EUR/USD, GBP/USD, and BTC with 1-2% risk per trade",
+    "name": "Deriv Matches Bot - 1 Min Tick Trading",
+    "description": "High-payout Matches bot: $1 stake = $8 win on 1-minute ticks. Predicts even/odd or rise/fall patterns.",
     "author": "Peter Forex Dashboard",
     "created": "2026-07-11",
-    "risk_level": "conservative",
-    "risk_per_trade": 0.01,
-    "default_symbols": ["frxEURUSD", "frxGBPUSD", "cryBTCUSD"],
-    "trade_type": "match_diff",
+    "trade_settings": {
+      "duration": "1t",
+      "stake_usd": 1,
+      "payout_per_win": 8,
+      "contract_type": "match_diff",
+      "symbol": "R_25",
+      "profit_target_usd": 100
+    },
+    "how_it_works": {
+      "step_1": "Each trade costs $1 USD and pays $8 if you win",
+      "step_2": "Bot predicts if next tick value is even or odd",
+      "step_3": "Runs continuously until daily profit goal of $100 is reached",
+      "step_4": "Automatically stops when target profit is achieved",
+      "winning_example": "Trade 13 winning trades = $104 profit for the day"
+    },
     "settings": {
       "enable_notifications": true,
       "enable_sound": true,
-      "max_concurrent_trades": 3,
-      "stop_on_profit": true,
-      "stop_on_loss": true
+      "auto_stop_on_goal": true
     }
   }
 }
