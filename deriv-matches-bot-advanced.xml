@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+  <metadata>
+    <name>Deriv Matches Bot - Advanced Multi-Asset</name>
+    <version>1.0</version>
+    <description>Advanced Matches trading bot for multiple asset classes with conservative risk management (1-2% per trade)</description>
+    <created>2026-07-11</created>
+    <author>Peter Forex Dashboard</author>
+  </metadata>
+
+  <configuration>
+    <trading_mode>matches</trading_mode>
+    <risk_per_trade>0.015</risk_per_trade>
+    <profit_target_ratio>0.5</profit_target_ratio>
+    <loss_limit_ratio>0.5</loss_limit_ratio>
+    <max_concurrent_trades>3</max_concurrent_trades>
+  </configuration>
+
+  <symbols>
+    <symbol type="forex" name="frxEURUSD">EUR/USD</symbol>
+    <symbol type="forex" name="frxGBPUSD">GBP/USD</symbol>
+    <symbol type="forex" name="frxUSDJPY">USD/JPY</symbol>
+    <symbol type="synthetic" name="R_50">Volatility 50</symbol>
+    <symbol type="synthetic" name="R_100">Volatility 100</symbol>
+    <symbol type="crypto" name="cryBTCUSD">Bitcoin</symbol>
+    <symbol type="crypto" name="cryETHUSD">Ethereum</symbol>
+  </symbols>
+
+  <variables>
+    <variable id="var_account_balance" default="10000">account_balance</variable>
+    <variable id="var_stake_amount" default="0">stake_amount</variable>
+    <variable id="var_profit_target" default="0">profit_target</variable>
+    <variable id="var_loss_limit" default="0">loss_limit</variable>
+    <variable id="var_trades_today" default="0">trades_today</variable>
+    <variable id="var_wins_today" default="0">wins_today</variable>
+    <variable id="var_losses_today" default="0">losses_today</variable>
+    <variable id="var_daily_profit" default="0">daily_profit</variable>
+  </variables>
+
+  <logic>
+    <initialization>
+      <block id="init_1" type="set_stake">
+        <formula>account_balance * 0.015</formula>
+        <store_in>stake_amount</store_in>
+      </block>
+      <block id="init_2" type="set_target">
+        <formula>stake_amount * 0.5</formula>
+        <store_in>profit_target</store_in>
+      </block>
+      <block id="init_3" type="set_loss_limit">
+        <formula>stake_amount * 0.5</formula>
+        <store_in>loss_limit</store_in>
+      </block>
+    </initialization>
+
+    <main_loop>
+      <block id="loop_1" type="repeat">
+        <count>100</count>
+        <condition>daily_profit &lt; profit_target</condition>
+        <statements>
+          <!-- Trade Forex Pairs -->
+          <block id="forex_eur" type="trade_matches">
+            <symbol>frxEURUSD</symbol>
+            <duration>5</duration>
+            <duration_unit>m</duration_unit>
+            <stake>stake_amount</stake>
+            <prediction>
+              <type>price_movement</type>
+              <direction>rise</direction>
+              <logic>if_last_price_lower_than_previous</logic>
+            </prediction>
+          </block>
+
+          <block id="forex_gbp" type="trade_matches">
+            <symbol>frxGBPUSD</symbol>
+            <duration>3</duration>
+            <duration_unit>m</duration_unit>
+            <stake>stake_amount</stake>
+            <prediction>
+              <type>price_movement</type>
+              <direction>fall</direction>
+              <logic>if_last_price_higher_than_previous</logic>
+            </prediction>
+          </block>
+
+          <!-- Trade Synthetic Indices -->
+          <block id="synthetic_vol50" type="trade_matches">
+            <symbol>R_50</symbol>
+            <duration>2</duration>
+            <duration_unit>m</duration_unit>
+            <stake>stake_amount</stake>
+            <prediction>
+              <type>volatility</type>
+              <logic>if_volatility_high</logic>
+            </prediction>
+          </block>
+
+          <!-- Trade Cryptocurrencies -->
+          <block id="crypto_btc" type="trade_matches">
+            <symbol>cryBTCUSD</symbol>
+            <duration>5</duration>
+            <duration_unit>m</duration_unit>
+            <stake>stake_amount</stake>
+            <prediction>
+              <type>trend</type>
+              <direction>rise</direction>
+              <logic>if_moving_average_cross</logic>
+            </prediction>
+          </block>
+
+          <!-- Exit Conditions -->
+          <block id="exit_profit" type="condition">
+            <statement>if daily_profit &gt;= profit_target then stop_all_trades</statement>
+          </block>
+
+          <block id="exit_loss" type="condition">
+            <statement>if daily_loss &gt;= loss_limit then stop_all_trades</statement>
+          </block>
+
+          <block id="max_trades" type="condition">
+            <statement>if trades_today &gt;= 10 then wait_until_next_period</statement>
+          </block>
+        </statements>
+      </block>
+    </main_loop>
+
+    <post_trade>
+      <block id="update_stats" type="update_variables">
+        <update var="trades_today">trades_today + 1</update>
+        <update var="daily_profit">calculate_profit()</update>
+      </block>
+      <block id="log_trade" type="log">
+        <message>Trade executed: {symbol}, Result: {profit/loss}, Balance: {new_balance}</message>
+      </block>
+    </post_trade>
+  </logic>
+
+  <risk_management>
+    <max_daily_loss_percent>2.0</max_daily_loss_percent>
+    <max_daily_win_percent>5.0</max_daily_win_percent>
+    <max_concurrent_trades>3</max_concurrent_trades>
+    <stop_loss_enabled>true</stop_loss_enabled>
+    <take_profit_enabled>true</take_profit_enabled>
+    <position_sizing>kelly_criterion</position_sizing>
+  </risk_management>
+
+  <notifications>
+    <on_trade_win>notify_user</on_trade_win>
+    <on_trade_loss>notify_user</on_trade_loss>
+    <on_daily_target_hit>notify_user</on_daily_target_hit>
+    <on_daily_loss_limit_hit>notify_user_and_stop</on_daily_loss_limit_hit>
+  </notifications>
+
+  <backtesting>
+    <enabled>true</enabled>
+    <start_date>2026-01-01</start_date>
+    <end_date>2026-07-11</end_date>
+    <initial_balance>10000</initial_balance>
+  </backtesting>
+</xml>

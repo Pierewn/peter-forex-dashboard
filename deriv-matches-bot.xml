@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+  <chart>
+    <type>chart</type>
+  </chart>
+  <block type="variables_set" id="1">
+    <field name="VAR">account_balance</field>
+    <value name="VALUE">
+      <block type="math_number" id="2">
+        <field name="NUM">1000</field>
+      </block>
+    </value>
+    <next>
+      <block type="variables_set" id="3">
+        <field name="VAR">stake_amount</field>
+        <value name="VALUE">
+          <block type="math_arithmetic" id="4">
+            <field name="OP">MULTIPLY</field>
+            <value name="A">
+              <block type="variables_get" id="5">
+                <field name="VAR">account_balance</field>
+              </block>
+            </value>
+            <value name="B">
+              <block type="math_number" id="6">
+                <field name="NUM">0.01</field>
+              </block>
+            </value>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set" id="7">
+            <field name="VAR">profit_target</field>
+            <value name="VALUE">
+              <block type="math_arithmetic" id="8">
+                <field name="OP">MULTIPLY</field>
+                <value name="A">
+                  <block type="variables_get" id="9">
+                    <field name="VAR">stake_amount</field>
+                  </block>
+                </value>
+                <value name="B">
+                  <block type="math_number" id="10">
+                    <field name="NUM">0.5</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <next>
+              <block type="variables_set" id="11">
+                <field name="VAR">loss_limit</field>
+                <value name="VALUE">
+                  <block type="math_arithmetic" id="12">
+                    <field name="OP">MULTIPLY</field>
+                    <value name="A">
+                      <block type="variables_get" id="13">
+                        <field name="VAR">stake_amount</field>
+                      </block>
+                    </value>
+                    <value name="B">
+                      <block type="math_number" id="14">
+                        <field name="NUM">0.5</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <next>
+                  <block type="controls_repeat_ext" id="15">
+                    <value name="TIMES">
+                      <block type="math_number" id="16">
+                        <field name="NUM">100</field>
+                      </block>
+                    </value>
+                    <statement name="DO">
+                      <block type="trade_matches" id="17">
+                        <field name="SYMBOL">frxEURUSD</field>
+                        <field name="PREDICTION">rise</field>
+                        <field name="DURATION">1</field>
+                        <field name="DURATION_TYPE">m</field>
+                        <value name="STAKE">
+                          <block type="variables_get" id="18">
+                            <field name="VAR">stake_amount</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="logic_if" id="19">
+                            <value name="IF">
+                              <block type="logic_compare" id="20">
+                                <field name="OP">GT</field>
+                                <value name="A">
+                                  <block type="trade_result" id="21">
+                                    <field name="RESULT">payout</field>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="variables_get" id="22">
+                                    <field name="VAR">profit_target</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <statement name="DO0">
+                              <block type="trade_stop" id="23">
+                              </block>
+                            </statement>
+                          </block>
+                        </next>
+                      </block>
+                    </statement>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </next>
+  </block>
+  <variables>
+    <variable id="account_balance_id">account_balance</variable>
+    <variable id="stake_amount_id">stake_amount</variable>
+    <variable id="profit_target_id">profit_target</variable>
+    <variable id="loss_limit_id">loss_limit</variable>
+  </variables>
+  <metadata>
+    <name>Deriv Matches Bot - Conservative Strategy</name>
+    <description>Conservative Matches trading bot for EUR/USD with 1-2% risk per trade</description>
+    <created>2026-07-11</created>
+    <author>Peter Forex Dashboard</author>
+  </metadata>
+</xml>
