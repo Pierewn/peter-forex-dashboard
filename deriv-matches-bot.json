@@ -1,0 +1,392 @@
+{
+  "version": "1.0",
+  "blockly": {
+    "blocks": [
+      {
+        "type": "variables_set",
+        "id": "init_balance",
+        "x": 13,
+        "y": 63,
+        "fields": {
+          "VAR": "account_balance"
+        },
+        "inputs": {
+          "VALUE": {
+            "shadow": {
+              "type": "math_number",
+              "id": "init_balance_value",
+              "fields": {
+                "NUM": 1000
+              }
+            }
+          }
+        },
+        "next": {
+          "block": "init_stake"
+        }
+      },
+      {
+        "type": "variables_set",
+        "id": "init_stake",
+        "fields": {
+          "VAR": "stake_amount"
+        },
+        "inputs": {
+          "VALUE": {
+            "block": {
+              "type": "math_arithmetic",
+              "id": "calc_stake",
+              "fields": {
+                "OP": "MULTIPLY"
+              },
+              "inputs": {
+                "A": {
+                  "shadow": {
+                    "type": "variables_get",
+                    "fields": {
+                      "VAR": "account_balance"
+                    }
+                  }
+                },
+                "B": {
+                  "shadow": {
+                    "type": "math_number",
+                    "fields": {
+                      "NUM": 0.01
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "next": {
+          "block": "init_profit_target"
+        }
+      },
+      {
+        "type": "variables_set",
+        "id": "init_profit_target",
+        "fields": {
+          "VAR": "profit_target"
+        },
+        "inputs": {
+          "VALUE": {
+            "block": {
+              "type": "math_arithmetic",
+              "id": "calc_profit",
+              "fields": {
+                "OP": "MULTIPLY"
+              },
+              "inputs": {
+                "A": {
+                  "shadow": {
+                    "type": "variables_get",
+                    "fields": {
+                      "VAR": "stake_amount"
+                    }
+                  }
+                },
+                "B": {
+                  "shadow": {
+                    "type": "math_number",
+                    "fields": {
+                      "NUM": 0.5
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "next": {
+          "block": "init_loss_limit"
+        }
+      },
+      {
+        "type": "variables_set",
+        "id": "init_loss_limit",
+        "fields": {
+          "VAR": "loss_limit"
+        },
+        "inputs": {
+          "VALUE": {
+            "block": {
+              "type": "math_arithmetic",
+              "id": "calc_loss",
+              "fields": {
+                "OP": "MULTIPLY"
+              },
+              "inputs": {
+                "A": {
+                  "shadow": {
+                    "type": "variables_get",
+                    "fields": {
+                      "VAR": "stake_amount"
+                    }
+                  }
+                },
+                "B": {
+                  "shadow": {
+                    "type": "math_number",
+                    "fields": {
+                      "NUM": 0.5
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "next": {
+          "block": "main_loop"
+        }
+      },
+      {
+        "type": "controls_repeat_ext",
+        "id": "main_loop",
+        "inputs": {
+          "TIMES": {
+            "shadow": {
+              "type": "math_number",
+              "fields": {
+                "NUM": 100
+              }
+            }
+          }
+        },
+        "statement": {
+          "DO": [
+            {
+              "type": "trade",
+              "id": "trade_eur",
+              "fields": {
+                "TRADETYPE": "match_diff",
+                "SYMBOL": "frxEURUSD",
+                "DURATION": 5,
+                "DURATION_UNIT": "m"
+              },
+              "inputs": {
+                "STAKE": {
+                  "shadow": {
+                    "type": "variables_get",
+                    "fields": {
+                      "VAR": "stake_amount"
+                    }
+                  }
+                },
+                "PREDICTION": {
+                  "shadow": {
+                    "type": "text",
+                    "fields": {
+                      "TEXT": "rise"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "type": "trade",
+              "id": "trade_gbp",
+              "fields": {
+                "TRADETYPE": "match_diff",
+                "SYMBOL": "frxGBPUSD",
+                "DURATION": 3,
+                "DURATION_UNIT": "m"
+              },
+              "inputs": {
+                "STAKE": {
+                  "shadow": {
+                    "type": "variables_get",
+                    "fields": {
+                      "VAR": "stake_amount"
+                    }
+                  }
+                },
+                "PREDICTION": {
+                  "shadow": {
+                    "type": "text",
+                    "fields": {
+                      "TEXT": "fall"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "type": "trade",
+              "id": "trade_btc",
+              "fields": {
+                "TRADETYPE": "match_diff",
+                "SYMBOL": "cryBTCUSD",
+                "DURATION": 5,
+                "DURATION_UNIT": "m"
+              },
+              "inputs": {
+                "STAKE": {
+                  "shadow": {
+                    "type": "variables_get",
+                    "fields": {
+                      "VAR": "stake_amount"
+                    }
+                  }
+                },
+                "PREDICTION": {
+                  "shadow": {
+                    "type": "text",
+                    "fields": {
+                      "TEXT": "rise"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "type": "logic_if",
+              "id": "check_profit",
+              "inputs": {
+                "IF": {
+                  "block": {
+                    "type": "logic_compare",
+                    "id": "compare_profit",
+                    "fields": {
+                      "OP": "GTE"
+                    },
+                    "inputs": {
+                      "A": {
+                        "shadow": {
+                          "type": "trade_result",
+                          "fields": {
+                            "RESULT": "total_profit"
+                          }
+                        }
+                      },
+                      "B": {
+                        "shadow": {
+                          "type": "variables_get",
+                          "fields": {
+                            "VAR": "profit_target"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "statement": {
+                "DO0": [
+                  {
+                    "type": "bot_stop",
+                    "id": "stop_on_profit"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "logic_if",
+              "id": "check_loss",
+              "inputs": {
+                "IF": {
+                  "block": {
+                    "type": "logic_compare",
+                    "id": "compare_loss",
+                    "fields": {
+                      "OP": "LTE"
+                    },
+                    "inputs": {
+                      "A": {
+                        "shadow": {
+                          "type": "trade_result",
+                          "fields": {
+                            "RESULT": "total_profit"
+                          }
+                        }
+                      },
+                      "B": {
+                        "shadow": {
+                          "type": "math_arithmetic",
+                          "fields": {
+                            "OP": "MINUS"
+                          },
+                          "inputs": {
+                            "A": {
+                              "shadow": {
+                                "type": "math_number",
+                                "fields": {
+                                  "NUM": 0
+                                }
+                              }
+                            },
+                            "B": {
+                              "shadow": {
+                                "type": "variables_get",
+                                "fields": {
+                                  "VAR": "loss_limit"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "statement": {
+                "DO0": [
+                  {
+                    "type": "bot_stop",
+                    "id": "stop_on_loss"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "variables": [
+      {
+        "name": "account_balance",
+        "id": "account_balance_var",
+        "type": "Number",
+        "value": 1000
+      },
+      {
+        "name": "stake_amount",
+        "id": "stake_amount_var",
+        "type": "Number",
+        "value": 10
+      },
+      {
+        "name": "profit_target",
+        "id": "profit_target_var",
+        "type": "Number",
+        "value": 5
+      },
+      {
+        "name": "loss_limit",
+        "id": "loss_limit_var",
+        "type": "Number",
+        "value": 5
+      }
+    ]
+  },
+  "config": {
+    "name": "Deriv Matches Bot - Conservative Strategy",
+    "description": "Conservative Matches trading bot for EUR/USD, GBP/USD, and BTC with 1-2% risk per trade",
+    "author": "Peter Forex Dashboard",
+    "created": "2026-07-11",
+    "risk_level": "conservative",
+    "risk_per_trade": 0.01,
+    "default_symbols": ["frxEURUSD", "frxGBPUSD", "cryBTCUSD"],
+    "trade_type": "match_diff",
+    "settings": {
+      "enable_notifications": true,
+      "enable_sound": true,
+      "max_concurrent_trades": 3,
+      "stop_on_profit": true,
+      "stop_on_loss": true
+    }
+  }
+}
