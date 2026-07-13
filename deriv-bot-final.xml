@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml xmlns="http://www.w3.org/1999/xhtml">
+  <block type="purchase_conditions" id="purchase_conditions_1" x="50" y="50">
+    <value name="condition">
+      <block type="logic_boolean" id="condition_1">
+        <field name="BOOL">TRUE</field>
+      </block>
+    </value>
+    <next>
+      <block type="trade_options" id="trade_options_1">
+        <field name="DURATION_TYPE">t</field>
+        <value name="DURATION">
+          <shadow type="math_number">
+            <field name="NUM">1</field>
+          </shadow>
+        </value>
+        <value name="SYMBOL">
+          <shadow type="text">
+            <field name="TEXT">R_25</field>
+          </shadow>
+        </value>
+        <value name="STAKE">
+          <shadow type="math_number">
+            <field name="NUM">1</field>
+          </shadow>
+        </value>
+        <value name="PREDICTION">
+          <shadow type="text">
+            <field name="TEXT">even</field>
+          </shadow>
+        </value>
+        <value name="CONTRACTTYPE">
+          <shadow type="text">
+            <field name="TEXT">MATCH_DIFF</field>
+          </shadow>
+        </value>
+        <next>
+          <block type="purchase" id="purchase_1">
+          </block>
+        </next>
+      </block>
+    </next>
+  </block>
+</xml>
