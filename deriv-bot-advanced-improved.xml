@@ -10,7 +10,6 @@
     <variable type="" id="consecutive_losses">Consecutive Losses</variable>
     <variable type="" id="first_stake">First Stake</variable>
     <variable type="" id="martingale_enabled">Martingale Enabled</variable>
-    <variable type="" id="last_prediction">Last Prediction</variable>
   </variables>
   <block type="trade_definition" id="trade_def_main" deletable="false" x="0" y="0">
     <statement name="TRADE_OPTIONS">
@@ -110,26 +109,6 @@
                                         <field name="NUM">0</field>
                                       </block>
                                     </value>
-                                    <next>
-                                      <block type="variables_set" id="init_martingale">
-                                        <field name="VAR" id="martingale_enabled">Martingale Enabled</field>
-                                        <value name="VALUE">
-                                          <block type="logic_boolean" id="martingale_value">
-                                            <field name="BOOL">FALSE</field>
-                                          </block>
-                                        </value>
-                                        <next>
-                                          <block type="variables_set" id="init_prediction">
-                                            <field name="VAR" id="last_prediction">Last Prediction</field>
-                                            <value name="VALUE">
-                                              <block type="text" id="prediction_value">
-                                                <field name="TEXT">rise</field>
-                                              </block>
-                                            </value>
-                                          </block>
-                                        </next>
-                                      </block>
-                                    </next>
                                   </block>
                                 </next>
                               </block>
@@ -168,68 +147,8 @@
   </block>
   <block type="before_purchase" id="before_purchase_block" deletable="false" x="0" y="600">
     <statement name="BEFOREPURCHASE_STACK">
-      <block type="controls_if" id="check_stop_loss">
-        <value name="IF0">
-          <block type="logic_compare" id="stop_loss_check">
-            <field name="OP">LTE</field>
-            <value name="A">
-              <block type="variables_get" id="profit_check">
-                <field name="VAR" id="profit_var">Profit</field>
-              </block>
-            </value>
-            <value name="B">
-              <block type="variables_get" id="stop_loss_check">
-                <field name="VAR" id="stop_loss_var">Stop Loss</field>
-              </block>
-            </value>
-          </block>
-        </value>
-        <statement name="DO0">
-          <block type="notify" id="stop_loss_notify">
-            <field name="NOTIFICATION_TYPE">error</field>
-            <field name="NOTIFICATION_SOUND">silent</field>
-            <value name="MESSAGE">
-              <block type="text" id="stop_loss_message">
-                <field name="TEXT">STOP LOSS HIT! Bot stopped.</field>
-              </block>
-            </value>
-          </block>
-        </statement>
-        <statement name="DO1">
-          <block type="controls_if" id="check_target">
-            <value name="IF0">
-              <block type="logic_compare" id="target_check">
-                <field name="OP">GTE</field>
-                <value name="A">
-                  <block type="variables_get" id="profit_target_check">
-                    <field name="VAR" id="profit_var">Profit</field>
-                  </block>
-                </value>
-                <value name="B">
-                  <block type="variables_get" id="target_get">
-                    <field name="VAR" id="target_var">Target Profit</field>
-                  </block>
-                </value>
-              </block>
-            </value>
-            <statement name="DO0">
-              <block type="notify" id="target_notify">
-                <field name="NOTIFICATION_TYPE">success</field>
-                <field name="NOTIFICATION_SOUND">silent</field>
-                <value name="MESSAGE">
-                  <block type="text" id="target_message">
-                    <field name="TEXT">TARGET PROFIT REACHED!</field>
-                  </block>
-                </value>
-              </block>
-            </statement>
-            <statement name="DO1">
-              <block type="purchase" id="purchase_block">
-                <field name="PURCHASE_LIST">CALL</field>
-              </block>
-            </statement>
-          </block>
-        </statement>
+      <block type="purchase" id="purchase_block">
+        <field name="PURCHASE_LIST">CALL</field>
       </block>
     </statement>
   </block>
@@ -273,16 +192,6 @@
                             <field name="VAR" id="first_stake">First Stake</field>
                           </block>
                         </value>
-                        <next>
-                          <block type="variables_set" id="reset_martingale">
-                            <field name="VAR" id="martingale_enabled">Martingale Enabled</field>
-                            <value name="VALUE">
-                              <block type="logic_boolean" id="reset_martingale_value">
-                                <field name="BOOL">FALSE</field>
-                              </block>
-                            </value>
-                          </block>
-                        </next>
                       </block>
                     </next>
                   </block>
@@ -343,16 +252,6 @@
                                 <field name="VAR" id="stake_var">Stake</field>
                               </block>
                             </value>
-                            <next>
-                              <block type="variables_set" id="enable_martingale">
-                                <field name="VAR" id="martingale_enabled">Martingale Enabled</field>
-                                <value name="VALUE">
-                                  <block type="logic_boolean" id="enable_martingale_value">
-                                    <field name="BOOL">TRUE</field>
-                                  </block>
-                                </value>
-                              </block>
-                            </next>
                           </block>
                         </statement>
                       </block>
@@ -364,7 +263,64 @@
           </block>
         </statement>
         <next>
-          <block type="trade_again" id="trade_again_block"></block>
+          <block type="controls_if" id="check_limits">
+            <mutation elseif="1" else="1"></mutation>
+            <value name="IF0">
+              <block type="logic_compare" id="stop_loss_compare">
+                <field name="OP">LTE</field>
+                <value name="A">
+                  <block type="variables_get" id="profit_stop_check">
+                    <field name="VAR" id="profit_var">Profit</field>
+                  </block>
+                </value>
+                <value name="B">
+                  <block type="variables_get" id="stop_loss_get">
+                    <field name="VAR" id="stop_loss_var">Stop Loss</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <statement name="DO0">
+              <block type="notify" id="stop_loss_notify">
+                <field name="NOTIFICATION_TYPE">error</field>
+                <field name="NOTIFICATION_SOUND">silent</field>
+                <value name="MESSAGE">
+                  <block type="text" id="stop_loss_message">
+                    <field name="TEXT">STOP LOSS HIT! Daily loss limit reached.</field>
+                  </block>
+                </value>
+              </block>
+            </statement>
+            <value name="IF1">
+              <block type="logic_compare" id="target_compare">
+                <field name="OP">GTE</field>
+                <value name="A">
+                  <block type="variables_get" id="profit_target_check">
+                    <field name="VAR" id="profit_var">Profit</field>
+                  </block>
+                </value>
+                <value name="B">
+                  <block type="variables_get" id="target_get2">
+                    <field name="VAR" id="target_var">Target Profit</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <statement name="DO1">
+              <block type="notify" id="target_notify">
+                <field name="NOTIFICATION_TYPE">success</field>
+                <field name="NOTIFICATION_SOUND">silent</field>
+                <value name="MESSAGE">
+                  <block type="text" id="target_message">
+                    <field name="TEXT">TARGET PROFIT REACHED! Congratulations!</field>
+                  </block>
+                </value>
+              </block>
+            </statement>
+            <statement name="ELSE">
+              <block type="trade_again" id="trade_again_block"></block>
+            </statement>
+          </block>
         </next>
       </block>
     </statement>
