@@ -4,6 +4,7 @@
     <variable type="" id="profit_var">Profit</variable>
     <variable type="" id="stake_var">Stake</variable>
     <variable type="" id="target_var">Target Profit</variable>
+    <variable type="" id="stop_loss_var">Stop Loss</variable>
   </variables>
   <block type="trade_definition" id="trade_def_main" deletable="false" x="0" y="0">
     <statement name="TRADE_OPTIONS">
@@ -64,14 +65,24 @@
                   </block>
                 </value>
                 <next>
-                  <block type="notify" id="bot_start_notify">
-                    <field name="NOTIFICATION_TYPE">info</field>
-                    <field name="NOTIFICATION_SOUND">silent</field>
-                    <value name="MESSAGE">
-                      <block type="text" id="start_message">
-                        <field name="TEXT">Bot Started! Trading until $100 profit is reached.</field>
+                  <block type="variables_set" id="init_stop_loss">
+                    <field name="VAR" id="stop_loss_var">Stop Loss</field>
+                    <value name="VALUE">
+                      <block type="math_number" id="stop_loss_value">
+                        <field name="NUM">-50</field>
                       </block>
                     </value>
+                    <next>
+                      <block type="notify" id="bot_start_notify">
+                        <field name="NOTIFICATION_TYPE">info</field>
+                        <field name="NOTIFICATION_SOUND">silent</field>
+                        <value name="MESSAGE">
+                          <block type="text" id="start_message">
+                            <field name="TEXT">Bot Started! Take Profit: $100 | Stop Loss: -$50</field>
+                          </block>
+                        </value>
+                      </block>
+                    </next>
                   </block>
                 </next>
               </block>
@@ -123,41 +134,6 @@
                 <field name="NUM">8</field>
               </shadow>
             </value>
-            <next>
-              <block type="notify" id="win_notify">
-                <field name="NOTIFICATION_TYPE">success</field>
-                <field name="NOTIFICATION_SOUND">silent</field>
-                <value name="MESSAGE">
-                  <block type="text_join" id="win_message">
-                    <field name="VARIABLE" id="win_text_var">win_text</field>
-                    <statement name="STACK">
-                      <block type="text_statement" id="win_text1">
-                        <value name="TEXT">
-                          <shadow type="text">
-                            <field name="TEXT"></field>
-                          </shadow>
-                          <block type="text" id="win_text_content">
-                            <field name="TEXT">WIN! Profit: $</field>
-                          </block>
-                        </value>
-                        <next>
-                          <block type="text_statement" id="win_text2">
-                            <value name="TEXT">
-                              <shadow type="text">
-                                <field name="TEXT"></field>
-                              </shadow>
-                              <block type="variables_get" id="profit_in_message">
-                                <field name="VAR" id="profit_var">Profit</field>
-                              </block>
-                            </value>
-                          </block>
-                        </next>
-                      </block>
-                    </statement>
-                  </block>
-                </value>
-              </block>
-            </next>
           </block>
         </statement>
         <statement name="DO1">
@@ -171,34 +147,61 @@
           </block>
         </statement>
         <next>
-          <block type="controls_if" id="check_target">
+          <block type="controls_if" id="check_limits" collapsed="true">
+            <mutation elseif="1" else="1"></mutation>
             <value name="IF0">
-              <block type="logic_compare" id="target_check">
+              <block type="logic_compare" id="take_profit_check">
                 <field name="OP">GTE</field>
                 <value name="A">
-                  <block type="variables_get" id="profit_get">
+                  <block type="variables_get" id="profit_get_tp">
                     <field name="VAR" id="profit_var">Profit</field>
                   </block>
                 </value>
                 <value name="B">
-                  <block type="variables_get" id="target_get">
+                  <block type="variables_get" id="target_get_tp">
                     <field name="VAR" id="target_var">Target Profit</field>
                   </block>
                 </value>
               </block>
             </value>
             <statement name="DO0">
-              <block type="notify" id="target_notify">
+              <block type="notify" id="take_profit_notify">
                 <field name="NOTIFICATION_TYPE">success</field>
                 <field name="NOTIFICATION_SOUND">silent</field>
                 <value name="MESSAGE">
-                  <block type="text" id="target_message">
-                    <field name="TEXT">🎉 TARGET PROFIT REACHED! Bot stopping.</field>
+                  <block type="text" id="take_profit_message">
+                    <field name="TEXT">🎉 TAKE PROFIT HIT! Target $100 reached!</field>
                   </block>
                 </value>
               </block>
             </statement>
+            <value name="IF1">
+              <block type="logic_compare" id="stop_loss_check">
+                <field name="OP">LTE</field>
+                <value name="A">
+                  <block type="variables_get" id="profit_get_sl">
+                    <field name="VAR" id="profit_var">Profit</field>
+                  </block>
+                </value>
+                <value name="B">
+                  <block type="variables_get" id="stop_loss_get_sl">
+                    <field name="VAR" id="stop_loss_var">Stop Loss</field>
+                  </block>
+                </value>
+              </block>
+            </value>
             <statement name="DO1">
+              <block type="notify" id="stop_loss_notify">
+                <field name="NOTIFICATION_TYPE">error</field>
+                <field name="NOTIFICATION_SOUND">silent</field>
+                <value name="MESSAGE">
+                  <block type="text" id="stop_loss_message">
+                    <field name="TEXT">🛑 STOP LOSS HIT! Loss limit -$50 reached!</field>
+                  </block>
+                </value>
+              </block>
+            </statement>
+            <statement name="ELSE">
               <block type="trade_again" id="trade_again_block"></block>
             </statement>
           </block>
