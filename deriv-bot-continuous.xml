@@ -14,8 +14,8 @@
         <field name="SYMBOL_LIST">R_25</field>
         <next>
           <block type="trade_definition_tradetype" id="tradetype_block" deletable="false" movable="false">
-            <field name="TRADETYPECAT_LIST">callput</field>
-            <field name="TRADETYPE_LIST">callput</field>
+            <field name="TRADETYPECAT_LIST">digits</field>
+            <field name="TRADETYPE_LIST">digits</field>
             <next>
               <block type="trade_definition_contracttype" id="contracttype_block" deletable="false" movable="false">
                 <field name="TYPE_LIST">both</field>
@@ -78,7 +78,7 @@
                         <field name="NOTIFICATION_SOUND">silent</field>
                         <value name="MESSAGE">
                           <block type="text" id="start_message">
-                            <field name="TEXT">Bot Started! Take Profit: $100 | Stop Loss: -$50</field>
+                            <field name="TEXT">Bot Started! Digits Trading | TP: $100 | SL: -$50</field>
                           </block>
                         </value>
                       </block>
