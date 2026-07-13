@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml xmlns="http://www.w3.org/1999/xhtml" is_dbot="true" collection="false">
+  <variables>
+    <variable type="" id="profit_var">Profit</variable>
+    <variable type="" id="stake_var">Stake</variable>
+    <variable type="" id="target_var">Target Profit</variable>
+  </variables>
+  <block type="trade_definition" id="trade_def_main" deletable="false" x="0" y="0">
+    <statement name="TRADE_OPTIONS">
+      <block type="trade_definition_market" id="market_block" deletable="false" movable="false">
+        <field name="MARKET_LIST">synthetic_index</field>
+        <field name="SUBMARKET_LIST">random_index</field>
+        <field name="SYMBOL_LIST">R_25</field>
+        <next>
+          <block type="trade_definition_tradetype" id="tradetype_block" deletable="false" movable="false">
+            <field name="TRADETYPECAT_LIST">callput</field>
+            <field name="TRADETYPE_LIST">callput</field>
+            <next>
+              <block type="trade_definition_contracttype" id="contracttype_block" deletable="false" movable="false">
+                <field name="TYPE_LIST">both</field>
+                <next>
+                  <block type="trade_definition_candleinterval" id="candleinterval_block" deletable="false" movable="false">
+                    <field name="CANDLEINTERVAL_LIST">1</field>
+                    <next>
+                      <block type="trade_definition_restartbuysell" id="restart_block" deletable="false" movable="false">
+                        <field name="TIME_MACHINE_ENABLED">FALSE</field>
+                        <next>
+                          <block type="trade_definition_restartonerror" id="restarterror_block" deletable="false" movable="false">
+                            <field name="RESTARTONERROR">TRUE</field>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    <statement name="INITIALIZATION">
+      <block type="variables_set" id="init_stake">
+        <field name="VAR" id="stake_var">Stake</field>
+        <value name="VALUE">
+          <block type="math_number" id="stake_value">
+            <field name="NUM">1</field>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set" id="init_profit">
+            <field name="VAR" id="profit_var">Profit</field>
+            <value name="VALUE">
+              <block type="math_number" id="profit_value">
+                <field name="NUM">0</field>
+              </block>
+            </value>
+            <next>
+              <block type="variables_set" id="init_target">
+                <field name="VAR" id="target_var">Target Profit</field>
+                <value name="VALUE">
+                  <block type="math_number" id="target_value">
+                    <field name="NUM">100</field>
+                  </block>
+                </value>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    <statement name="SUBMARKET">
+      <block type="trade_definition_tradeoptions" id="tradeoptions_block" collapsed="true">
+        <mutation has_first_barrier="false" has_second_barrier="false" has_prediction="false"></mutation>
+        <field name="DURATIONTYPE_LIST">t</field>
+        <value name="DURATION">
+          <shadow type="math_number" id="duration_value">
+            <field name="NUM">1</field>
+          </shadow>
+        </value>
+        <value name="AMOUNT">
+          <shadow type="math_number" id="amount_value">
+            <field name="NUM">1</field>
+          </shadow>
+          <block type="variables_get" id="stake_get">
+            <field name="VAR" id="stake_var">Stake</field>
+          </block>
+        </value>
+      </block>
+    </statement>
+  </block>
+  <block type="before_purchase" id="before_purchase_block" deletable="false" x="0" y="600">
+    <statement name="BEFOREPURCHASE_STACK">
+      <block type="purchase" id="purchase_block">
+        <field name="PURCHASE_LIST">CALL</field>
+      </block>
+    </statement>
+  </block>
+  <block type="after_purchase" id="after_purchase_block" x="1466" y="0">
+    <statement name="AFTERPURCHASE_STACK">
+      <block type="controls_if" id="check_result_block">
+        <value name="IF0">
+          <block type="contract_check_result" id="win_check">
+            <field name="CHECK_RESULT">win</field>
+          </block>
+        </value>
+        <statement name="DO0">
+          <block type="math_change" id="add_profit_win">
+            <field name="VAR" id="profit_var">Profit</field>
+            <value name="DELTA">
+              <shadow type="math_number" id="win_amount">
+                <field name="NUM">8</field>
+              </shadow>
+            </value>
+            <next>
+              <block type="controls_if" id="check_target">
+                <value name="IF0">
+                  <block type="logic_compare" id="profit_compare">
+                    <field name="OP">GTE</field>
+                    <value name="A">
+                      <block type="variables_get" id="profit_get">
+                        <field name="VAR" id="profit_var">Profit</field>
+                      </block>
+                    </value>
+                    <value name="B">
+                      <block type="variables_get" id="target_get">
+                        <field name="VAR" id="target_var">Target Profit</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <statement name="DO0">
+                  <block type="notify" id="profit_notify">
+                    <field name="NOTIFICATION_TYPE">success</field>
+                    <field name="NOTIFICATION_SOUND">silent</field>
+                    <value name="MESSAGE">
+                      <block type="text" id="profit_message">
+                        <field name="TEXT">Target Profit Reached!</field>
+                      </block>
+                    </value>
+                  </block>
+                </statement>
+              </block>
+            </next>
+          </block>
+        </statement>
+        <statement name="DO1">
+          <block type="math_change" id="subtract_loss">
+            <field name="VAR" id="profit_var">Profit</field>
+            <value name="DELTA">
+              <shadow type="math_number" id="loss_amount">
+                <field name="NUM">-1</field>
+              </shadow>
+            </value>
+          </block>
+        </statement>
+        <next>
+          <block type="trade_again" id="trade_again_block"></block>
+        </next>
+      </block>
+    </statement>
+  </block>
+</xml>
