@@ -36,99 +36,124 @@
                   </shadow>
                 </value>
                 <statement name="DO">
-                  <block type="trade" id="trade_even_odd">
-                    <field name="TRADETYPE">match_diff</field>
-                    <field name="SYMBOL">R_25</field>
-                    <field name="DURATION">1</field>
-                    <field name="DURATION_UNIT">t</field>
-                    <value name="STAKE">
-                      <block type="variables_get" id="get_stake">
-                        <field name="VAR">stake</field>
+                  <block type="purchase_conditions" id="purchase_conditions">
+                    <value name="CONDITIONS">
+                      <block type="logic_boolean" id="always_true">
+                        <field name="BOOL">TRUE</field>
                       </block>
                     </value>
-                    <value name="PREDICTION">
-                      <shadow type="text" id="pred_even">
-                        <field name="TEXT">even</field>
-                      </shadow>
-                    </value>
                     <next>
-                      <block type="logic_if" id="check_win">
-                        <value name="IF">
-                          <block type="logic_compare" id="is_win">
-                            <field name="OP">EQ</field>
-                            <value name="A">
-                              <block type="trade_result" id="trade_is_win">
-                                <field name="RESULT">is_win</field>
-                              </block>
-                            </value>
-                            <value name="B">
-                              <block type="logic_boolean" id="true_val">
-                                <field name="BOOL">TRUE</field>
-                              </block>
-                            </value>
+                      <block type="trade_options" id="trade_options">
+                        <field name="DURATION_TYPE">t</field>
+                        <value name="DURATION">
+                          <shadow type="math_number" id="duration_value">
+                            <field name="NUM">1</field>
+                          </shadow>
+                        </value>
+                        <value name="SYMBOL">
+                          <shadow type="text" id="symbol_value">
+                            <field name="TEXT">R_25</field>
+                          </shadow>
+                        </value>
+                        <value name="STAKE">
+                          <block type="variables_get" id="get_stake">
+                            <field name="VAR">stake</field>
                           </block>
                         </value>
-                        <statement name="DO0">
-                          <block type="variables_set" id="add_profit">
-                            <field name="VAR">daily_profit</field>
-                            <value name="VALUE">
-                              <block type="math_arithmetic" id="calc_add_profit">
-                                <field name="OP">ADD</field>
-                                <value name="A">
-                                  <block type="variables_get" id="get_profit_1">
-                                    <field name="VAR">daily_profit</field>
-                                  </block>
-                                </value>
-                                <value name="B">
-                                  <shadow type="math_number" id="win_amount">
-                                    <field name="NUM">8</field>
-                                  </shadow>
-                                </value>
-                              </block>
-                            </value>
-                          </block>
-                        </statement>
-                        <statement name="DO1">
-                          <block type="variables_set" id="subtract_loss">
-                            <field name="VAR">daily_profit</field>
-                            <value name="VALUE">
-                              <block type="math_arithmetic" id="calc_sub_profit">
-                                <field name="OP">MINUS</field>
-                                <value name="A">
-                                  <block type="variables_get" id="get_profit_2">
-                                    <field name="VAR">daily_profit</field>
-                                  </block>
-                                </value>
-                                <value name="B">
-                                  <shadow type="math_number" id="loss_amount">
-                                    <field name="NUM">1</field>
-                                  </shadow>
-                                </value>
-                              </block>
-                            </value>
-                          </block>
-                        </statement>
+                        <value name="PREDICTION">
+                          <shadow type="text" id="pred_value">
+                            <field name="TEXT">even</field>
+                          </shadow>
+                        </value>
+                        <value name="CONTRACTTYPE">
+                          <shadow type="text" id="contract_type">
+                            <field name="TEXT">MATCH_DIFF</field>
+                          </shadow>
+                        </value>
                         <next>
-                          <block type="logic_if" id="check_goal">
-                            <value name="IF">
-                              <block type="logic_compare" id="goal_reached">
-                                <field name="OP">GTE</field>
-                                <value name="A">
-                                  <block type="variables_get" id="get_daily_profit">
+                          <block type="purchase" id="purchase_block">
+                            <next>
+                              <block type="logic_if" id="check_win">
+                                <value name="IF">
+                                  <block type="logic_compare" id="is_win">
+                                    <field name="OP">EQ</field>
+                                    <value name="A">
+                                      <block type="trade_result" id="trade_is_win">
+                                        <field name="RESULT">is_win</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="logic_boolean" id="true_val">
+                                        <field name="BOOL">TRUE</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <statement name="DO0">
+                                  <block type="variables_set" id="add_profit">
                                     <field name="VAR">daily_profit</field>
+                                    <value name="VALUE">
+                                      <block type="math_arithmetic" id="calc_add_profit">
+                                        <field name="OP">ADD</field>
+                                        <value name="A">
+                                          <block type="variables_get" id="get_profit_1">
+                                            <field name="VAR">daily_profit</field>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <shadow type="math_number" id="win_amount">
+                                            <field name="NUM">8</field>
+                                          </shadow>
+                                        </value>
+                                      </block>
+                                    </value>
                                   </block>
-                                </value>
-                                <value name="B">
-                                  <block type="variables_get" id="get_profit_goal">
-                                    <field name="VAR">profit_goal</field>
+                                </statement>
+                                <statement name="DO1">
+                                  <block type="variables_set" id="subtract_loss">
+                                    <field name="VAR">daily_profit</field>
+                                    <value name="VALUE">
+                                      <block type="math_arithmetic" id="calc_sub_profit">
+                                        <field name="OP">MINUS</field>
+                                        <value name="A">
+                                          <block type="variables_get" id="get_profit_2">
+                                            <field name="VAR">daily_profit</field>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <shadow type="math_number" id="loss_amount">
+                                            <field name="NUM">1</field>
+                                          </shadow>
+                                        </value>
+                                      </block>
+                                    </value>
                                   </block>
-                                </value>
+                                </statement>
+                                <next>
+                                  <block type="logic_if" id="check_goal">
+                                    <value name="IF">
+                                      <block type="logic_compare" id="goal_reached">
+                                        <field name="OP">GTE</field>
+                                        <value name="A">
+                                          <block type="variables_get" id="get_daily_profit">
+                                            <field name="VAR">daily_profit</field>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="variables_get" id="get_profit_goal">
+                                            <field name="VAR">profit_goal</field>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                    <statement name="DO0">
+                                      <block type="bot_stop" id="stop_on_goal">
+                                      </block>
+                                    </statement>
+                                  </block>
+                                </next>
                               </block>
-                            </value>
-                            <statement name="DO0">
-                              <block type="bot_stop" id="stop_on_goal">
-                              </block>
-                            </statement>
+                            </next>
                           </block>
                         </next>
                       </block>
