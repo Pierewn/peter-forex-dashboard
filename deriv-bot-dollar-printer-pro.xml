@@ -8,7 +8,6 @@
     <variable type="" id="target_profit_var">Target Profit</variable>
     <variable type="" id="stop_loss_var">Stop Loss</variable>
     <variable type="" id="consecutive_losses_var">Consecutive Losses</variable>
-    <variable type="" id="max_losses_var">Max Consecutive Losses</variable>
   </variables>
   <block type="trade_definition" id="trade_def_main" deletable="false" x="0" y="0">
     <statement name="TRADE_OPTIONS">
@@ -93,32 +92,22 @@
                               </block>
                             </value>
                             <next>
-                              <block type="variables_set" id="init_max_losses">
-                                <field name="VAR" id="max_losses_var">Max Consecutive Losses</field>
+                              <block type="variables_set" id="init_profit">
+                                <field name="VAR" id="total_profit_var">Total Profit</field>
                                 <value name="VALUE">
-                                  <block type="math_number" id="max_losses_value">
-                                    <field name="NUM">5</field>
+                                  <block type="math_number" id="profit_value">
+                                    <field name="NUM">0</field>
                                   </block>
                                 </value>
                                 <next>
-                                  <block type="variables_set" id="init_profit">
-                                    <field name="VAR" id="total_profit_var">Total Profit</field>
-                                    <value name="VALUE">
-                                      <block type="math_number" id="profit_value">
-                                        <field name="NUM">0</field>
+                                  <block type="notify" id="bot_start_notify">
+                                    <field name="NOTIFICATION_TYPE">info</field>
+                                    <field name="NOTIFICATION_SOUND">silent</field>
+                                    <value name="MESSAGE">
+                                      <block type="text" id="start_message">
+                                        <field name="TEXT">Dollar Printer PRO Started | Running continuously...</field>
                                       </block>
                                     </value>
-                                    <next>
-                                      <block type="notify" id="bot_start_notify">
-                                        <field name="NOTIFICATION_TYPE">info</field>
-                                        <field name="NOTIFICATION_SOUND">silent</field>
-                                        <value name="MESSAGE">
-                                          <block type="text" id="start_message">
-                                            <field name="TEXT">Dollar Printer PRO Started | Continuous Trading Enabled | TP: 100 | SL: -50</field>
-                                          </block>
-                                        </value>
-                                      </block>
-                                    </next>
                                   </block>
                                 </next>
                               </block>
@@ -171,175 +160,136 @@
           </block>
         </value>
         <statement name="DO0">
-          <block type="notify" id="win_notify">
-            <field name="NOTIFICATION_TYPE">success</field>
-            <field name="NOTIFICATION_SOUND">silent</field>
-            <value name="MESSAGE">
-              <block type="text" id="win_text">
-                <field name="TEXT">Won! Resetting to initial stake.</field>
+          <block type="variables_set" id="reset_consecutive_on_win">
+            <field name="VAR" id="consecutive_losses_var">Consecutive Losses</field>
+            <value name="VALUE">
+              <block type="math_number" id="reset_consecutive_value">
+                <field name="NUM">0</field>
               </block>
             </value>
             <next>
-              <block type="variables_set" id="reset_consecutive_on_win">
-                <field name="VAR" id="consecutive_losses_var">Consecutive Losses</field>
+              <block type="variables_set" id="reset_stake_on_win">
+                <field name="VAR" id="stake_var">Stake</field>
                 <value name="VALUE">
-                  <block type="math_number" id="reset_consecutive_value">
-                    <field name="NUM">0</field>
+                  <block type="variables_get" id="reset_stake_value">
+                    <field name="VAR" id="initial_stake_var">Initial Stake</field>
                   </block>
                 </value>
-                <next>
-                  <block type="variables_set" id="reset_stake_on_win">
-                    <field name="VAR" id="stake_var">Stake</field>
-                    <value name="VALUE">
-                      <block type="variables_get" id="reset_stake_value">
-                        <field name="VAR" id="initial_stake_var">Initial Stake</field>
-                      </block>
-                    </value>
-                  </block>
-                </next>
               </block>
             </next>
           </block>
         </statement>
         <statement name="DO1">
-          <block type="notify" id="loss_notify">
-            <field name="NOTIFICATION_TYPE">info</field>
-            <field name="NOTIFICATION_SOUND">silent</field>
-            <value name="MESSAGE">
-                <block type="text" id="loss_text">
-                <field name="TEXT">Lost. Adjusting stake...</field>
-              </block>
+          <block type="math_change" id="increment_consecutive_losses">
+            <field name="VAR" id="consecutive_losses_var">Consecutive Losses</field>
+            <value name="DELTA">
+              <shadow type="math_number" id="consecutive_delta">
+                <field name="NUM">1</field>
+              </shadow>
             </value>
             <next>
-              <block type="math_change" id="increment_consecutive_losses">
-                <field name="VAR" id="consecutive_losses_var">Consecutive Losses</field>
-                <value name="DELTA">
-                  <shadow type="math_number" id="consecutive_delta">
-                    <field name="NUM">1</field>
-                  </shadow>
-                </value>
-                <next>
-                  <block type="controls_if" id="check_double_stake">
-                    <value name="IF0">
-                      <block type="logic_compare" id="can_double_stake">
-                        <field name="OP">LT</field>
-                        <value name="A">
-                          <block type="variables_get" id="current_stake_check">
-                            <field name="VAR" id="stake_var">Stake</field>
-                          </block>
-                        </value>
-                        <value name="B">
-                          <block type="variables_get" id="max_stake_check">
-                            <field name="VAR" id="max_stake_var">Max Stake</field>
-                          </block>
-                        </value>
-                      </block>
-                    </value>
-                    <statement name="DO0">
-                      <block type="math_change" id="double_stake">
-                        <field name="VAR" id="stake_var">Stake</field>
-                        <value name="DELTA">
-                          <shadow type="math_number" id="double_delta">
-                            <field name="NUM">1</field>
-                          </shadow>
-                          <block type="variables_get" id="stake_for_doubling">
-                            <field name="VAR" id="stake_var">Stake</field>
-                          </block>
-                        </value>
-                      </block>
-                    </statement>
-                  </block>
-                </next>
-              </block>
-            </next>
-          </block>
-        </statement>
-        <next>
-          <block type="controls_if" id="check_stop_conditions">
-            <mutation elseif="1" else="1"></mutation>
-            <value name="IF0">
-              <block type="logic_compare" id="consecutive_check">
-                <field name="OP">GTE</field>
-                <value name="A">
-                  <block type="variables_get" id="consecutive_get">
-                    <field name="VAR" id="consecutive_losses_var">Consecutive Losses</field>
-                  </block>
-                </value>
-                <value name="B">
-                  <block type="variables_get" id="max_losses_get">
-                    <field name="VAR" id="max_losses_var">Max Consecutive Losses</field>
-                  </block>
-                </value>
-              </block>
-            </value>
-            <statement name="DO0">
-              <block type="notify" id="max_loss_streak_notify">
-                <field name="NOTIFICATION_TYPE">error</field>
-                <field name="NOTIFICATION_SOUND">silent</field>
-                <value name="MESSAGE">
-                  <block type="text" id="max_loss_streak_text">
-                    <field name="TEXT">Max loss streak reached. Bot stopped.</field>
-                  </block>
-                </value>
-              </block>
-            </statement>
-            <value name="IF1">
-              <block type="logic_compare" id="stop_loss_check">
-                <field name="OP">LTE</field>
-                <value name="A">
-                  <block type="variables_get" id="profit_check_sl">
-                    <field name="VAR" id="total_profit_var">Total Profit</field>
-                  </block>
-                </value>
-                <value name="B">
-                  <block type="variables_get" id="stop_loss_check_value">
-                    <field name="VAR" id="stop_loss_var">Stop Loss</field>
-                  </block>
-                </value>
-              </block>
-            </value>
-            <statement name="DO1">
-              <block type="notify" id="stop_loss_notify">
-                <field name="NOTIFICATION_TYPE">error</field>
-                <field name="NOTIFICATION_SOUND">silent</field>
-                <value name="MESSAGE">
-                  <block type="text" id="stop_loss_text">
-                    <field name="TEXT">Stop loss hit at -50. Bot stopped.</field>
-                  </block>
-                </value>
-              </block>
-            </statement>
-            <statement name="ELSE">
-              <block type="controls_if" id="check_take_profit">
+              <block type="controls_if" id="can_increase_stake">
                 <value name="IF0">
-                  <block type="logic_compare" id="take_profit_check">
-                    <field name="OP">GTE</field>
+                  <block type="logic_compare" id="stake_under_max">
+                    <field name="OP">LT</field>
                     <value name="A">
-                      <block type="variables_get" id="profit_check_tp">
-                        <field name="VAR" id="total_profit_var">Total Profit</field>
+                      <block type="variables_get" id="current_stake">
+                        <field name="VAR" id="stake_var">Stake</field>
                       </block>
                     </value>
                     <value name="B">
-                      <block type="variables_get" id="target_check_value">
-                        <field name="VAR" id="target_profit_var">Target Profit</field>
+                      <block type="variables_get" id="max_stake_val">
+                        <field name="VAR" id="max_stake_var">Max Stake</field>
                       </block>
                     </value>
                   </block>
                 </value>
                 <statement name="DO0">
-                  <block type="notify" id="take_profit_notify">
-                    <field name="NOTIFICATION_TYPE">success</field>
-                    <field name="NOTIFICATION_SOUND">silent</field>
-                    <value name="MESSAGE">
-                      <block type="text" id="take_profit_text">
-                        <field name="TEXT">Target profit +100 reached! Dollar Printer won!</field>
+                  <block type="math_change" id="double_stake">
+                    <field name="VAR" id="stake_var">Stake</field>
+                    <value name="DELTA">
+                      <shadow type="math_number" id="double_delta">
+                        <field name="NUM">1</field>
+                      </shadow>
+                      <block type="variables_get" id="stake_for_double">
+                        <field name="VAR" id="stake_var">Stake</field>
                       </block>
                     </value>
                   </block>
                 </statement>
-                <statement name="DO1">
-                  <block type="trade_again" id="trade_again_block"></block>
-                </statement>
+              </block>
+            </next>
+          </block>
+        </statement>
+        <next>
+          <block type="controls_if" id="should_continue">
+            <value name="IF0">
+              <block type="logic_operation" id="continue_logic">
+                <field name="OP">AND</field>
+                <value name="A">
+                  <block type="logic_operation" id="tp_sl_check">
+                    <field name="OP">AND</field>
+                    <value name="A">
+                      <block type="logic_compare" id="under_tp">
+                        <field name="OP">LT</field>
+                        <value name="A">
+                          <block type="variables_get" id="profit_for_tp">
+                            <field name="VAR" id="total_profit_var">Total Profit</field>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="variables_get" id="target_for_tp">
+                            <field name="VAR" id="target_profit_var">Target Profit</field>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                    <value name="B">
+                      <block type="logic_compare" id="above_sl">
+                        <field name="OP">GT</field>
+                        <value name="A">
+                          <block type="variables_get" id="profit_for_sl">
+                            <field name="VAR" id="total_profit_var">Total Profit</field>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="variables_get" id="stop_for_sl">
+                            <field name="VAR" id="stop_loss_var">Stop Loss</field>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <value name="B">
+                  <block type="logic_compare" id="losses_check">
+                    <field name="OP">LT</field>
+                    <value name="A">
+                      <block type="variables_get" id="consecutive_for_check">
+                        <field name="VAR" id="consecutive_losses_var">Consecutive Losses</field>
+                      </block>
+                    </value>
+                    <value name="B">
+                      <block type="math_number" id="max_losses_threshold">
+                        <field name="NUM">5</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <statement name="DO0">
+              <block type="trade_again" id="trade_again_block"></block>
+            </statement>
+            <statement name="DO1">
+              <block type="notify" id="stop_notify">
+                <field name="NOTIFICATION_TYPE">error</field>
+                <field name="NOTIFICATION_SOUND">silent</field>
+                <value name="MESSAGE">
+                  <block type="text" id="stop_text">
+                    <field name="TEXT">Bot stopped. Conditions met.</field>
+                  </block>
+                </value>
               </block>
             </statement>
           </block>
