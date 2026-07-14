@@ -14,7 +14,7 @@
       <block type="trade_definition_market" id="market_block" deletable="false" movable="false">
         <field name="MARKET_LIST">synthetic_index</field>
         <field name="SUBMARKET_LIST">continuous_indices</field>
-        <field name="SYMBOL_LIST">R_10</field>
+        <field name="SYMBOL_LIST">R_25</field>
         <next>
           <block type="trade_definition_tradetype" id="tradetype_block" deletable="false" movable="false">
             <field name="TRADETYPECAT_LIST">digits</field>
@@ -105,7 +105,7 @@
                                     <field name="NOTIFICATION_SOUND">silent</field>
                                     <value name="MESSAGE">
                                       <block type="text" id="start_message">
-                                        <field name="TEXT">Dollar Printer PRO Started | Running continuously...</field>
+                                        <field name="TEXT">Dollar Printer PRO (R_25 Optimized) | TP: +$100 | SL: -$50 | Running continuously...</field>
                                       </block>
                                     </value>
                                   </block>
