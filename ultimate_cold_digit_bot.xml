@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml xmlns="http://www.w3.org/1999/xhtml" is_dbot="true" collection="false">
+  <variables>
+    <variable type="" id="base_stake_var">Base Stake</variable>
+    <variable type="" id="current_stake_var">Current Stake</variable>
+    <variable type="" id="target_profit_var">Target Profit</variable>
+    <variable type="" id="stop_loss_var">Stop Loss</variable>
+    <variable type="" id="total_profit_var">Total Profit</variable>
+    <variable type="" id="prediction_digit_var">Prediction Digit</variable>
+    <variable type="" id="loss_count_var">Loss Count</variable>
+  </variables>
+  <block type="trade_definition" id="cold_digit_setup" deletable="false" x="0" y="0">
+    <statement name="TRADE_OPTIONS">
+      <block type="trade_definition_market" id="market_block" deletable="false" movable="false">
+        <field name="MARKET_LIST">synthetic_index</field>
+        <field name="SUBMARKET_LIST">random_index</field>
+        <field name="SYMBOL_LIST">R_100</field>
+        <next>
+          <block type="trade_definition_tradetype" id="tradetype_block" deletable="false" movable="false">
+            <field name="TRADETYPECAT_LIST">digits</field>
+            <field name="TRADETYPE_LIST">matchesdiffers</field>
+            <next>
+              <block type="trade_definition_contracttype" id="contracttype_block" deletable="false" movable="false">
+                <field name="TYPE_LIST">both</field>
+                <next>
+                  <block type="trade_definition_candleinterval" id="candleinterval_block" deletable="false" movable="false">
+                    <field name="CANDLEINTERVAL_LIST">60</field>
+                    <next>
+                      <block type="trade_definition_restartbuysell" id="restart_block" deletable="false" movable="false">
+                        <field name="TIME_MACHINE_ENABLED">FALSE</field>
+                        <next>
+                          <block type="trade_definition_restartonerror" id="restarterror_block" deletable="false" movable="false">
+                            <field name="RESTARTONERROR">TRUE</field>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    <statement name="INITIALIZATION">
+      <block type="variables_set" id="init_base_stake">
+        <field name="VAR" id="base_stake_var">Base Stake</field>
+        <value name="VALUE">
+          <block type="math_number" id="base_stake_value">
+            <field name="NUM">0.35</field>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set" id="init_current_stake">
+            <field name="VAR" id="current_stake_var">Current Stake</field>
+            <value name="VALUE">
+              <block type="variables_get" id="get_base_stake">
+                <field name="VAR" id="base_stake_var">Base Stake</field>
+              </block>
+            </value>
+            <next>
+              <block type="variables_set" id="init_target_profit">
+                <field name="VAR" id="target_profit_var">Target Profit</field>
+                <value name="VALUE">
+                  <block type="math_number" id="target_profit_value">
+                    <field name="NUM">10</field>
+                  </block>
+                </value>
+                <next>
+                  <block type="variables_set" id="init_stop_loss">
+                    <field name="VAR" id="stop_loss_var">Stop Loss</field>
+                    <value name="VALUE">
+                      <block type="math_number" id="stop_loss_value">
+                        <field name="NUM">15</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="variables_set" id="init_total_profit">
+                        <field name="VAR" id="total_profit_var">Total Profit</field>
+                        <value name="VALUE">
+                          <block type="math_number" id="total_profit_value">
+                            <field name="NUM">0</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="variables_set" id="init_prediction_digit">
+                            <field name="VAR" id="prediction_digit_var">Prediction Digit</field>
+                            <value name="VALUE">
+                              <block type="math_number" id="prediction_digit_value">
+                                <field name="NUM">8</field>
+                              </block>
+                            </value>
+                            <next>
+                              <block type="variables_set" id="init_loss_count">
+                                <field name="VAR" id="loss_count_var">Loss Count</field>
+                                <value name="VALUE">
+                                  <block type="math_number" id="loss_count_value">
+                                    <field name="NUM">0</field>
+                                  </block>
+                                </value>
+                                <next>
+                                  <block type="notify" id="bot_start_notify">
+                                    <field name="NOTIFICATION_TYPE">info</field>
+                                    <field name="NOTIFICATION_SOUND">silent</field>
+                                    <value name="MESSAGE">
+                                      <block type="text" id="start_message">
+                                        <field name="TEXT">Ultimate Cold Digit Bot | R_100 60min | Digit 8 MATCHES | TP: +$10 | SL: -$15 | Mild Martingale 1.12x | Running...</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </next>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    <statement name="SUBMARKET">
+      <block type="trade_definition_tradeoptions" id="tradeoptions_block" collapsed="true">
+        <mutation has_first_barrier="false" has_second_barrier="false" has_prediction="true"></mutation>
+        <field name="DURATIONTYPE_LIST">t</field>
+        <value name="DURATION">
+          <shadow type="math_number" id="duration_value">
+            <field name="NUM">1</field>
+          </shadow>
+        </value>
+        <value name="AMOUNT">
+          <shadow type="math_number" id="amount_value">
+            <field name="NUM">0.35</field>
+          </shadow>
+          <block type="variables_get" id="stake_get">
+            <field name="VAR" id="current_stake_var">Current Stake</field>
+          </block>
+        </value>
+        <value name="PREDICTION">
+          <shadow type="math_number" id="prediction_value">
+            <field name="NUM">8</field>
+          </shadow>
+          <block type="variables_get" id="prediction_get">
+            <field name="VAR" id="prediction_digit_var">Prediction Digit</field>
+          </block>
+        </value>
+      </block>
+    </statement>
+  </block>
+  <block type="before_purchase" id="before_purchase_block" deletable="false" x="0" y="600">
+    <statement name="BEFOREPURCHASE_STACK">
+      <block type="purchase" id="purchase_block">
+        <field name="PURCHASE_LIST">MATCHES</field>
+      </block>
+    </statement>
+  </block>
+  <block type="after_purchase" id="after_purchase_block" x="1466" y="0">
+    <statement name="AFTERPURCHASE_STACK">
+      <block type="controls_if" id="win_loss_check">
+        <value name="IF0">
+          <block type="contract_check_result" id="win_check">
+            <field name="CHECK_RESULT">win</field>
+          </block>
+        </value>
+        <statement name="DO0">
+          <block type="variables_set" id="reset_stake_on_win">
+            <field name="VAR" id="current_stake_var">Current Stake</field>
+            <value name="VALUE">
+              <block type="variables_get" id="reset_stake_value">
+                <field name="VAR" id="base_stake_var">Base Stake</field>
+              </block>
+            </value>
+            <next>
+              <block type="variables_set" id="reset_losses_on_win">
+                <field name="VAR" id="loss_count_var">Loss Count</field>
+                <value name="VALUE">
+                  <block type="math_number" id="reset_losses_value">
+                    <field name="NUM">0</field>
+                  </block>
+                </value>
+              </block>
+            </next>
+          </block>
+        </statement>
+        <statement name="DO1">
+          <block type="math_change" id="increment_loss_count">
+            <field name="VAR" id="loss_count_var">Loss Count</field>
+            <value name="DELTA">
+              <shadow type="math_number" id="loss_delta">
+                <field name="NUM">1</field>
+              </shadow>
+            </value>
+            <next>
+              <block type="variables_set" id="apply_martingale_multiplier">
+                <field name="VAR" id="current_stake_var">Current Stake</field>
+                <value name="VALUE">
+                  <block type="math_arithmetic" id="calc_new_stake">
+                    <field name="OP">MULTIPLY</field>
+                    <value name="A">
+                      <block type="variables_get" id="current_stake_for_mult">
+                        <field name="VAR" id="current_stake_var">Current Stake</field>
+                      </block>
+                    </value>
+                    <value name="B">
+                      <block type="math_number" id="martingale_ratio">
+                        <field name="NUM">1.12</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+              </block>
+            </next>
+          </block>
+        </statement>
+        <next>
+          <block type="controls_if" id="check_limits">
+            <value name="IF0">
+              <block type="logic_operation" id="limits_check">
+                <field name="OP">OR</field>
+                <value name="A">
+                  <block type="logic_compare" id="tp_check">
+                    <field name="OP">GTE</field>
+                    <value name="A">
+                      <block type="variables_get" id="profit_for_tp">
+                        <field name="VAR" id="total_profit_var">Total Profit</field>
+                      </block>
+                    </value>
+                    <value name="B">
+                      <block type="variables_get" id="target_for_tp">
+                        <field name="VAR" id="target_profit_var">Target Profit</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <value name="B">
+                  <block type="logic_compare" id="sl_check">
+                    <field name="OP">LTE</field>
+                    <value name="A">
+                      <block type="variables_get" id="profit_for_sl">
+                        <field name="VAR" id="total_profit_var">Total Profit</field>
+                      </block>
+                    </value>
+                    <value name="B">
+                      <block type="math_single" id="neg_stop_loss">
+                        <field name="OP">NEG</field>
+                        <value name="NUM">
+                          <block type="variables_get" id="stop_for_sl">
+                            <field name="VAR" id="stop_loss_var">Stop Loss</field>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <statement name="DO0">
+              <block type="notify" id="stop_notify">
+                <field name="NOTIFICATION_TYPE">error</field>
+                <field name="NOTIFICATION_SOUND">silent</field>
+                <value name="MESSAGE">
+                  <block type="text" id="stop_text">
+                    <field name="TEXT">Ultimate Cold Digit Bot: Session Complete! Risk targets hit.</field>
+                  </block>
+                </value>
+              </block>
+            </statement>
+            <statement name="DO1">
+              <block type="trade_again" id="trade_again_block"></block>
+            </statement>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+</xml>
