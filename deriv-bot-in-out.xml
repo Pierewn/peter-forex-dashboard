@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml xmlns="http://www.w3.org/1999/xhtml" is_dbot="true" collection="false">
+  <variables>
+    <variable type="" id="total_profit_var">Total Profit</variable>
+    <variable type="" id="stake_var">Stake</variable>
+    <variable type="" id="initial_stake_var">Initial Stake</variable>
+    <variable type="" id="max_stake_var">Max Stake</variable>
+    <variable type="" id="target_profit_var">Target Profit</variable>
+    <variable type="" id="stop_loss_var">Stop Loss</variable>
+    <variable type="" id="consecutive_losses_var">Consecutive Losses</variable>
+  </variables>
+  <block type="trade_definition" id="trade_def_main" deletable="false" x="0" y="0">
+    <statement name="TRADE_OPTIONS">
+      <block type="trade_definition_market" id="market_block" deletable="false" movable="false">
+        <field name="MARKET_LIST">synthetic_index</field>
+        <field name="SUBMARKET_LIST">continuous_indices</field>
+        <field name="SYMBOL_LIST">R_25</field>
+        <next>
+          <block type="trade_definition_tradetype" id="tradetype_block" deletable="false" movable="false">
+            <field name="TRADETYPECAT_LIST">ranges</field>
+            <field name="TRADETYPE_LIST">in_out</field>
+            <next>
+              <block type="trade_definition_contracttype" id="contracttype_block" deletable="false" movable="false">
+                <field name="TYPE_LIST">both</field>
+                <next>
+                  <block type="trade_definition_candleinterval" id="candleinterval_block" deletable="false" movable="false">
+                    <field name="CANDLEINTERVAL_LIST">1</field>
+                    <next>
+                      <block type="trade_definition_restartbuysell" id="restart_block" deletable="false" movable="false">
+                        <field name="TIME_MACHINE_ENABLED">FALSE</field>
+                        <next>
+                          <block type="trade_definition_restartonerror" id="restarterror_block" deletable="false" movable="false">
+                            <field name="RESTARTONERROR">TRUE</field>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    <statement name="INITIALIZATION">
+      <block type="variables_set" id="init_initial_stake">
+        <field name="VAR" id="initial_stake_var">Initial Stake</field>
+        <value name="VALUE">
+          <block type="math_number" id="initial_stake_value">
+            <field name="NUM">1</field>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set" id="init_stake">
+            <field name="VAR" id="stake_var">Stake</field>
+            <value name="VALUE">
+              <block type="variables_get" id="stake_value">
+                <field name="VAR" id="initial_stake_var">Initial Stake</field>
+              </block>
+            </value>
+            <next>
+              <block type="variables_set" id="init_max_stake">
+                <field name="VAR" id="max_stake_var">Max Stake</field>
+                <value name="VALUE">
+                  <block type="math_number" id="max_stake_value">
+                    <field name="NUM">8</field>
+                  </block>
+                </value>
+                <next>
+                  <block type="variables_set" id="init_target_profit">
+                    <field name="VAR" id="target_profit_var">Target Profit</field>
+                    <value name="VALUE">
+                      <block type="math_number" id="target_profit_value">
+                        <field name="NUM">100</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="variables_set" id="init_stop_loss">
+                        <field name="VAR" id="stop_loss_var">Stop Loss</field>
+                        <value name="VALUE">
+                          <block type="math_number" id="stop_loss_value">
+                            <field name="NUM">-50</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="variables_set" id="init_consecutive_losses">
+                            <field name="VAR" id="consecutive_losses_var">Consecutive Losses</field>
+                            <value name="VALUE">
+                              <block type="math_number" id="consecutive_losses_value">
+                                <field name="NUM">0</field>
+                              </block>
+                            </value>
+                            <next>
+                              <block type="variables_set" id="init_profit">
+                                <field name="VAR" id="total_profit_var">Total Profit</field>
+                                <value name="VALUE">
+                                  <block type="math_number" id="profit_value">
+                                    <field name="NUM">0</field>
+                                  </block>
+                                </value>
+                                <next>
+                                  <block type="notify" id="bot_start_notify">
+                                    <field name="NOTIFICATION_TYPE">info</field>
+                                    <field name="NOTIFICATION_SOUND">silent</field>
+                                    <value name="MESSAGE">
+                                      <block type="text" id="start_message">
+                                        <field name="TEXT">Dollar Printer PRO In/Out | Higher Payouts 2-4x | TP: +$100 | SL: -$50 | Running...</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </next>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    <statement name="SUBMARKET">
+      <block type="trade_definition_tradeoptions" id="tradeoptions_block" collapsed="true">
+        <mutation has_first_barrier="true" has_second_barrier="true" has_prediction="false"></mutation>
+        <field name="DURATIONTYPE_LIST">t</field>
+        <value name="DURATION">
+          <shadow type="math_number" id="duration_value">
+            <field name="NUM">1</field>
+          </shadow>
+        </value>
+        <value name="BARRIER1">
+          <shadow type="math_number" id="barrier1_value">
+            <field name="NUM">-0.05</field>
+          </shadow>
+        </value>
+        <value name="BARRIER2">
+          <shadow type="math_number" id="barrier2_value">
+            <field name="NUM">0.05</field>
+          </shadow>
+        </value>
+        <value name="AMOUNT">
+          <shadow type="math_number" id="amount_value">
+            <field name="NUM">1</field>
+          </shadow>
+          <block type="variables_get" id="stake_get">
+            <field name="VAR" id="stake_var">Stake</field>
+          </block>
+        </value>
+      </block>
+    </statement>
+  </block>
+  <block type="before_purchase" id="before_purchase_block" deletable="false" x="0" y="600">
+    <statement name="BEFOREPURCHASE_STACK">
+      <block type="purchase" id="purchase_block">
+        <field name="PURCHASE_LIST">IN</field>
+      </block>
+    </statement>
+  </block>
+  <block type="after_purchase" id="after_purchase_block" x="1466" y="0">
+    <statement name="AFTERPURCHASE_STACK">
+      <block type="controls_if" id="check_win_loss">
+        <value name="IF0">
+          <block type="contract_check_result" id="win_check">
+            <field name="CHECK_RESULT">win</field>
+          </block>
+        </value>
+        <statement name="DO0">
+          <block type="variables_set" id="reset_consecutive_on_win">
+            <field name="VAR" id="consecutive_losses_var">Consecutive Losses</field>
+            <value name="VALUE">
+              <block type="math_number" id="reset_consecutive_value">
+                <field name="NUM">0</field>
+              </block>
+            </value>
+            <next>
+              <block type="variables_set" id="reset_stake_on_win">
+                <field name="VAR" id="stake_var">Stake</field>
+                <value name="VALUE">
+                  <block type="variables_get" id="reset_stake_value">
+                    <field name="VAR" id="initial_stake_var">Initial Stake</field>
+                  </block>
+                </value>
+              </block>
+            </next>
+          </block>
+        </statement>
+        <statement name="DO1">
+          <block type="math_change" id="increment_consecutive_losses">
+            <field name="VAR" id="consecutive_losses_var">Consecutive Losses</field>
+            <value name="DELTA">
+              <shadow type="math_number" id="consecutive_delta">
+                <field name="NUM">1</field>
+              </shadow>
+            </value>
+            <next>
+              <block type="controls_if" id="can_increase_stake">
+                <value name="IF0">
+                  <block type="logic_compare" id="stake_under_max">
+                    <field name="OP">LT</field>
+                    <value name="A">
+                      <block type="variables_get" id="current_stake">
+                        <field name="VAR" id="stake_var">Stake</field>
+                      </block>
+                    </value>
+                    <value name="B">
+                      <block type="variables_get" id="max_stake_val">
+                        <field name="VAR" id="max_stake_var">Max Stake</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <statement name="DO0">
+                  <block type="math_change" id="double_stake">
+                    <field name="VAR" id="stake_var">Stake</field>
+                    <value name="DELTA">
+                      <shadow type="math_number" id="double_delta">
+                        <field name="NUM">1</field>
+                      </shadow>
+                      <block type="variables_get" id="stake_for_double">
+                        <field name="VAR" id="stake_var">Stake</field>
+                      </block>
+                    </value>
+                  </block>
+                </statement>
+              </block>
+            </next>
+          </block>
+        </statement>
+        <next>
+          <block type="controls_if" id="should_continue">
+            <value name="IF0">
+              <block type="logic_operation" id="continue_logic">
+                <field name="OP">AND</field>
+                <value name="A">
+                  <block type="logic_operation" id="tp_sl_check">
+                    <field name="OP">AND</field>
+                    <value name="A">
+                      <block type="logic_compare" id="under_tp">
+                        <field name="OP">LT</field>
+                        <value name="A">
+                          <block type="variables_get" id="profit_for_tp">
+                            <field name="VAR" id="total_profit_var">Total Profit</field>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="variables_get" id="target_for_tp">
+                            <field name="VAR" id="target_profit_var">Target Profit</field>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                    <value name="B">
+                      <block type="logic_compare" id="above_sl">
+                        <field name="OP">GT</field>
+                        <value name="A">
+                          <block type="variables_get" id="profit_for_sl">
+                            <field name="VAR" id="total_profit_var">Total Profit</field>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="variables_get" id="stop_for_sl">
+                            <field name="VAR" id="stop_loss_var">Stop Loss</field>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <value name="B">
+                  <block type="logic_compare" id="losses_check">
+                    <field name="OP">LT</field>
+                    <value name="A">
+                      <block type="variables_get" id="consecutive_for_check">
+                        <field name="VAR" id="consecutive_losses_var">Consecutive Losses</field>
+                      </block>
+                    </value>
+                    <value name="B">
+                      <block type="math_number" id="max_losses_threshold">
+                        <field name="NUM">3</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <statement name="DO0">
+              <block type="trade_again" id="trade_again_block"></block>
+            </statement>
+            <statement name="DO1">
+              <block type="notify" id="stop_notify">
+                <field name="NOTIFICATION_TYPE">error</field>
+                <field name="NOTIFICATION_SOUND">silent</field>
+                <value name="MESSAGE">
+                  <block type="text" id="stop_text">
+                    <field name="TEXT">Bot stopped. Conditions met.</field>
+                  </block>
+                </value>
+              </block>
+            </statement>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+</xml>
