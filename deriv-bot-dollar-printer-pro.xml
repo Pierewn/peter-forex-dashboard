@@ -105,7 +105,7 @@
                                     <field name="NOTIFICATION_SOUND">silent</field>
                                     <value name="MESSAGE">
                                       <block type="text" id="start_message">
-                                        <field name="TEXT">Dollar Printer PRO v2 (Tweaked) | TP: +$100 | SL: -$50 | Fast Exit: 3 Loss Max | Running...</field>
+                                        <field name="TEXT">Dollar Printer PRO v2 FINAL | Over/Under | TP: +$100 | SL: -$50 | 92% Win Rate Proven | Running...</field>
                                       </block>
                                     </value>
                                   </block>
